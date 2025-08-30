@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Ventas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --verde-farmacia: #05642d;
+      --fondo-oscuro: #1a1a1a;
+      --texto-blanco: #ffffff;
+      --azul-ventas: #1e88e5;
+    }
+    
+    body {
+      background-color: #000;
+      color: var(--texto-blanco);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .container-mobile {
+      max-width: 100%;
+      padding: 15px;
+    }
+
+    .btn-submit {
+      background-color: #05642d;
+      color: #fff;
+      padding: 10px 30px;
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+      background-color: #cccccc;
+      color: #000000;
+      transform: translateY(-2px);
+    }
+    
+    .logo-container {
+      text-align: center;
+      margin: 15px 0 25px;
+    }
+    
+    .card-ventas {
+      background-color: var(--fondo-oscuro);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    
+    .title-ventas {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--texto-blanco);
+      font-size: 1.5rem;
+    }
+    
+    .search-box {
+      margin-bottom: 15px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 10px 15px;
+      background-color: #2a2a2a;
+      border: 1px solid var(--verde-farmacia);
+      border-radius: 5px;
+      color: var(--texto-blanco);
+    }
+    
+    .table-ventas {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    
+    .table-ventas th {
+      background-color: var(--azul-ventas);
+      color: white;
+      padding: 12px 8px;
+      text-align: left;
+    }
+    
+    .table-ventas td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #333;
+    }
+    
+    .table-ventas tr:nth-child(even) {
+      background-color: #2a2a2a;
+    }
+    
+    .table-ventas tr:hover {
+      background-color: #333;
+    }
+    
+    .btn-volver {
+      display: block;
+      width: 100%;
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 20px;
+      text-decoration: none;
+    }
+    
+    .btn-volver:hover {
+      background-color: #444;
+      color: white;
+    }
+    
+    /* Scroll horizontal para móviles */
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Ajustes para pantallas pequeñas */
+    @media (max-width: 576px) {
+      .table-ventas th, 
+      .table-ventas td {
+        padding: 8px 5px;
+        font-size: 0.9rem;
+      }
+      
+      .table-ventas th {
+        font-size: 0.95rem;
+      }
+    }
+
+    /* Estilos para las tarjetas de resumen */
+    .summary-cards {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .summary-card {
+      background-color: var(--fondo-oscuro);
+      border-radius: 10px;
+      padding: 15px;
+      flex: 1;
+      min-width: 200px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+    }
+
+    .summary-icon {
+      font-size: 2rem;
+      margin-right: 15px;
+      color: var(--azul-ventas);
+    }
+
+    .summary-content {
+      flex: 1;
+    }
+
+    .summary-title {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-bottom: 5px;
+    }
+
+    .summary-value {
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
+    /* Filtros rápidos */
+    .filtros-rapidos {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .btn-filtro {
+      background-color: #333;
+      color: white;
+      border: none;
+      padding: 5px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-filtro:hover {
+      background-color: #444;
+    }
+
+    .btn-filtro.active {
+      background-color: var(--azul-ventas);
+      font-weight: bold;
+    }
+
+    /* Modal para detalles de venta */
+    .modal-venta {
+      color: var(--texto-blanco);
+    }
+
+    .modal-content {
+      background-color: var(--fondo-oscuro);
+    }
+
+    .modal-header {
+      border-bottom: 1px solid #333;
+    }
+
+    .modal-footer {
+      border-top: 1px solid #333;
+    }
+
+    /* CSS adicional para la animación del spinner */
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container-mobile">
+    <div class="row">
+      <div class="col-12 text-center logo-container">
+        <img alt="Logo" src="logo.png" class="img-fluid" height="150px" width="350px">
+      </div>
+    </div>
+    
+    <div class="card-ventas">
+      <h2 class="title-ventas">REPORTE DE VENTAS</h2>
+      
+      <!-- Tarjetas de resumen -->
+      <div class="summary-cards" id="summaryCards" style="display: none;">
+        <div class="summary-card">
+          <div class="summary-icon">
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-title">Total Ventas</div>
+            <div class="summary-value" id="totalVentas">0</div>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon">
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-title">Monto Total</div>
+            <div class="summary-value" id="montoTotal">USD. 0.00</div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-icon">
+            <i class="fas fa-store"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-title">Punto de Venta</div>
+            <div class="summary-value" id="ventasPunto">USD. 0.00</div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-icon">
+            <i class="fas fa-money-bill"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-title">Efectivo</div>
+            <div class="summary-value" id="ventasEfectivo">USD. 0.00</div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-icon">
+            <i class="fas fa-mobile-alt"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-title">Pago Móvil</div>
+            <div class="summary-value" id="ventasMovil">USD. 0.00</div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-icon">
+            <i class="fas fa-dollar-sign"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-title">Dólares</div>
+            <div class="summary-value" id="ventasDolares">USD. 0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros rápidos -->
+      <div class="filtros-rapidos" id="filtrosRapidos" style="display: none;">
+        <button class="btn-filtro active" data-filter="all">Todas</button>
+        <button class="btn-filtro" data-filter="Punto de venta">Punto de Venta</button>
+        <button class="btn-filtro" data-filter="Efectivo">Efectivo</button>
+        <button class="btn-filtro" data-filter="Pago móvil">Pago Móvil</button>
+        <button class="btn-filtro" data-filter="Dólares">Dólares</button>
+        
+      </div>
+      
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="Buscar por producto..." id="buscadorVentas">
+      </div>
+      
+      <!-- Loading indicator -->
+      <div id="loadingIndicator" class="text-center" style="padding: 20px;">
+        <svg style="animation: spin 1s linear infinite; display: inline-block; width: 24px; height: 24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p>Cargando ventas...</p>
+      </div>
+      
+      <div class="table-responsive" id="tableContainer" style="display: none;">
+        <table class="table-ventas">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Producto</th>
+              <th>Tipo Pago</th>
+              <th>Cantidad</th>
+              <th>Precio Unitario</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="tablaVentas">
+            <!-- Los datos se cargarán aquí dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Mensaje cuando no hay ventas -->
+      <div id="emptyMessage" class="text-center" style="display: none; padding: 40px;">
+        <p>No hay ventas registradas.</p>
+      </div>
+      
+      <!-- Mensaje de error -->
+      <div id="errorMessage" class="text-center" style="display: none; padding: 40px; color: #ff6b6b;">
+        <p>Error al cargar ventas. Por favor, recarga la página.</p>
+      </div>
+      <br>
+      <div class="text-center">
+         <a class="btn btn-submit btn-lg" href="menuProductos.html">Volver al Menú</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incluir Supabase SDK y Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Configuración de Supabase
+    const SUPABASE_URL = 'https://rirfvhvlmytnpqkcpxbx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpcmZ2aHZsbXl0bnBxa2NweGJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0ODE2NDUsImV4cCI6MjA3MjA1NzY0NX0.5JLGuOIWNvKIESJG26JLOgRVCu0jVoH0ELZjQ63gV48';
+    
+    // Inicializar Supabase
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Variable global para almacenar datos
+    let ventasCompletas = [];
+    let detallesVentas = [];
+    let productosMap = {};
+    let filtroActual = 'all';
+    let fechaFiltro = null;
+
+    // Función para formatear fecha (solo fecha, sin hora)
+    function formatearFecha(fechaStr) {
+      const fecha = new Date(fechaStr);
+      const dia = fecha.getDate().toString().padStart(2, '0');
+      const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+      const año = fecha.getFullYear();
+      return `${dia}/${mes}/${año}`;
+    }
+
+    // Función para cargar datos desde Supabase
+    async function cargarDatos() {
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const tableContainer = document.getElementById('tableContainer');
+      const emptyMessage = document.getElementById('emptyMessage');
+      const errorMessage = document.getElementById('errorMessage');
+      const summaryCards = document.getElementById('summaryCards');
+      const filtrosRapidos = document.getElementById('filtrosRapidos');
+      
+      try {
+        // Mostrar loading
+        loadingIndicator.style.display = 'block';
+        tableContainer.style.display = 'none';
+        emptyMessage.style.display = 'none';
+        errorMessage.style.display = 'none';
+        summaryCards.style.display = 'none';
+        filtrosRapidos.style.display = 'none';
+
+        // Obtener datos en paralelo
+        const [productosResponse, ventasResponse, detallesResponse] = await Promise.all([
+          supabaseClient.from('productos').select('id, nombre'),
+          supabaseClient.from('ventas').select('*').order('fecha', { ascending: false }),
+          supabaseClient.from('detalles_venta').select('*')
+        ]);
+
+        if (productosResponse.error) throw productosResponse.error;
+        if (ventasResponse.error) throw ventasResponse.error;
+        if (detallesResponse.error) throw detallesResponse.error;
+
+        // Crear mapa de productos para búsqueda rápida
+        productosMap = {};
+        productosResponse.data.forEach(producto => {
+          productosMap[producto.id] = producto.nombre;
+        });
+
+        // Procesar ventas y detalles
+        ventasCompletas = ventasResponse.data || [];
+        detallesVentas = detallesResponse.data || [];
+
+        // Ordenar ventas por fecha (más reciente primero)
+        ventasCompletas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        // Calcular estadísticas
+        let totalVentas = 0;
+        let montoTotal = 0;
+        let ventasPunto = 0;
+        let ventasEfectivo = 0;
+        let ventasMovil = 0;
+        let ventasDolares = 0;
+
+        // Contar ventas únicas (una venta puede tener múltiples productos)
+        const ventasUnicas = new Set(detallesVentas.map(d => d.venta_id));
+        totalVentas = ventasUnicas.size;
+
+        // Calcular montos por tipo de pago
+        ventasCompletas.forEach(venta => {
+          montoTotal += venta.total;
+          
+          switch(venta.tipo_pago) {
+            case 'Punto de venta':
+              ventasPunto += venta.total;
+              break;
+            case 'Efectivo':
+              ventasEfectivo += venta.total;
+              break;
+            case 'Pago móvil':
+              ventasMovil += venta.total;
+              break;
+            case 'Dólares':
+              ventasDolares += venta.total;
+              break;
+          }
+        });
+
+        // Actualizar tarjetas de resumen
+        document.getElementById('totalVentas').textContent = totalVentas;
+        document.getElementById('montoTotal').textContent = `USD. ${montoTotal.toFixed(2)}`;
+        document.getElementById('ventasPunto').textContent = `USD. ${ventasPunto.toFixed(2)}`;
+        document.getElementById('ventasEfectivo').textContent = `USD. ${ventasEfectivo.toFixed(2)}`;
+        document.getElementById('ventasMovil').textContent = `USD. ${ventasMovil.toFixed(2)}`;
+        document.getElementById('ventasDolares').textContent = `USD. ${ventasDolares.toFixed(2)}`;
+
+        summaryCards.style.display = 'flex';
+        filtrosRapidos.style.display = 'flex';
+
+        // Ocultar loading
+        loadingIndicator.style.display = 'none';
+
+        if (detallesVentas.length > 0) {
+          // Mostrar tabla con detalles de ventas ordenados
+          mostrarVentasOrdenadas();
+          tableContainer.style.display = 'block';
+        } else {
+          // Mostrar mensaje de no hay ventas
+          emptyMessage.style.display = 'block';
+        }
+
+      } catch (error) {
+        console.error('Error al cargar datos:', error);
+        
+        // Ocultar loading y mostrar error
+        loadingIndicator.style.display = 'none';
+        errorMessage.style.display = 'block';
+      }
+    }
+
+    // Función para mostrar ventas ordenadas por fecha (más reciente primero)
+    function mostrarVentasOrdenadas() {
+      const tabla = document.getElementById('tablaVentas');
+      tabla.innerHTML = '';
+      
+      // Crear array de detalles con información de venta asociada
+      const detallesConVenta = detallesVentas.map(detalle => {
+        const venta = ventasCompletas.find(v => v.id === detalle.venta_id);
+        return {
+          ...detalle,
+          venta: venta
+        };
+      });
+
+      // Filtrar según los filtros seleccionados
+      let detallesFiltrados = aplicarFiltros(detallesConVenta);
+      
+      // Ordenar por fecha de venta (más reciente primero)
+      detallesFiltrados.sort((a, b) => new Date(b.venta.fecha) - new Date(a.venta.fecha));
+      
+      if (detallesFiltrados.length === 0) {
+        document.getElementById('tableContainer').style.display = 'none';
+        document.getElementById('emptyMessage').style.display = 'block';
+        document.getElementById('emptyMessage').innerHTML = 
+          '<p>No hay ventas que coincidan con los filtros seleccionados.</p>';
+        return;
+      }
+      
+      document.getElementById('tableContainer').style.display = 'block';
+      document.getElementById('emptyMessage').style.display = 'none';
+
+      // Mostrar detalles en la tabla
+      detallesFiltrados.forEach(item => {
+        const row = document.createElement('tr');
+        const nombreProducto = productosMap[item.producto_id] || `Producto ID: ${item.producto_id.substring(0, 8)}...`;
+        
+        row.innerHTML = `
+          <td>${formatearFecha(item.venta.fecha)}</td>
+          <td>${nombreProducto}</td>
+          <td>${item.venta.tipo_pago}</td>
+          <td>${item.cantidad}</td>
+          <td>USD. ${item.precio_unitario.toFixed(2)}</td>
+          <td>USD. ${item.subtotal.toFixed(2)}</td>
+        `;
+        
+        tabla.appendChild(row);
+      });
+    }
+
+    // Función para aplicar filtros
+    function aplicarFiltros(detallesConVenta) {
+      let filtrados = [...detallesConVenta];
+      
+      // Filtro por tipo de pago
+      if (filtroActual !== 'all') {
+        filtrados = filtrados.filter(item => {
+          return item.venta && item.venta.tipo_pago === filtroActual;
+        });
+      }
+      
+      // Filtro por fecha
+      if (fechaFiltro) {
+        const fechaSeleccionada = new Date(fechaFiltro).toDateString();
+        filtrados = filtrados.filter(item => {
+          if (!item.venta) return false;
+          const fechaVenta = new Date(item.venta.fecha).toDateString();
+          return fechaVenta === fechaSeleccionada;
+        });
+      }
+      
+      // Filtro de búsqueda
+      const searchValue = document.getElementById('buscadorVentas').value.toLowerCase();
+      if (searchValue) {
+        filtrados = filtrados.filter(item => {
+          const nombreProducto = productosMap[item.producto_id]?.toLowerCase() || '';
+          return nombreProducto.includes(searchValue);
+        });
+      }
+      
+      return filtrados;
+    }
+
+    // Función de búsqueda
+    function buscarVentas(searchValue) {
+      mostrarVentasOrdenadas();
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      // Cargar datos al cargar la página
+      cargarDatos();
+      
+      // Búsqueda en tiempo real
+      document.getElementById('buscadorVentas').addEventListener('input', function() {
+        buscarVentas(this.value);
+      });
+
+      // Filtros rápidos por tipo de pago
+      document.querySelectorAll('.btn-filtro').forEach(btn => {
+        btn.addEventListener('click', function() {
+          // Quitar clase active de todos los botones
+          document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('active'));
+          
+          // Añadir clase active al botón clickeado
+          this.classList.add('active');
+          
+          // Actualizar filtro
+          filtroActual = this.dataset.filter;
+          
+          // Aplicar filtro
+          buscarVentas(document.getElementById('buscadorVentas').value);
+        });
+      });
+
+      // Filtro por fecha
+      document.getElementById('fechaFiltro').addEventListener('change', function() {
+        fechaFiltro = this.value;
+        buscarVentas(document.getElementById('buscadorVentas').value);
+      });
+    });
+
+    // Función para recargar datos (opcional)
+    function recargarDatos() {
+      cargarDatos();
+    }
+</script>
+</body>
+</html>

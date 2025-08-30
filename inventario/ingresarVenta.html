@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Ventas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <style>
+      #info-mayor {
+    background-color: #2a2a2a;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    border: 1px solid #3105f1;
+    color: white; /* Asegurar que el texto sea blanco */
+}
+
+#info-mayor small {
+    color: #ffffff !important; /* Forzar color blanco para el texto */
+}
+
+#info-mayor .text-muted {
+    color: #ffffff !important; /* Sobrescribir el color gris por defecto */
+}
+/* Estilos específicos para el input de cantidad */
+#cantidad {
+    background-color: #2a2a2a !important;
+    border: 1px solid #3105f1 !important;
+    color: #ffffff !important;
+}
+
+#cantidad:focus {
+    background-color: #2a2a2a !important;
+    border-color: #041fbd !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 0.25rem rgba(5, 100, 45, 0.25) !important;
+}
+
+#cantidad:disabled {
+    background-color: #333333 !important;
+    color: #888888 !important;
+    border-color: #555555 !important;
+}
+
+/* También asegurar que todos los inputs type="number" tengan texto blanco */
+input[type="number"] {
+    width: 70px;
+    text-align: center;
+    background-color: #2a2a2a !important;
+    border: 1px solid #3105f1 !important;
+    color: #ffffff !important;
+}
+
+input[type="number"]:focus {
+    background-color: #2a2a2a !important;
+    border-color: #041fbd !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 0.25rem rgba(5, 100, 45, 0.25) !important;
+}
+
+input[type="number"]:disabled {
+    background-color: #333333 !important;
+    color: #888888 !important;
+    border-color: #555555 !important;
+}
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .logo-container {
+            margin-top: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .enlace {
+            text-align: center;
+            display: block;
+            text-decoration: none;
+        }
+
+        .enlace:hover {
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-container {
+            background-color: #1a1a1a;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-container {
+            background-color: #1a1a1a;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-control, .form-select {
+            background-color: #2a2a2a;
+            border: 1px solid #3105f1;
+            color: white;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: #2a2a2a;
+            border-color: #041fbd;
+            box-shadow: 0 0 0 0.25rem rgba(5, 100, 45, 0.25);
+        }
+
+        /* Estilos para botones principales (Agregar y Finalizar Venta) */
+        .btn-principal {
+            background-color: #3105f1;
+            color: #fff;
+            padding: 12px 40px;
+            border: none;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .btn-principal:hover {
+            background-color: #041fbd;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-principal:active {
+            transform: translateY(0);
+        }
+
+        /* Estilo para botón eliminar */
+        .btn-danger {
+            background-color: #dc3545;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            border: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-danger:active {
+            transform: translateY(0);
+        }
+
+        .table-carrito {
+            color: white;
+            width: 100%;
+        }
+
+        .table-carrito thead th {
+            background-color: #3105f1;
+            border-color: #041fbd;
+            padding: 10px 8px;
+        }
+
+        .table-carrito tbody td {
+            padding: 8px;
+            vertical-align: middle;
+        }
+
+        .table-carrito tbody tr {
+            background-color: #2a2a2a;
+        }
+
+        .table-carrito tbody tr:nth-child(even) {
+            background-color: #333333;
+        }
+
+        .total-container {
+            background-color: #3105f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        input[type="number"] {
+            width: 70px;
+            text-align: center;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+        }
+
+        /* Estilos para Select2 */
+        .select2-container--default .select2-selection--single {
+            background-color: #2a2a2a !important;
+            border: 1px solid #3105f1 !important;
+            height: 38px;
+            color: white !important;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: white !important;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: white transparent transparent transparent !important;
+        }
+        
+        .select2-container--default .select2-results__option {
+            background-color: #3105f1 !important;
+            color: white !important;
+            padding: 8px 12px !important;
+        }
+        
+        .select2-container--default .select2-results__option--highlighted {
+            background-color: #0648d6 !important;
+        }
+        
+        .select2-dropdown {
+            background-color: #3105f1 !important;
+            border: 1px solid #034d21 !important;
+        }
+
+        #info-mayor {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border: 1px solid #3105f1;
+        }
+
+        .form-control:disabled, .form-select:disabled {
+            background-color: #333333;
+            cursor: not-allowed;
+            border-color: #555555;
+        }
+
+        @media (max-width: 768px) {
+            .table-carrito thead th, 
+            .table-carrito tbody td {
+                padding: 6px 4px;
+                font-size: 0.9rem;
+            }
+            
+            .btn-principal {
+                padding: 10px 30px;
+                font-size: 1rem;
+            }
+            
+            .btn-danger {
+                padding: 5px 10px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+        <div class="col-12 text-center logo-container">
+          <img alt="Logo" src="logo.png" class="img-fluid" height="150px" width="350px">
+        </div>
+    </div>
+
+    <!-- Formulario para agregar productos -->
+    <div class="form-container">
+      <h3 class="text-center mb-3">AGREGAR PRODUCTOS</h3>
+      <form id="form-agregar-producto">
+        <div class="row g-2">
+          <!-- Producto -->
+          <div class="col-md-3">
+            <label class="form-label">Producto</label>
+            <select class="form-control js-product-search" id="producto" required>
+              <option value="">Buscar producto...</option>
+              <!-- Productos cargados desde Supabase -->
+            </select>
+          </div>
+          
+          <!-- Tipo de Venta -->
+          <div class="col-md-2">
+            <label class="form-label">Tipo de Venta</label>
+            <select class="form-select" id="tipo-venta" required disabled>
+              <option value="">Seleccione</option>
+              <option value="detal">Al Detal</option>
+              <option value="mayor">Al Mayor</option>
+            </select>
+          </div>
+          
+          <!-- Unidad -->
+          <div class="col-md-2">
+            <label class="form-label">Unidad</label>
+            <input type="text" class="form-control" id="unidad" readonly placeholder="Seleccione tipo de venta">
+          </div>
+          
+          <!-- Precio Unitario -->
+          <div class="col-md-2">
+            <label class="form-label">Precio Unit. (USD)</label>
+            <input type="text" class="form-control" id="precio" readonly placeholder="Seleccione tipo de venta">
+          </div>
+          
+          <!-- Cantidad -->
+          <div class="col-md-2">
+            <label class="form-label">Cantidad</label>
+            <input type="number" min="1" value="1" class="form-control" id="cantidad" required disabled>
+          </div>
+          
+          <!-- Categoría (oculto, se mantiene para compatibilidad) -->
+          <input type="hidden" id="categoria">
+        </div>
+        
+        <!-- Información adicional para venta al mayor -->
+        <div class="row g-2 mt-2" id="info-mayor" style="display: none;">
+          <div class="col-md-4">
+            <small class="text-muted">
+              <i class="bi bi-info-circle"></i> 
+              <span id="info-empaque">Cada paca contiene 0 unidades</span>
+            </small>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted">
+              <i class="bi bi-calculator"></i> 
+              <span id="total-unidades">Total: 0 unidades</span>
+            </small>
+          </div>
+          <div class="col-md-4">
+            <small class="text-muted">
+              <i class="bi bi-currency-dollar"></i> 
+              <span id="subtotal-preview">Subtotal: USD 0.00</span>
+            </small>
+          </div>
+        </div>
+        
+        <div class="text-center mt-4">
+          <button type="submit" class="btn btn-principal" id="btn-agregar" disabled>
+            <i class="bi bi-cart-plus"></i> AGREGAR
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Carrito de compras -->
+    <div class="card-container">
+      <h3 class="text-center mb-3">CARRITO DE COMPRAS</h3>
+      <div class="table-responsive">
+        <table class="table table-carrito">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Tipo</th>
+              <th>Cantidad</th>
+              <th>Unidades</th>
+              <th>P. Unit.</th>
+              <th>Subtotal</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="carrito-body">
+            <!-- Los productos se agregarán aquí dinámicamente -->
+            <tr>
+              <td colspan="7" class="text-center text-muted">No hay productos en el carrito</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="total-container">
+        <div class="row">
+          <div class="col-md-6">
+            <h5 class="mb-0">TOTAL A PAGAR:</h5>
+          </div>
+          <div class="col-md-6 text-end">
+            <h4 class="mb-0" id="total-pagar">USD. 0.00</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Datos de la venta -->
+    <div class="form-container">
+      <h3 class="text-center mb-3">DATOS DE LA VENTA</h3>
+      <form id="form-finalizar-venta">
+        <div class="row g-2">
+          <div class="col-md-6">
+            <label class="form-label">Fecha</label>
+            <input type="date" class="form-control" id="fecha" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Tipo de Pago</label>
+            <select class="form-select" id="tipo-pago" required>
+              <option value="">Seleccionar...</option>
+              <option value="Efectivo">Efectivo</option>
+              <option value="Dólares">Dólares</option>
+              <option value="Punto de venta">Punto de venta</option>
+              <option value="Pago móvil">Pago móvil</option>                           
+            </select>
+          </div>
+        </div>
+        
+        <div class="text-center mt-4">
+          <button type="submit" class="btn btn-principal" id="btn-finalizar" disabled>
+            FINALIZAR VENTA
+          </button><br>
+          <a class="enlace" href="index.html">
+            <button type="button" class="btn btn-principal mt-2">
+              ← Volver al Menú
+            </button>
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center;">
+      <div style="text-align: center; color: white;">
+        <svg style="animation: spin 1s linear infinite; width: 40px; height: 40px; margin-bottom: 10px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p>Procesando venta...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    // Configuración de Supabase
+const SUPABASE_URL = 'https://rirfvhvlmytnpqkcpxbx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpcmZ2aHZsbXl0bnBxa2NweGJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0ODE2NDUsImV4cCI6MjA3MjA1NzY0NX0.5JLGuOIWNvKIESJG26JLOgRVCu0jVoH0ELZjQ63gV48';
+
+// Inicializar Supabase
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Variables globales
+let todosLosProductos = [];
+let carrito = [];
+let productoSeleccionado = null;
+
+// Cargar productos desde Supabase
+async function cargarProductos() {
+  try {
+    const { data: productos, error } = await supabaseClient
+      .from('productos')
+      .select('*')
+      .gt('cantidad', 0) // Solo productos con stock
+      .order('nombre', { ascending: true });
+
+    if (error) throw error;
+    
+    todosLosProductos = productos || [];
+    console.log('Productos cargados:', todosLosProductos);
+    inicializarSelect2();
+    
+  } catch (error) {
+    console.error('Error al cargar productos:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al cargar productos: ' + error.message
+    });
+  }
+}
+
+// Inicializar Select2 con productos de Supabase
+function inicializarSelect2() {
+  // Destruir Select2 existente si existe
+  if ($('#producto').hasClass('select2-hidden-accessible')) {
+    $('#producto').select2('destroy');
+  }
+  
+  // Limpiar opciones existentes
+  $('#producto').empty().append('<option value="">Buscar producto...</option>');
+  
+  // Agregar productos como opciones
+  todosLosProductos.forEach(producto => {
+    $('#producto').append(new Option(
+      `${producto.nombre} - ${producto.marca} (Stock: ${producto.cantidad})`,
+      producto.id,
+      false,
+      false
+    ));
+  });
+  
+  // Inicializar Select2
+  $('#producto').select2({
+    placeholder: "Buscar producto...",
+    width: '100%',
+    language: "es"
+  });
+  
+  console.log('Select2 inicializado con', todosLosProductos.length, 'productos');
+}
+
+// Manejar selección de producto
+function manejarSeleccionProducto() {
+  $('#producto').on('select2:select', function(e) {
+    const productoId = e.params.data.id;
+    
+    console.log('Producto seleccionado ID:', productoId);
+    
+    if (productoId) {
+      // Obtener el producto seleccionado
+      productoSeleccionado = todosLosProductos.find(p => p.id === productoId);
+      
+      if (productoSeleccionado) {
+        console.log('Producto encontrado:', productoSeleccionado);
+        
+        // Habilitar tipo de venta
+        $('#tipo-venta').prop('disabled', false);
+        
+        // Limpiar campos dependientes
+        $('#tipo-venta').val('');
+        $('#unidad').val('');
+        $('#precio').val('');
+        $('#cantidad').val('1').prop('disabled', true);
+        $('#btn-agregar').prop('disabled', true);
+        ocultarInfoMayor();
+      } else {
+        console.error('Producto no encontrado en la lista');
+      }
+    } else {
+      productoSeleccionado = null;
+      limpiarCamposDependientes();
+    }
+  });
+  
+  // Manejar cuando se limpia la selección
+  $('#producto').on('select2:clear', function() {
+    productoSeleccionado = null;
+    limpiarCamposDependientes();
+  });
+}
+
+// Manejar selección de tipo de venta
+function manejarTipoVenta() {
+  $('#tipo-venta').on('change', function() {
+    const tipoVenta = $(this).val();
+    
+    console.log('Tipo de venta seleccionado:', tipoVenta);
+    console.log('Producto seleccionado:', productoSeleccionado);
+    
+    if (tipoVenta && productoSeleccionado) {
+      // Habilitar cantidad
+      $('#cantidad').prop('disabled', false);
+      $('#btn-agregar').prop('disabled', false);
+      
+      if (tipoVenta === 'detal') {
+        $('#unidad').val('Unidad');
+        $('#precio').val(productoSeleccionado.precio_venta.toFixed(2));
+        ocultarInfoMayor();
+      } else if (tipoVenta === 'mayor') {
+        // Verificar que el producto tenga empaque mayor configurado
+        if (productoSeleccionado.empaque_mayor && productoSeleccionado.cantidad_por_empaque > 0) {
+          $('#unidad').val(productoSeleccionado.empaque_mayor);
+          // Precio por empaque mayor (precio unitario * cantidad por empaque)
+          const precioMayor = (productoSeleccionado.precio_venta * productoSeleccionado.cantidad_por_empaque).toFixed(2);
+          $('#precio').val(precioMayor);
+          mostrarInfoMayor();
+        } else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Producto sin empaque mayor',
+            text: 'Este producto no tiene configurado empaque para venta al mayor'
+          });
+          $(this).val('');
+          return;
+        }
+      }
+      
+      actualizarCalculosMayor();
+    } else {
+      $('#unidad').val('');
+      $('#precio').val('');
+      $('#cantidad').prop('disabled', true);
+      $('#btn-agregar').prop('disabled', true);
+      ocultarInfoMayor();
+    }
+  });
+}
+
+// Mostrar información para venta al mayor
+function mostrarInfoMayor() {
+  const infoMayor = document.getElementById('info-mayor');
+  const infoEmpaque = document.getElementById('info-empaque');
+  
+  infoMayor.style.display = 'block';
+  infoEmpaque.textContent = `Cada ${productoSeleccionado.empaque_mayor.toLowerCase()} contiene ${productoSeleccionado.cantidad_por_empaque} unidades`;
+}
+
+// Ocultar información para venta al mayor
+function ocultarInfoMayor() {
+  document.getElementById('info-mayor').style.display = 'none';
+}
+
+// Actualizar cálculos para venta al mayor
+function actualizarCalculosMayor() {
+  const cantidad = parseInt($('#cantidad').val()) || 0;
+  const tipoVenta = $('#tipo-venta').val();
+  
+  if (tipoVenta === 'mayor' && productoSeleccionado && cantidad > 0) {
+    const totalUnidades = cantidad * productoSeleccionado.cantidad_por_empaque;
+    const precioUnitario = productoSeleccionado.precio_venta;
+    const subtotal = totalUnidades * precioUnitario;
+    
+    $('#total-unidades').text(`Total: ${totalUnidades} unidades`);
+    $('#subtotal-preview').text(`Subtotal: USD ${subtotal.toFixed(2)}`);
+  } else if (tipoVenta === 'detal' && productoSeleccionado && cantidad > 0) {
+    const subtotal = cantidad * productoSeleccionado.precio_venta;
+    $('#total-unidades').text(`Total: ${cantidad} unidades`);
+    $('#subtotal-preview').text(`Subtotal: USD ${subtotal.toFixed(2)}`);
+  } else {
+    $('#total-unidades').text('Total: 0 unidades');
+    $('#subtotal-preview').text('Subtotal: USD 0.00');
+  }
+}
+
+// Manejar cambio de cantidad
+function manejarCambioCantidad() {
+  $('#cantidad').on('input', function() {
+    actualizarCalculosMayor();
+  });
+}
+
+// Limpiar campos dependientes
+function limpiarCamposDependientes() {
+  $('#tipo-venta').val('').prop('disabled', true);
+  $('#unidad').val('');
+  $('#precio').val('');
+  $('#cantidad').val('1').prop('disabled', true);
+  $('#btn-agregar').prop('disabled', true);
+  ocultarInfoMayor();
+}
+
+// Verificar stock disponible
+function verificarStock(productoId, cantidadSolicitada, tipoVenta) {
+  const producto = todosLosProductos.find(p => p.id === productoId);
+  if (!producto) return false;
+  
+  // Calcular unidades reales según tipo de venta
+  const unidadesReales = tipoVenta === 'mayor' 
+    ? cantidadSolicitada * producto.cantidad_por_empaque 
+    : cantidadSolicitada;
+  
+  // Calcular cantidad ya en el carrito
+  const itemEnCarrito = carrito.find(item => item.productoId === productoId && item.tipoVenta === tipoVenta);
+  const unidadesEnCarrito = itemEnCarrito ? itemEnCarrito.unidades : 0;
+  
+  return (unidadesEnCarrito + unidadesReales) <= producto.cantidad;
+}
+
+// Agregar producto al carrito
+function agregarAlCarrito(event) {
+  event.preventDefault();
+  
+  if (!productoSeleccionado) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Seleccione un producto',
+      text: 'Debe seleccionar un producto primero'
+    });
+    return;
+  }
+  
+  const tipoVenta = $('#tipo-venta').val();
+  const cantidad = parseInt($('#cantidad').val());
+  
+  if (!tipoVenta) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Seleccione tipo de venta',
+      text: 'Debe seleccionar el tipo de venta'
+    });
+    return;
+  }
+  
+  if (!cantidad || cantidad < 1) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Cantidad inválida',
+      text: 'Ingrese una cantidad válida'
+    });
+    return;
+  }
+  
+  // Verificar stock disponible
+  if (!verificarStock(productoSeleccionado.id, cantidad, tipoVenta)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Stock insuficiente',
+      text: `No hay suficiente stock disponible para este producto`
+    });
+    return;
+  }
+  
+  let itemCarrito;
+  
+  if (tipoVenta === 'detal') {
+    itemCarrito = {
+      id: Date.now(),
+      productoId: productoSeleccionado.id,
+      nombre: productoSeleccionado.nombre,
+      marca: productoSeleccionado.marca,
+      tipoVenta: tipoVenta,
+      tipo: 'Al Detal',
+      cantidad: cantidad,
+      unidades: cantidad,
+      precioUnitario: productoSeleccionado.precio_venta,
+      subtotal: cantidad * productoSeleccionado.precio_venta
+    };
+  } else {
+    const totalUnidades = cantidad * productoSeleccionado.cantidad_por_empaque;
+    itemCarrito = {
+      id: Date.now(),
+      productoId: productoSeleccionado.id,
+      nombre: productoSeleccionado.nombre,
+      marca: productoSeleccionado.marca,
+      tipoVenta: tipoVenta,
+      tipo: `Al Mayor (${productoSeleccionado.empaque_mayor})`,
+      cantidad: cantidad,
+      unidades: totalUnidades,
+      precioUnitario: productoSeleccionado.precio_venta,
+      subtotal: totalUnidades * productoSeleccionado.precio_venta
+    };
+  }
+  
+  carrito.push(itemCarrito);
+  actualizarVistaCarrito();
+  limpiarFormulario();
+  
+  console.log('Item agregado al carrito:', itemCarrito);
+}
+
+// Actualizar vista del carrito
+function actualizarVistaCarrito() {
+  const carritoBody = document.getElementById('carrito-body');
+  carritoBody.innerHTML = '';
+  
+  let total = 0;
+  
+  if (carrito.length === 0) {
+    carritoBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No hay productos en el carrito</td></tr>';
+    $('#btn-finalizar').prop('disabled', true);
+  } else {
+    $('#btn-finalizar').prop('disabled', false);
+    
+    carrito.forEach((item, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${item.nombre}<br><small class="text-muted">${item.marca}</small></td>
+        <td>${item.tipo}</td>
+        <td>${item.cantidad}</td>
+        <td>${item.unidades}</td>
+        <td>USD ${item.precioUnitario.toFixed(2)}</td>
+        <td>USD ${item.subtotal.toFixed(2)}</td>
+        <td>
+          <button type="button" class="btn btn-danger btn-sm" onclick="eliminarDelCarrito(${index})">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      `;
+      carritoBody.appendChild(row);
+      total += item.subtotal;
+    });
+  }
+  
+  $('#total-pagar').text(`USD ${total.toFixed(2)}`);
+}
+
+// Eliminar item del carrito
+function eliminarDelCarrito(index) {
+  carrito.splice(index, 1);
+  actualizarVistaCarrito();
+}
+
+// Limpiar formulario
+function limpiarFormulario() {
+  $('#producto').val(null).trigger('change');
+  productoSeleccionado = null;
+  limpiarCamposDependientes();
+}
+
+// Función para generar el HTML de los productos para SweetAlert
+function generarDetalleProductos(productos) {
+  let html = '<div style="text-align: left; margin: 10px 0;">';
+  html += '<ul style="padding-left: 20px; margin: 0;">';
+  
+  productos.forEach(producto => {
+    html += `<li>${producto.nombre} - ${producto.tipo} - Cantidad: ${producto.cantidad} - USD. ${producto.subtotal.toFixed(2)}</li>`;
+  });
+  
+  html += '</ul></div>';
+  return html;
+}
+
+async function finalizarVentaEnSupabase(datosVenta) {
+  const loadingOverlay = document.getElementById('loadingOverlay');
+  
+  try {
+    loadingOverlay.style.display = 'flex';
+    
+    // Preparar datos para la tabla ventas
+    const ventaParaInsertar = {
+      fecha: datosVenta.fecha,
+      tipo_pago: datosVenta.tipoPago,
+      total: datosVenta.total
+    };
+    
+    // 1. Crear la venta principal
+    const { data: venta, error: errorVenta } = await supabaseClient
+      .from('ventas')
+      .insert(ventaParaInsertar)
+      .select()
+      .single();
+
+    if (errorVenta) {
+      console.error('Error al insertar venta:', errorVenta);
+      throw errorVenta;
+    }
+
+    // 2. Crear los detalles de la venta
+    const detallesVenta = datosVenta.productos.map(producto => ({
+      venta_id: venta.id,
+      producto_id: producto.productoId,
+      cantidad: producto.unidades, // Guardamos las unidades totales
+      tipo_venta: producto.tipoVenta,
+      precio_unitario: producto.precioUnitario
+      // Removemos subtotal si es una columna calculada
+    }));
+
+    const { error: errorDetalles } = await supabaseClient
+      .from('detalles_venta')
+      .insert(detallesVenta);
+
+    if (errorDetalles) {
+      console.error('Error al insertar detalles:', errorDetalles);
+      throw errorDetalles;
+    }
+
+    // 3. Actualizar stock de productos
+    for (const producto of datosVenta.productos) {
+      const productoActual = todosLosProductos.find(p => p.id === producto.productoId);
+      const nuevoStock = productoActual.cantidad - producto.unidades;
+      
+      const { error: errorStock } = await supabaseClient
+        .from('productos')
+        .update({ cantidad: nuevoStock })
+        .eq('id', producto.productoId);
+
+      if (errorStock) throw errorStock;
+    }
+
+    // 4. Actualizar datos locales
+    datosVenta.productos.forEach(productoVendido => {
+      const producto = todosLosProductos.find(p => p.id === productoVendido.productoId);
+      if (producto) {
+        producto.cantidad -= productoVendido.unidades;
+      }
+    });
+
+    loadingOverlay.style.display = 'none';
+    
+    // Mostrar alerta de éxito con SweetAlert con detalles completos
+    Swal.fire({
+      icon: 'success',
+      title: '¡Venta registrada exitosamente!',
+      html: `
+        <div style="text-align: left;">
+          <p><strong>Productos:</strong></p>
+          ${generarDetalleProductos(datosVenta.productos)}
+          <p><strong>Tipo de pago:</strong> ${datosVenta.tipoPago}</p>
+          <p><strong>Total:</strong> USD. ${datosVenta.total.toFixed(2)}</p>
+        </div>
+      `,
+      confirmButtonText: 'Aceptar'
+    });
+    
+    // Limpiar carrito y formulario
+    carrito = [];
+    actualizarVistaCarrito();
+    $('#form-finalizar-venta')[0].reset();
+    $('#fecha').val(new Date().toISOString().split('T')[0]);
+    
+    // Recargar select2 con stock actualizado
+    inicializarSelect2();
+
+  } catch (error) {
+    loadingOverlay.style.display = 'none';
+    console.error('Error al finalizar venta:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al registrar la venta: ' + error.message
+    });
+  }
+}
+
+// Inicializar cuando se carga el DOM
+$(document).ready(function() {
+  // Configurar fecha actual
+  $('#fecha').val(new Date().toISOString().split('T')[0]);
+  
+  // Inicializar funciones
+  cargarProductos();
+  manejarSeleccionProducto();
+  manejarTipoVenta();
+  manejarCambioCantidad();
+  
+  // Event listener para el formulario
+  $('#form-agregar-producto').on('submit', agregarAlCarrito);
+  
+  // Event listener para finalizar venta
+  $('#form-finalizar-venta').on('submit', function(e) {
+    e.preventDefault();
+    
+    const fecha = $('#fecha').val();
+    const tipoPago = $('#tipo-pago').val();
+    const total = carrito.reduce((sum, item) => sum + item.subtotal, 0);
+    
+    if (carrito.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Carrito vacío',
+        text: 'No hay productos en el carrito'
+      });
+      return;
+    }
+    
+    if (!tipoPago) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Tipo de pago requerido',
+        text: 'Seleccione un tipo de pago'
+      });
+      return;
+    }
+    
+    // Confirmar venta con SweetAlert con detalles completos
+    Swal.fire({
+      title: '¿Confirmar venta?',
+      html: `
+        <div style="text-align: left;">
+          <p><strong>Productos:</strong></p>
+          ${generarDetalleProductos(carrito)}
+          <p><strong>Tipo de pago:</strong> ${tipoPago}</p>
+          <p><strong>Total a pagar:</strong> USD. ${total.toFixed(2)}</p>
+        </div>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, confirmar venta',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        finalizarVentaEnSupabase({
+          fecha,
+          tipoPago,
+          productos: carrito,
+          total: total
+        });
+      }
+    });
+  });
+  
+  // Inicializar vista del carrito
+  actualizarVistaCarrito();
+  
+  console.log('Sistema inicializado correctamente');
+});
+  </script>
+</body>
+</html>

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --verde-farmacia: #3105f1;
+      --fondo-oscuro: #1a1a1a;
+      --texto-blanco: #ffffff;
+      --rojo-alerta: #ff6b6b;
+      --amarillo-alerta: #ffc107;
+    }
+    
+    body {
+      background-color: #000;
+      color: var(--texto-blanco);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .container-mobile {
+      max-width: 100%;
+      padding: 15px;
+    }
+
+    .btn-submit {
+      background-color: #3105f1;
+      color: #fff;
+      padding: 10px 30px;
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+      background-color: #cccccc;
+      color: #000000;
+      transform: translateY(-2px);
+    }
+    
+    .logo-container {
+      text-align: center;
+      margin: 15px 0 25px;
+    }
+    
+    .card-inventario {
+      background-color: var(--fondo-oscuro);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    
+    .title-inventario {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--texto-blanco);
+      font-size: 1.5rem;
+    }
+    
+    .search-box {
+      margin-bottom: 15px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 10px 15px;
+      background-color: #2a2a2a;
+      border: 1px solid var(--verde-farmacia);
+      border-radius: 5px;
+      color: var(--texto-blanco);
+    }
+    
+    .table-inventario {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    
+    .table-inventario th {
+      background-color: var(--verde-farmacia);
+      color: white;
+      padding: 12px 8px;
+      text-align: left;
+    }
+    
+    .table-inventario td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #333;
+    }
+    
+    .table-inventario tr:nth-child(even) {
+      background-color: #2a2a2a;
+    }
+    
+    .table-inventario tr:hover {
+      background-color: #333;
+    }
+    
+    .btn-volver {
+      display: block;
+      width: 100%;
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 20px;
+      text-decoration: none;
+    }
+    
+    .btn-volver:hover {
+      background-color: #444;
+      color: white;
+    }
+    
+    /* Scroll horizontal para móviles */
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Ajustes para pantallas pequeñas */
+    @media (max-width: 576px) {
+      .table-inventario th, 
+      .table-inventario td {
+        padding: 8px 5px;
+        font-size: 0.9rem;
+      }
+      
+      .table-inventario th {
+        font-size: 0.95rem;
+      }
+    }
+
+    /* Estilos para las tarjetas de resumen */
+    .summary-cards {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .summary-card {
+      background-color: var(--fondo-oscuro);
+      border-radius: 10px;
+      padding: 15px;
+      flex: 1;
+      min-width: 200px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+    }
+
+    .summary-card.alert {
+      border-left: 5px solid var(--rojo-alerta);
+    }
+
+    .summary-card.warning {
+      border-left: 5px solid var(--amarillo-alerta);
+    }
+
+    .summary-icon {
+      font-size: 2rem;
+      margin-right: 15px;
+      color: var(--verde-farmacia);
+    }
+
+    .alert .summary-icon {
+      color: var(--rojo-alerta);
+    }
+
+    .warning .summary-icon {
+      color: var(--amarillo-alerta);
+    }
+
+    .summary-content {
+      flex: 1;
+    }
+
+    .summary-title {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-bottom: 5px;
+    }
+
+    .summary-value {
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
+    .alert .summary-value {
+      color: var(--rojo-alerta);
+    }
+
+    .warning .summary-value {
+      color: var(--amarillo-alerta);
+    }
+
+    .badge-alerta {
+      background-color: var(--rojo-alerta);
+      color: white;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      margin-left: 5px;
+    }
+
+    /* Filtros rápidos */
+    .filtros-rapidos {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .btn-filtro {
+      background-color: #333;
+      color: white;
+      border: none;
+      padding: 5px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-filtro:hover {
+      background-color: #444;
+    }
+
+    .btn-filtro.active {
+      background-color: var(--verde-farmacia);
+      font-weight: bold;
+    }
+
+    .btn-filtro.alert {
+      background-color: var(--rojo-alerta);
+    }
+
+    .btn-filtro.warning {
+      background-color: var(--amarillo-alerta);
+      color: #000;
+    }
+
+    /* CSS adicional para la animación del spinner */
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container-mobile">
+    <div class="row">
+      <div class="col-12 text-center logo-container">
+        <img alt="Logo" src="logo.png" class="img-fluid" height="150px" width="350px">
+      </div>
+    </div>
+    
+    <div class="card-inventario">
+      <h2 class="title-inventario">INVENTARIO DE PRODUCTOS</h2>
+      
+      <!-- Tarjetas de resumen -->
+      <div class="summary-cards" id="summaryCards" style="display: none;">
+        <div class="summary-card">
+          <div class="summary-icon">
+            <i class="fas fa-boxes"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-title">Productos en Inventario</div>
+            <div class="summary-value" id="totalProductos">0</div>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon">
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-title">Capital Invertido</div>
+            <div class="summary-value" id="capitalInvertido">USD. 0.00</div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-title">Ganancia Potencial</div>
+            <div class="summary-value" id="gananciaInventario">USD. 0.00</div>
+          </div>
+        </div>
+
+        <div class="summary-card warning" id="cardBajoStock">
+          <div class="summary-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-title">Productos con Stock Bajo</div>
+            <div class="summary-value" id="productosBajoStock">0</div>
+          </div>
+        </div>
+
+        <div class="summary-card alert" id="cardStockCero">
+          <div class="summary-icon">
+            <i class="fas fa-times-circle"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-title">Productos Agotados</div>
+            <div class="summary-value" id="productosStockCero">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros rápidos -->
+      <div class="filtros-rapidos" id="filtrosRapidos" style="display: none;">
+        <button class="btn-filtro active" data-filter="all">Todos</button>
+        <button class="btn-filtro warning" data-filter="low">Stock Bajo (<10)</button>
+        <button class="btn-filtro alert" data-filter="zero">Agotados</button>
+      </div>
+      
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="Buscar producto..." id="buscadorInventario">
+      </div>
+      
+      <!-- Loading indicator -->
+      <div id="loadingIndicator" class="text-center" style="padding: 20px;">
+        <svg style="animation: spin 1s linear infinite; display: inline-block; width: 24px; height: 24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p>Cargando inventario...</p>
+      </div>
+      
+      <div class="table-responsive" id="tableContainer" style="display: none;">
+        <table class="table-inventario">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Marca</th>
+              <th>Categoría</th>
+              <th>Stock</th>
+              <th>P. Compra</th>
+              <th>P. Venta</th>
+              <th>Ganancia</th>
+              <th>Capital Invertido</th>
+            </tr>
+          </thead>
+          <tbody id="tablaInventario">
+            <!-- Los datos se cargarán aquí dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Mensaje cuando no hay productos -->
+      <div id="emptyMessage" class="text-center" style="display: none; padding: 40px;">
+        <p>No hay productos en el inventario.</p>
+      </div>
+      
+      <!-- Mensaje de error -->
+      <div id="errorMessage" class="text-center" style="display: none; padding: 40px; color: #ff6b6b;">
+        <p>Error al cargar inventario. Por favor, recarga la página.</p>
+      </div>
+      <br>
+      <div class="text-center">
+         <a class="btn btn-submit btn-lg" href="menuProductos.html">Volver al Menú</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incluir Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+
+  <script>
+    // Configuración de Supabase
+    const SUPABASE_URL = 'https://rirfvhvlmytnpqkcpxbx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpcmZ2aHZsbXl0bnBxa2NweGJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0ODE2NDUsImV4cCI6MjA3MjA1NzY0NX0.5JLGuOIWNvKIESJG26JLOgRVCu0jVoH0ELZjQ63gV48';
+    
+    // Inicializar Supabase
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Variable global para almacenar todos los productos con su stock calculado
+    let inventarioCompleto = [];
+    let filtroActual = 'all';
+
+    // Función para cargar y calcular el inventario
+    async function cargarInventario() {
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const tableContainer = document.getElementById('tableContainer');
+      const emptyMessage = document.getElementById('emptyMessage');
+      const errorMessage = document.getElementById('errorMessage');
+      const summaryCards = document.getElementById('summaryCards');
+      const filtrosRapidos = document.getElementById('filtrosRapidos');
+      
+      try {
+        // Mostrar loading
+        loadingIndicator.style.display = 'block';
+        tableContainer.style.display = 'none';
+        emptyMessage.style.display = 'none';
+        errorMessage.style.display = 'none';
+        summaryCards.style.display = 'none';
+        filtrosRapidos.style.display = 'none';
+
+        // Obtener productos y ventas en paralelo para mayor eficiencia
+        const [productosResponse, ventasResponse] = await Promise.all([
+          supabaseClient.from('productos').select('*'),
+          supabaseClient.from('detalles_venta').select('producto_id, cantidad')
+        ]);
+
+        if (productosResponse.error) throw productosResponse.error;
+        if (ventasResponse.error) throw ventasResponse.error;
+
+        const productos = productosResponse.data || [];
+        const ventas = ventasResponse.data || [];
+
+        // Calcular el stock vendido por producto
+        const stockVendidoPorProducto = {};
+        ventas.forEach(venta => {
+          const productoId = venta.producto_id;
+          stockVendidoPorProducto[productoId] = (stockVendidoPorProducto[productoId] || 0) + venta.cantidad;
+        });
+
+        // Variables para estadísticas
+        let totalProductos = 0;
+        let capitalInvertido = 0;
+        let gananciaTotal = 0;
+        let productosBajoStock = 0;
+        let productosStockCero = 0;
+
+        // Calcular el inventario (entradas - salidas)
+        const inventario = productos.map(producto => {
+          const stockVendido = stockVendidoPorProducto[producto.id] || 0;
+          const stockDisponible = producto.cantidad - stockVendido;
+          const valorCompra = stockDisponible * producto.precio_compra;
+          const valorVenta = stockDisponible * producto.precio_venta;
+          const ganancia = valorVenta - valorCompra;
+          
+          // Actualizar estadísticas
+          totalProductos += stockDisponible;
+          capitalInvertido += valorCompra;
+          gananciaTotal += ganancia;
+
+          // Contar productos con stock bajo o cero
+          if (stockDisponible <= 0) {
+            productosStockCero++;
+          } else if (stockDisponible < 10) {
+            productosBajoStock++;
+          }
+          
+          return {
+            ...producto,
+            stock_disponible: stockDisponible,
+            valor_compra_total: valorCompra,
+            valor_venta_total: valorVenta,
+            ganancia_total: ganancia
+          };
+        });
+
+        // Guardar inventario para búsqueda
+        inventarioCompleto = inventario;
+
+        // Actualizar tarjetas de resumen
+        document.getElementById('totalProductos').textContent = totalProductos;
+        document.getElementById('capitalInvertido').textContent = `USD. ${capitalInvertido.toFixed(2)}`;
+        document.getElementById('gananciaInventario').textContent = `USD. ${gananciaTotal.toFixed(2)}`;
+        document.getElementById('productosBajoStock').textContent = productosBajoStock;
+        document.getElementById('productosStockCero').textContent = productosStockCero;
+
+        // Mostrar u ocultar tarjetas de alerta según sea necesario
+        document.getElementById('cardBajoStock').style.display = productosBajoStock > 0 ? 'flex' : 'none';
+        document.getElementById('cardStockCero').style.display = productosStockCero > 0 ? 'flex' : 'none';
+
+        summaryCards.style.display = 'flex';
+        filtrosRapidos.style.display = 'flex';
+
+        // Ocultar loading
+        loadingIndicator.style.display = 'none';
+
+        if (inventario.length > 0) {
+          // Mostrar tabla con inventario
+          mostrarInventario(inventario);
+          tableContainer.style.display = 'block';
+        } else {
+          // Mostrar mensaje de inventario vacío
+          emptyMessage.style.display = 'block';
+        }
+
+      } catch (error) {
+        console.error('Error al cargar inventario:', error);
+        
+        // Ocultar loading y mostrar error
+        loadingIndicator.style.display = 'none';
+        errorMessage.style.display = 'block';
+      }
+    }
+
+    // Función para mostrar el inventario en la tabla
+    function mostrarInventario(inventario) {
+      const tabla = document.getElementById('tablaInventario');
+      tabla.innerHTML = '';
+      
+      // Filtrar según el filtro seleccionado
+      let inventarioFiltrado = inventario;
+      if (filtroActual === 'low') {
+        inventarioFiltrado = inventario.filter(item => item.stock_disponible > 0 && item.stock_disponible < 10);
+      } else if (filtroActual === 'zero') {
+        inventarioFiltrado = inventario.filter(item => item.stock_disponible <= 0);
+      }
+      
+      if (inventarioFiltrado.length === 0) {
+        document.getElementById('tableContainer').style.display = 'none';
+        document.getElementById('emptyMessage').style.display = 'block';
+        document.getElementById('emptyMessage').innerHTML = 
+          filtroActual === 'all' ? '<p>No hay productos en el inventario.</p>' :
+          filtroActual === 'low' ? '<p>No hay productos con stock bajo.</p>' :
+          '<p>No hay productos agotados.</p>';
+        return;
+      }
+      
+      document.getElementById('tableContainer').style.display = 'block';
+      document.getElementById('emptyMessage').style.display = 'none';
+
+      inventarioFiltrado.forEach(item => {
+        const row = document.createElement('tr');
+        
+        // Determinar clase según stock
+        let rowClass = '';
+        if (item.stock_disponible <= 0) {
+          rowClass = 'class="stock-cero" style="color: var(--rojo-alerta); font-weight: bold;"';
+        } else if (item.stock_disponible < 10) {
+          rowClass = 'class="stock-bajo" style="color: var(--amarillo-alerta); font-weight: bold;"';
+        }
+        
+        row.innerHTML = `
+          <td ${rowClass}>${item.nombre}</td>
+          <td ${rowClass}>${item.marca}</td>
+          <td ${rowClass}>${item.categoria}</td>
+          <td ${rowClass}>
+            ${item.stock_disponible}
+            ${item.stock_disponible <= 0 ? '<span class="badge-alerta">AGOTADO</span>' : 
+              item.stock_disponible < 10 ? '<span class="badge-alerta">BAJO</span>' : ''}
+          </td>
+          <td ${rowClass}>USD. ${parseFloat(item.precio_compra).toFixed(2)}</td>
+          <td ${rowClass}>USD. ${parseFloat(item.precio_venta).toFixed(2)}</td>
+          <td ${rowClass}>USD. ${item.ganancia_total.toFixed(2)}</td>
+          <td ${rowClass}>USD. ${item.valor_compra_total.toFixed(2)}</td>
+        `;
+        
+        tabla.appendChild(row);
+      });
+    }
+
+    // Función de búsqueda
+    function buscarProductos(searchValue) {
+      const productosFiltrados = inventarioCompleto.filter(item => {
+        const nombre = item.nombre.toLowerCase();
+        const marca = item.marca.toLowerCase();
+        const categoria = item.categoria.toLowerCase();
+        const search = searchValue.toLowerCase();
+        
+        return nombre.includes(search) || 
+               marca.includes(search) || 
+               categoria.includes(search);
+      });
+      
+      // Aplicar filtro adicional si está activo
+      let resultadosFiltrados = productosFiltrados;
+      if (filtroActual === 'low') {
+        resultadosFiltrados = productosFiltrados.filter(item => item.stock_disponible > 0 && item.stock_disponible < 10);
+      } else if (filtroActual === 'zero') {
+        resultadosFiltrados = productosFiltrados.filter(item => item.stock_disponible <= 0);
+      }
+      
+      mostrarInventario(resultadosFiltrados);
+      
+      // Mostrar mensaje si no hay resultados
+      const tableContainer = document.getElementById('tableContainer');
+      const emptyMessage = document.getElementById('emptyMessage');
+      
+      if (resultadosFiltrados.length === 0 && searchValue.trim() !== '') {
+        tableContainer.style.display = 'none';
+        emptyMessage.innerHTML = '<p>No se encontraron productos que coincidan con tu búsqueda.</p>';
+        emptyMessage.style.display = 'block';
+      } else if (resultadosFiltrados.length === 0) {
+        tableContainer.style.display = 'none';
+        emptyMessage.innerHTML = 
+          filtroActual === 'all' ? '<p>No se encontraron productos en el inventario.</p>' :
+          filtroActual === 'low' ? '<p>No hay productos con stock bajo que coincidan.</p>' :
+          '<p>No hay productos agotados que coincidan.</p>';
+        emptyMessage.style.display = 'block';
+      } else {
+        tableContainer.style.display = 'block';
+        emptyMessage.style.display = 'none';
+      }
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      // Cargar inventario al cargar la página
+      cargarInventario();
+      
+      // Búsqueda en tiempo real
+      document.getElementById('buscadorInventario').addEventListener('input', function() {
+        const searchValue = this.value;
+        buscarProductos(searchValue);
+      });
+
+      // Filtros rápidos
+      document.querySelectorAll('.btn-filtro').forEach(btn => {
+        btn.addEventListener('click', function() {
+          // Quitar clase active de todos los botones
+          document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('active'));
+          
+          // Añadir clase active al botón clickeado
+          this.classList.add('active');
+          
+          // Actualizar filtro
+          filtroActual = this.dataset.filter;
+          
+          // Aplicar filtro
+          buscarProductos(document.getElementById('buscadorInventario').value);
+        });
+      });
+    });
+
+    // Función para recargar inventario (opcional)
+    function recargarInventario() {
+      cargarInventario();
+    }
+  </script>
+</body>
+</html>
