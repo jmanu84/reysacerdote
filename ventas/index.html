@@ -131,6 +131,43 @@
       .table-ventas th {
         font-size: 0.95rem;
       }
+      
+      .filtros-fechas {
+        flex-direction: column;
+      }
+      
+      .filtros-rapidos-fechas {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .rango-fechas {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .rango-fechas-horizontal {
+        display: none;
+      }
+      
+      .rango-fechas-vertical {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+    
+    /* Para pantallas más grandes */
+    @media (min-width: 577px) {
+      .rango-fechas-vertical {
+        display: none;
+      }
+      
+      .rango-fechas-horizontal {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
     }
 
     /* Estilos para las tarjetas de resumen */
@@ -181,6 +218,20 @@
       margin-bottom: 15px;
       flex-wrap: wrap;
     }
+    
+    .filtros-fechas {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .filtros-rapidos-fechas {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
     .btn-filtro {
       background-color: #333;
@@ -200,6 +251,26 @@
     .btn-filtro.active {
       background-color: var(--azul-ventas);
       font-weight: bold;
+    }
+    
+    .rango-fechas {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .fecha-input {
+      background-color: #2a2a2a;
+      border: 1px solid var(--verde-farmacia);
+      border-radius: 5px;
+      color: var(--texto-blanco);
+      padding: 5px 10px;
+    }
+    
+    .fecha-label {
+      font-size: 0.9rem;
+      color: #aaa;
     }
 
     /* Modal para detalles de venta */
@@ -300,6 +371,36 @@
         </div>
       </div>
 
+      <!-- Filtros de fechas -->
+      <div class="filtros-fechas" id="filtrosFechas" style="display: none;">
+        <div class="filtros-rapidos-fechas">
+          <button class="btn-filtro active" data-fecha-filtro="all">Todas las fechas</button>
+          <button class="btn-filtro" data-fecha-filtro="hoy">Hoy</button>
+          <button class="btn-filtro" data-fecha-filtro="semana">Esta semana</button>
+          <button class="btn-filtro" data-fecha-filtro="mes">Este mes</button>
+        </div>
+        
+        <div class="rango-fechas">
+          <!-- Versión horizontal para escritorio -->
+          <div class="rango-fechas-horizontal">
+            <span class="fecha-label">Rango personalizado:</span>
+            <input type="date" class="fecha-input" id="fechaInicio">
+            <span class="fecha-label">a</span>
+            <input type="date" class="fecha-input" id="fechaFin">
+            <button class="btn-filtro" id="aplicarRango">Aplicar</button>
+          </div>
+          
+          <!-- Versión vertical para móviles -->
+          <div class="rango-fechas-vertical">
+            <span class="fecha-label">Rango personalizado:</span>
+            <input type="date" class="fecha-input mb-2" id="fechaInicioMobile" placeholder="Fecha inicio">
+            <span class="fecha-label">a</span>
+            <input type="date" class="fecha-input mb-2" id="fechaFinMobile" placeholder="Fecha fin">
+            <button class="btn-filtro" id="aplicarRangoMobile">Aplicar</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Filtros rápidos -->
       <div class="filtros-rapidos" id="filtrosRapidos" style="display: none;">
         <button class="btn-filtro active" data-filter="all">Todas</button>
@@ -307,7 +408,6 @@
         <button class="btn-filtro" data-filter="Efectivo">Efectivo</button>
         <button class="btn-filtro" data-filter="Pago móvil">Pago Móvil</button>
         <button class="btn-filtro" data-filter="Dólares">Dólares</button>
-        
       </div>
       
       <div class="search-box">
@@ -376,7 +476,9 @@
     let detallesVentas = [];
     let productosMap = {};
     let filtroActual = 'all';
-    let fechaFiltro = null;
+    let filtroFechaTipo = 'all'; // all, hoy, semana, mes, rango
+    let fechaInicioRango = null;
+    let fechaFinRango = null;
 
     // Función para formatear fecha (solo fecha, sin hora)
     function formatearFecha(fechaStr) {
@@ -387,6 +489,48 @@
       return `${dia}/${mes}/${año}`;
     }
 
+    // Función para obtener el inicio del día
+    function inicioDelDia(fecha = new Date()) {
+      const inicio = new Date(fecha);
+      inicio.setHours(0, 0, 0, 0);
+      return inicio;
+    }
+
+    // Función para obtener el fin del día
+    function finDelDia(fecha = new Date()) {
+      const fin = new Date(fecha);
+      fin.setHours(23, 59, 59, 999);
+      return fin;
+    }
+
+    // Función para obtener el inicio de la semana
+    function inicioDeSemana() {
+      const hoy = new Date();
+      const dia = hoy.getDay();
+      const diff = hoy.getDate() - dia + (dia === 0 ? -6 : 1); // Ajuste cuando es domingo
+      return inicioDelDia(new Date(hoy.setDate(diff)));
+    }
+
+    // Función para obtener el fin de la semana
+    function finDeSemana() {
+      const inicio = inicioDeSemana();
+      const fin = new Date(inicio);
+      fin.setDate(inicio.getDate() + 6);
+      return finDelDia(fin);
+    }
+
+    // Función para obtener el inicio del mes
+    function inicioDeMes() {
+      const hoy = new Date();
+      return inicioDelDia(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
+    }
+
+    // Función para obtener el fin del mes
+    function finDeMes() {
+      const hoy = new Date();
+      return finDelDia(new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0));
+    }
+
     // Función para cargar datos desde Supabase
     async function cargarDatos() {
       const loadingIndicator = document.getElementById('loadingIndicator');
@@ -395,6 +539,7 @@
       const errorMessage = document.getElementById('errorMessage');
       const summaryCards = document.getElementById('summaryCards');
       const filtrosRapidos = document.getElementById('filtrosRapidos');
+      const filtrosFechas = document.getElementById('filtrosFechas');
       
       try {
         // Mostrar loading
@@ -404,6 +549,7 @@
         errorMessage.style.display = 'none';
         summaryCards.style.display = 'none';
         filtrosRapidos.style.display = 'none';
+        filtrosFechas.style.display = 'none';
 
         // Obtener datos en paralelo
         const [productosResponse, ventasResponse, detallesResponse] = await Promise.all([
@@ -471,6 +617,7 @@
 
         summaryCards.style.display = 'flex';
         filtrosRapidos.style.display = 'flex';
+        filtrosFechas.style.display = 'flex';
 
         // Ocultar loading
         loadingIndicator.style.display = 'none';
@@ -554,12 +701,27 @@
       }
       
       // Filtro por fecha
-      if (fechaFiltro) {
-        const fechaSeleccionada = new Date(fechaFiltro).toDateString();
+      if (filtroFechaTipo !== 'all') {
         filtrados = filtrados.filter(item => {
           if (!item.venta) return false;
-          const fechaVenta = new Date(item.venta.fecha).toDateString();
-          return fechaVenta === fechaSeleccionada;
+          
+          const fechaVenta = new Date(item.venta.fecha);
+          
+          switch(filtroFechaTipo) {
+            case 'hoy':
+              return fechaVenta >= inicioDelDia() && fechaVenta <= finDelDia();
+            case 'semana':
+              return fechaVenta >= inicioDeSemana() && fechaVenta <= finDeSemana();
+            case 'mes':
+              return fechaVenta >= inicioDeMes() && fechaVenta <= finDeMes();
+            case 'rango':
+              if (!fechaInicioRango || !fechaFinRango) return true;
+              const inicio = inicioDelDia(new Date(fechaInicioRango));
+              const fin = finDelDia(new Date(fechaFinRango));
+              return fechaVenta >= inicio && fechaVenta <= fin;
+            default:
+              return true;
+          }
         });
       }
       
@@ -580,10 +742,32 @@
       mostrarVentasOrdenadas();
     }
 
+    // Sincronizar los campos de fecha entre desktop y mobile
+    function sincronizarCamposFechas() {
+      document.getElementById('fechaInicio').addEventListener('change', function() {
+        document.getElementById('fechaInicioMobile').value = this.value;
+      });
+      
+      document.getElementById('fechaInicioMobile').addEventListener('change', function() {
+        document.getElementById('fechaInicio').value = this.value;
+      });
+      
+      document.getElementById('fechaFin').addEventListener('change', function() {
+        document.getElementById('fechaFinMobile').value = this.value;
+      });
+      
+      document.getElementById('fechaFinMobile').addEventListener('change', function() {
+        document.getElementById('fechaFin').value = this.value;
+      });
+    }
+
     // Event listeners
     document.addEventListener('DOMContentLoaded', function() {
       // Cargar datos al cargar la página
       cargarDatos();
+      
+      // Sincronizar campos de fecha
+      sincronizarCamposFechas();
       
       // Búsqueda en tiempo real
       document.getElementById('buscadorVentas').addEventListener('input', function() {
@@ -591,10 +775,10 @@
       });
 
       // Filtros rápidos por tipo de pago
-      document.querySelectorAll('.btn-filtro').forEach(btn => {
+      document.querySelectorAll('.btn-filtro[data-filter]').forEach(btn => {
         btn.addEventListener('click', function() {
-          // Quitar clase active de todos los botones
-          document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('active'));
+          // Quitar clase active de todos los botones de tipo pago
+          document.querySelectorAll('.btn-filtro[data-filter]').forEach(b => b.classList.remove('active'));
           
           // Añadir clase active al botón clickeado
           this.classList.add('active');
@@ -607,9 +791,88 @@
         });
       });
 
-      // Filtro por fecha
-      document.getElementById('fechaFiltro').addEventListener('change', function() {
-        fechaFiltro = this.value;
+      // Filtros rápidos por fecha
+      document.querySelectorAll('.btn-filtro[data-fecha-filtro]').forEach(btn => {
+        btn.addEventListener('click', function() {
+          // Quitar clase active de todos los botones de fecha
+          document.querySelectorAll('.btn-filtro[data-fecha-filtro]').forEach(b => b.classList.remove('active'));
+          
+          // Añadir clase active al botón clickeado
+          this.classList.add('active');
+          
+          // Actualizar filtro de fecha
+          filtroFechaTipo = this.dataset.fechaFiltro;
+          
+          // Si no es un rango personalizado, limpiar las fechas de rango
+          if (filtroFechaTipo !== 'rango') {
+            fechaInicioRango = null;
+            fechaFinRango = null;
+            document.getElementById('fechaInicio').value = '';
+            document.getElementById('fechaFin').value = '';
+            document.getElementById('fechaInicioMobile').value = '';
+            document.getElementById('fechaFinMobile').value = '';
+          }
+          
+          // Aplicar filtro
+          buscarVentas(document.getElementById('buscadorVentas').value);
+        });
+      });
+
+      // Filtro por rango de fechas personalizado (desktop)
+      document.getElementById('aplicarRango').addEventListener('click', function() {
+        const fechaInicio = document.getElementById('fechaInicio').value;
+        const fechaFin = document.getElementById('fechaFin').value;
+        
+        if (!fechaInicio || !fechaFin) {
+          alert('Por favor, selecciona ambas fechas para el rango.');
+          return;
+        }
+        
+        if (new Date(fechaInicio) > new Date(fechaFin)) {
+          alert('La fecha de inicio no puede ser mayor que la fecha de fin.');
+          return;
+        }
+        
+        // Activar el filtro de rango
+        document.querySelectorAll('.btn-filtro[data-fecha-filtro]').forEach(b => b.classList.remove('active'));
+        document.querySelector('.btn-filtro[data-fecha-filtro="rango"]').classList.add('active');
+        
+        filtroFechaTipo = 'rango';
+        fechaInicioRango = fechaInicio;
+        fechaFinRango = fechaFin;
+        
+        // Aplicar filtro
+        buscarVentas(document.getElementById('buscadorVentas').value);
+      });
+
+      // Filtro por rango de fechas personalizado (mobile)
+      document.getElementById('aplicarRangoMobile').addEventListener('click', function() {
+        const fechaInicio = document.getElementById('fechaInicioMobile').value;
+        const fechaFin = document.getElementById('fechaFinMobile').value;
+        
+        if (!fechaInicio || !fechaFin) {
+          alert('Por favor, selecciona ambas fechas para el rango.');
+          return;
+        }
+        
+        if (new Date(fechaInicio) > new Date(fechaFin)) {
+          alert('La fecha de inicio no puede ser mayor que la fecha de fin.');
+          return;
+        }
+        
+        // Activar el filtro de rango
+        document.querySelectorAll('.btn-filtro[data-fecha-filtro]').forEach(b => b.classList.remove('active'));
+        document.querySelector('.btn-filtro[data-fecha-filtro="rango"]').classList.add('active');
+        
+        filtroFechaTipo = 'rango';
+        fechaInicioRango = fechaInicio;
+        fechaFinRango = fechaFin;
+        
+        // Sincronizar con la versión desktop
+        document.getElementById('fechaInicio').value = fechaInicio;
+        document.getElementById('fechaFin').value = fechaFin;
+        
+        // Aplicar filtro
         buscarVentas(document.getElementById('buscadorVentas').value);
       });
     });
@@ -618,6 +881,6 @@
     function recargarDatos() {
       cargarDatos();
     }
-</script>
+  </script>
 </body>
 </html>
