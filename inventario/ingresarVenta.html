@@ -8,63 +8,63 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
     <style>
-      #info-mayor {
-    background-color: #2a2a2a;
-    padding: 10px;
-    border-radius: 5px;
-    margin-top: 10px;
-    border: 1px solid #3105f1;
-    color: white; /* Asegurar que el texto sea blanco */
-}
+        #info-mayor {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border: 1px solid #3105f1;
+            color: white;
+        }
 
-#info-mayor small {
-    color: #ffffff !important; /* Forzar color blanco para el texto */
-}
+        #info-mayor small {
+            color: #ffffff !important;
+        }
 
-#info-mayor .text-muted {
-    color: #ffffff !important; /* Sobrescribir el color gris por defecto */
-}
-/* Estilos específicos para el input de cantidad */
-#cantidad {
-    background-color: #2a2a2a !important;
-    border: 1px solid #3105f1 !important;
-    color: #ffffff !important;
-}
+        #info-mayor .text-muted {
+            color: #ffffff !important;
+        }
 
-#cantidad:focus {
-    background-color: #2a2a2a !important;
-    border-color: #041fbd !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 0 0.25rem rgba(5, 100, 45, 0.25) !important;
-}
+        #cantidad {
+            background-color: #2a2a2a !important;
+            border: 1px solid #3105f1 !important;
+            color: #ffffff !important;
+        }
 
-#cantidad:disabled {
-    background-color: #333333 !important;
-    color: #888888 !important;
-    border-color: #555555 !important;
-}
+        #cantidad:focus {
+            background-color: #2a2a2a !important;
+            border-color: #041fbd !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 0 0.25rem rgba(5, 100, 45, 0.25) !important;
+        }
 
-/* También asegurar que todos los inputs type="number" tengan texto blanco */
-input[type="number"] {
-    width: 70px;
-    text-align: center;
-    background-color: #2a2a2a !important;
-    border: 1px solid #3105f1 !important;
-    color: #ffffff !important;
-}
+        #cantidad:disabled {
+            background-color: #333333 !important;
+            color: #888888 !important;
+            border-color: #555555 !important;
+        }
 
-input[type="number"]:focus {
-    background-color: #2a2a2a !important;
-    border-color: #041fbd !important;
-    color: #ffffff !important;
-    box-shadow: 0 0 0 0.25rem rgba(5, 100, 45, 0.25) !important;
-}
+        input[type="number"] {
+            width: 70px;
+            text-align: center;
+            background-color: #2a2a2a !important;
+            border: 1px solid #3105f1 !important;
+            color: #ffffff !important;
+        }
 
-input[type="number"]:disabled {
-    background-color: #333333 !important;
-    color: #888888 !important;
-    border-color: #555555 !important;
-}
+        input[type="number"]:focus {
+            background-color: #2a2a2a !important;
+            border-color: #041fbd !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 0 0.25rem rgba(5, 100, 45, 0.25) !important;
+        }
+
+        input[type="number"]:disabled {
+            background-color: #333333 !important;
+            color: #888888 !important;
+            border-color: #555555 !important;
+        }
+
         body {
             background-color: #000000;
             color: #ffffff;
@@ -117,7 +117,6 @@ input[type="number"]:disabled {
             box-shadow: 0 0 0 0.25rem rgba(5, 100, 45, 0.25);
         }
 
-        /* Estilos para botones principales (Agregar y Finalizar Venta) */
         .btn-principal {
             background-color: #3105f1;
             color: #fff;
@@ -140,7 +139,6 @@ input[type="number"]:disabled {
             transform: translateY(0);
         }
 
-        /* Estilo para botón eliminar */
         .btn-danger {
             background-color: #dc3545;
             padding: 8px 15px;
@@ -191,16 +189,10 @@ input[type="number"]:disabled {
             margin-top: 15px;
         }
 
-        input[type="number"] {
-            width: 70px;
-            text-align: center;
-        }
-
         input[type="date"]::-webkit-calendar-picker-indicator {
             filter: invert(1);
         }
 
-        /* Estilos para Select2 */
         .select2-container--default .select2-selection--single {
             background-color: #2a2a2a !important;
             border: 1px solid #3105f1 !important;
@@ -231,18 +223,47 @@ input[type="number"]:disabled {
             border: 1px solid #034d21 !important;
         }
 
-        #info-mayor {
-            background-color: #2a2a2a;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            border: 1px solid #3105f1;
-        }
-
         .form-control:disabled, .form-select:disabled {
             background-color: #333333;
             cursor: not-allowed;
             border-color: #555555;
+        }
+
+        .metodo-pago {
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #3105f1;
+        }
+        
+        .metodo-pago-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .total-pago {
+            font-weight: bold;
+            color: #ffffff;
+            text-align: right;
+        }
+        
+        .restante-pendiente {
+            font-size: 0.9rem;
+            color: #ffcc00;
+        }
+        
+        .pago-completado {
+            color: #00cc66;
+        }
+
+        .detalle-unidades {
+            font-size: 0.85rem;
+            color: #cccccc;
+            display: block;
+            margin-top: 3px;
         }
 
         @media (max-width: 768px) {
@@ -282,12 +303,17 @@ input[type="number"]:disabled {
       <h3 class="text-center mb-3">AGREGAR PRODUCTOS</h3>
       <form id="form-agregar-producto">
         <div class="row g-2">
+          <!-- Tasa de Cambio (movido aquí desde abajo) -->
+          <div class="col-md-3">
+            <label class="form-label">Tasa de Cambio (BS a USD)</label>
+            <input type="number" step="1" min="1" class="form-control" id="tasa-cambio" value="140" required>
+          </div>
+          
           <!-- Producto -->
           <div class="col-md-3">
             <label class="form-label">Producto</label>
             <select class="form-control js-product-search" id="producto" required>
               <option value="">Buscar producto...</option>
-              <!-- Productos cargados desde Supabase -->
             </select>
           </div>
           
@@ -301,16 +327,18 @@ input[type="number"]:disabled {
             </select>
           </div>
           
+          <!-- Precio Unitario (Selector) -->
+          <div class="col-md-2">
+            <label class="form-label">Precio Unit. (BS)</label>
+            <select class="form-select" id="precio-selector" required disabled>
+              <option value="">Seleccione precio</option>
+            </select>
+          </div>
+          
           <!-- Unidad -->
           <div class="col-md-2">
             <label class="form-label">Unidad</label>
-            <input type="text" class="form-control" id="unidad" readonly placeholder="Seleccione tipo de venta">
-          </div>
-          
-          <!-- Precio Unitario -->
-          <div class="col-md-2">
-            <label class="form-label">Precio Unit. (USD)</label>
-            <input type="text" class="form-control" id="precio" readonly placeholder="Seleccione tipo de venta">
+            <input type="text" class="form-control" id="unidad" readonly placeholder="Seleccione precio">
           </div>
           
           <!-- Cantidad -->
@@ -318,9 +346,6 @@ input[type="number"]:disabled {
             <label class="form-label">Cantidad</label>
             <input type="number" min="1" value="1" class="form-control" id="cantidad" required disabled>
           </div>
-          
-          <!-- Categoría (oculto, se mantiene para compatibilidad) -->
-          <input type="hidden" id="categoria">
         </div>
         
         <!-- Información adicional para venta al mayor -->
@@ -340,7 +365,7 @@ input[type="number"]:disabled {
           <div class="col-md-4">
             <small class="text-muted">
               <i class="bi bi-currency-dollar"></i> 
-              <span id="subtotal-preview">Subtotal: USD 0.00</span>
+              <span id="subtotal-preview">Subtotal: BS 0.00</span>
             </small>
           </div>
         </div>
@@ -370,7 +395,6 @@ input[type="number"]:disabled {
             </tr>
           </thead>
           <tbody id="carrito-body">
-            <!-- Los productos se agregarán aquí dinámicamente -->
             <tr>
               <td colspan="7" class="text-center text-muted">No hay productos en el carrito</td>
             </tr>
@@ -384,7 +408,8 @@ input[type="number"]:disabled {
             <h5 class="mb-0">TOTAL A PAGAR:</h5>
           </div>
           <div class="col-md-6 text-end">
-            <h4 class="mb-0" id="total-pagar">USD. 0.00</h4>
+            <h4 class="mb-0" id="total-pagar">BS. 0.00</h4>
+            <h5 class="mb-0" id="total-pagar-usd">USD. 0.00</h5>
           </div>
         </div>
       </div>
@@ -399,15 +424,27 @@ input[type="number"]:disabled {
             <label class="form-label">Fecha</label>
             <input type="date" class="form-control" id="fecha" required>
           </div>
-          <div class="col-md-6">
-            <label class="form-label">Tipo de Pago</label>
-            <select class="form-select" id="tipo-pago" required>
-              <option value="">Seleccionar...</option>
-              <option value="Efectivo">Efectivo</option>
-              <option value="Dólares">Dólares</option>
-              <option value="Punto de venta">Punto de venta</option>
-              <option value="Pago móvil">Pago móvil</option>                           
-            </select>
+          <!-- El campo de tasa de cambio fue movido arriba -->
+          <div class="col-md-6" style="display: none;">
+            <!-- Este campo se mantiene oculto para no romper la estructura pero ya no se usa -->
+            <input type="number" step="0.01" min="1" class="form-control" id="tasa-cambio-old" value="140">
+          </div>
+        </div>
+        
+        <!-- Métodos de pago -->
+        <div class="mt-4" id="metodos-pago-container">
+          <h5 class="mb-3">MÉTODOS DE PAGO</h5>
+          <div id="metodos-pago">
+            <!-- Los métodos de pago se agregarán aquí dinámicamente -->
+          </div>
+          
+          <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-outline-primary" id="btn-agregar-metodo">
+              <i class="bi bi-plus-circle"></i> Agregar Método de Pago
+            </button>
+            <div>
+              <span id="restante-pagar" class="restante-pendiente">Restante por pagar: BS 0.00</span>
+            </div>
           </div>
         </div>
         
@@ -445,550 +482,933 @@ input[type="number"]:disabled {
 
   <script>
     // Configuración de Supabase
-const SUPABASE_URL = 'https://rirfvhvlmytnpqkcpxbx.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpcmZ2aHZsbXl0bnBxa2NweGJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0ODE2NDUsImV4cCI6MjA3MjA1NzY0NX0.5JLGuOIWNvKIESJG26JLOgRVCu0jVoH0ELZjQ63gV48';
-
-// Inicializar Supabase
-const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// Variables globales
-let todosLosProductos = [];
-let carrito = [];
-let productoSeleccionado = null;
-
-// Cargar productos desde Supabase
-async function cargarProductos() {
-  try {
-    const { data: productos, error } = await supabaseClient
-      .from('productos')
-      .select('*')
-      .gt('cantidad', 0) // Solo productos con stock
-      .order('nombre', { ascending: true });
-
-    if (error) throw error;
+    const SUPABASE_URL = 'https://rirfvhvlmytnpqkcpxbx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpcmZ2aHZsbXl0bnBxa2NweGJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0ODE2NDUsImV4cCI6MjA3MjA1NzY0NX0.5JLGuOIWNvKIESJG26JLOgRVCu0jVoH0ELZjQ63gV48';
     
-    todosLosProductos = productos || [];
-    console.log('Productos cargados:', todosLosProductos);
-    inicializarSelect2();
-    
-  } catch (error) {
-    console.error('Error al cargar productos:', error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Error al cargar productos: ' + error.message
-    });
-  }
-}
+    // Inicializar Supabase
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Inicializar Select2 con productos de Supabase
-function inicializarSelect2() {
-  // Destruir Select2 existente si existe
-  if ($('#producto').hasClass('select2-hidden-accessible')) {
-    $('#producto').select2('destroy');
-  }
-  
-  // Limpiar opciones existentes
-  $('#producto').empty().append('<option value="">Buscar producto...</option>');
-  
-  // Agregar productos como opciones
-  todosLosProductos.forEach(producto => {
-    $('#producto').append(new Option(
-      `${producto.nombre} - ${producto.marca} (Stock: ${producto.cantidad})`,
-      producto.id,
-      false,
-      false
-    ));
-  });
-  
-  // Inicializar Select2
-  $('#producto').select2({
-    placeholder: "Buscar producto...",
-    width: '100%',
-    language: "es"
-  });
-  
-  console.log('Select2 inicializado con', todosLosProductos.length, 'productos');
-}
+    // Variables globales
+    let todosLosProductos = [];
+    let carrito = [];
+    let productoSeleccionado = null;
+    let precioSeleccionado = null;
+    let metodosPago = [];
 
-// Manejar selección de producto
-function manejarSeleccionProducto() {
-  $('#producto').on('select2:select', function(e) {
-    const productoId = e.params.data.id;
-    
-    console.log('Producto seleccionado ID:', productoId);
-    
-    if (productoId) {
-      // Obtener el producto seleccionado
-      productoSeleccionado = todosLosProductos.find(p => p.id === productoId);
+    function formatearFechaLocal(fechaString) {
+      const [year, month, day] = fechaString.split('-');
+      const fecha = new Date(year, month - 1, day);
       
-      if (productoSeleccionado) {
-        console.log('Producto encontrado:', productoSeleccionado);
-        
-        // Habilitar tipo de venta
-        $('#tipo-venta').prop('disabled', false);
-        
-        // Limpiar campos dependientes
-        $('#tipo-venta').val('');
-        $('#unidad').val('');
-        $('#precio').val('');
-        $('#cantidad').val('1').prop('disabled', true);
-        $('#btn-agregar').prop('disabled', true);
-        ocultarInfoMayor();
-      } else {
-        console.error('Producto no encontrado en la lista');
-      }
-    } else {
-      productoSeleccionado = null;
-      limpiarCamposDependientes();
+      return fecha.toLocaleDateString('es-VE', {
+        year: 'numeric',
+        month: 'numeric',  
+        day: 'numeric'
+      });
     }
-  });
-  
-  // Manejar cuando se limpia la selección
-  $('#producto').on('select2:clear', function() {
-    productoSeleccionado = null;
-    limpiarCamposDependientes();
-  });
-}
 
-// Manejar selección de tipo de venta
-function manejarTipoVenta() {
-  $('#tipo-venta').on('change', function() {
-    const tipoVenta = $(this).val();
-    
-    console.log('Tipo de venta seleccionado:', tipoVenta);
-    console.log('Producto seleccionado:', productoSeleccionado);
-    
-    if (tipoVenta && productoSeleccionado) {
-      // Habilitar cantidad
-      $('#cantidad').prop('disabled', false);
-      $('#btn-agregar').prop('disabled', false);
+    // Obtener la tasa de cambio actual del input
+    function obtenerTasaCambio() {
+      const tasaInput = parseFloat($('#tasa-cambio').val());
+      return isNaN(tasaInput) || tasaInput <= 0 ? 140 : tasaInput;
+    }
+
+    // Convertir precio de BS a USD usando la tasa del input
+    function convertirBsAUsd(precioBs) {
+      const tasaActual = obtenerTasaCambio();
+      return precioBs / tasaActual;
+    }
+
+    // Cargar productos desde Supabase
+    async function cargarProductos() {
+      try {
+        console.log('Cargando productos desde Supabase...');
+        const { data: productos, error } = await supabaseClient
+          .from('productos')
+          .select('*')
+          .gt('cantidad', 0)
+          .order('nombre', { ascending: true });
+
+        if (error) {
+          console.error('Error de Supabase:', error);
+          throw error;
+        }
+        
+        todosLosProductos = productos || [];
+        console.log('Productos cargados:', todosLosProductos);
+        inicializarSelect2();
+        
+      } catch (error) {
+        console.error('Error al cargar productos:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al cargar productos: ' + error.message
+        });
+      }
+    }
+
+    // Inicializar Select2 con productos de Supabase
+    function inicializarSelect2() {
+      console.log('Inicializando Select2 con', todosLosProductos.length, 'productos');
       
-      if (tipoVenta === 'detal') {
-        $('#unidad').val('Unidad');
-        $('#precio').val(productoSeleccionado.precio_venta.toFixed(2));
-        ocultarInfoMayor();
-      } else if (tipoVenta === 'mayor') {
-        // Verificar que el producto tenga empaque mayor configurado
-        if (productoSeleccionado.empaque_mayor && productoSeleccionado.cantidad_por_empaque > 0) {
-          $('#unidad').val(productoSeleccionado.empaque_mayor);
-          // Precio por empaque mayor (precio unitario * cantidad por empaque)
-          const precioMayor = (productoSeleccionado.precio_venta * productoSeleccionado.cantidad_por_empaque).toFixed(2);
-          $('#precio').val(precioMayor);
-          mostrarInfoMayor();
+      // Limpiar opciones existentes
+      $('#producto').empty().append('<option value="">Buscar producto...</option>');
+      
+      // Agregar productos como opciones
+      todosLosProductos.forEach(producto => {
+        $('#producto').append(new Option(
+          `${producto.nombre} - ${producto.marca || 'Sin marca'}`,
+          producto.id,
+          false,
+          false
+        ));
+      });
+      
+      // Inicializar Select2
+      $('#producto').select2({
+        placeholder: "Buscar producto...",
+        width: '100%',
+        language: "es"
+      });
+      
+      console.log('Select2 inicializado correctamente');
+    }
+
+    // Manejar selección de producto
+    function manejarSeleccionProducto() {
+      $('#producto').on('select2:select', function(e) {
+        const productoId = e.params.data.id;
+        
+        console.log('Producto seleccionado ID:', productoId);
+        
+        if (productoId) {
+          // Obtener el producto seleccionado
+          productoSeleccionado = todosLosProductos.find(p => p.id === productoId);
+          
+          if (productoSeleccionado) {
+            console.log('Producto encontrado:', productoSeleccionado);
+            
+            // Habilitar tipo de venta
+            $('#tipo-venta').prop('disabled', false);
+            
+            // Llenar selector de precios
+            llenarSelectorPrecios();
+            
+            // Limpiar campos dependientes
+            $('#tipo-venta').val('');
+            $('#unidad').val('');
+            $('#cantidad').val('1').prop('disabled', true);
+            $('#btn-agregar').prop('disabled', true);
+            ocultarInfoMayor();
+          } else {
+            console.error('Producto no encontrado en la lista');
+          }
         } else {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Producto sin empaque mayor',
-            text: 'Este producto no tiene configurado empaque para venta al mayor'
-          });
-          $(this).val('');
-          return;
+          productoSeleccionado = null;
+          precioSeleccionado = null;
+          limpiarCamposDependientes();
+        }
+      });
+      
+      // Manejar cuando se limpia la selección
+      $('#producto').on('select2:clear', function() {
+        productoSeleccionado = null;
+        precioSeleccionado = null;
+        limpiarCamposDependientes();
+      });
+    }
+
+    // Llenar selector de precios con los 4 precios del producto
+    function llenarSelectorPrecios() {
+      if (!productoSeleccionado) return;
+      
+      $('#precio-selector').empty().append('<option value="">Seleccione precio</option>');
+      
+      // Agregar los 4 precios del producto
+      for (let i = 1; i <= 4; i++) {
+        const precio = productoSeleccionado[`precio_venta_${i}`];
+        if (precio && precio > 0) {
+          $('#precio-selector').append(new Option(
+            `Precio ${i}: BS ${precio.toFixed(2)}`,
+            precio,
+            false,
+            false
+          ));
         }
       }
       
-      actualizarCalculosMayor();
-    } else {
+      // Habilitar selector de precios
+      $('#precio-selector').prop('disabled', false);
+    }
+
+    // Manejar selección de precio
+    function manejarSeleccionPrecio() {
+      $('#precio-selector').on('change', function() {
+        const precio = parseFloat($(this).val());
+        
+        if (precio && !isNaN(precio)) {
+          precioSeleccionado = precio;
+          
+          // Si ya está seleccionado el tipo de venta, actualizar cálculos
+          const tipoVenta = $('#tipo-venta').val();
+          if (tipoVenta) {
+            actualizarCalculosVenta();
+            $('#btn-agregar').prop('disabled', false);
+          }
+        } else {
+          precioSeleccionado = null;
+          $('#btn-agregar').prop('disabled', true);
+        }
+      });
+    }
+
+    // Manejar selección de tipo de venta
+    function manejarTipoVenta() {
+      $('#tipo-venta').on('change', function() {
+        const tipoVenta = $(this).val();
+        
+        if (tipoVenta && productoSeleccionado) {
+          // Habilitar cantidad inmediatamente al seleccionar tipo de venta
+          $('#cantidad').prop('disabled', false);
+          
+          // Establecer la unidad según el tipo de venta
+          if (tipoVenta === 'detal') {
+            $('#unidad').val('Unidad');
+            ocultarInfoMayor();
+          } else if (tipoVenta === 'mayor') {
+            // Verificar que el producto tenga empaque mayor configurado
+            if (productoSeleccionado.empaque_mayor && productoSeleccionado.cantidad_por_empaque > 0) {
+              $('#unidad').val(productoSeleccionado.empaque_mayor);
+              mostrarInfoMayor();
+            } else {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Producto sin empaque mayor',
+                text: 'Este producto no tiene configurado empaque para venta al mayor'
+              });
+              $(this).val('');
+              $('#unidad').val('');
+              $('#cantidad').prop('disabled', true);
+              $('#btn-agregar').prop('disabled', true);
+              return;
+            }
+          }
+          
+          // Si ya hay precio seleccionado, habilitar botón de agregar
+          if (precioSeleccionado) {
+            $('#btn-agregar').prop('disabled', false);
+            actualizarCalculosVenta();
+          }
+        } else {
+          $('#unidad').val('');
+          $('#cantidad').prop('disabled', true);
+          $('#btn-agregar').prop('disabled', true);
+          ocultarInfoMayor();
+        }
+      });
+    }
+
+    // Mostrar información para venta al mayor
+    function mostrarInfoMayor() {
+      const infoMayor = document.getElementById('info-mayor');
+      const infoEmpaque = document.getElementById('info-empaque');
+      
+      infoMayor.style.display = 'block';
+      infoEmpaque.textContent = `Cada ${productoSeleccionado.empaque_mayor.toLowerCase()} contiene ${productoSeleccionado.cantidad_por_empaque} unidades`;
+    }
+
+    // Ocultar información para venta al mayor
+    function ocultarInfoMayor() {
+      document.getElementById('info-mayor').style.display = 'none';
+    }
+
+    // Actualizar cálculos para la venta
+    function actualizarCalculosVenta() {
+      const cantidad = parseInt($('#cantidad').val()) || 0;
+      const tipoVenta = $('#tipo-venta').val();
+      
+      if (tipoVenta === 'mayor' && productoSeleccionado && precioSeleccionado && cantidad > 0) {
+        const totalUnidades = cantidad * productoSeleccionado.cantidad_por_empaque;
+        const subtotalBs = totalUnidades * precioSeleccionado;
+        
+        $('#total-unidades').text(`Total: ${totalUnidades} unidades`);
+        $('#subtotal-preview').text(`Subtotal: BS ${subtotalBs.toFixed(2)}`);
+      } else if (tipoVenta === 'detal' && productoSeleccionado && precioSeleccionado && cantidad > 0) {
+        const subtotalBs = cantidad * precioSeleccionado;
+        $('#total-unidades').text(`Total: ${cantidad} unidades`);
+        $('#subtotal-preview').text(`Subtotal: BS ${subtotalBs.toFixed(2)}`);
+      } else {
+        $('#total-unidades').text('Total: 0 unidades');
+        $('#subtotal-preview').text('Subtotal: BS 0.00');
+      }
+    }
+
+    // Manejar cambio de cantidad
+    function manejarCambioCantidad() {
+      $('#cantidad').on('input', function() {
+        actualizarCalculosVenta();
+      });
+    }
+
+    // Limpiar campos dependientes
+    function limpiarCamposDependientes() {
+      $('#tipo-venta').val('').prop('disabled', true);
+      $('#precio-selector').val('').prop('disabled', true);
       $('#unidad').val('');
-      $('#precio').val('');
-      $('#cantidad').prop('disabled', true);
+      $('#cantidad').val('1').prop('disabled', true);
       $('#btn-agregar').prop('disabled', true);
       ocultarInfoMayor();
     }
-  });
-}
 
-// Mostrar información para venta al mayor
-function mostrarInfoMayor() {
-  const infoMayor = document.getElementById('info-mayor');
-  const infoEmpaque = document.getElementById('info-empaque');
-  
-  infoMayor.style.display = 'block';
-  infoEmpaque.textContent = `Cada ${productoSeleccionado.empaque_mayor.toLowerCase()} contiene ${productoSeleccionado.cantidad_por_empaque} unidades`;
-}
-
-// Ocultar información para venta al mayor
-function ocultarInfoMayor() {
-  document.getElementById('info-mayor').style.display = 'none';
-}
-
-// Actualizar cálculos para venta al mayor
-function actualizarCalculosMayor() {
-  const cantidad = parseInt($('#cantidad').val()) || 0;
-  const tipoVenta = $('#tipo-venta').val();
-  
-  if (tipoVenta === 'mayor' && productoSeleccionado && cantidad > 0) {
-    const totalUnidades = cantidad * productoSeleccionado.cantidad_por_empaque;
-    const precioUnitario = productoSeleccionado.precio_venta;
-    const subtotal = totalUnidades * precioUnitario;
-    
-    $('#total-unidades').text(`Total: ${totalUnidades} unidades`);
-    $('#subtotal-preview').text(`Subtotal: USD ${subtotal.toFixed(2)}`);
-  } else if (tipoVenta === 'detal' && productoSeleccionado && cantidad > 0) {
-    const subtotal = cantidad * productoSeleccionado.precio_venta;
-    $('#total-unidades').text(`Total: ${cantidad} unidades`);
-    $('#subtotal-preview').text(`Subtotal: USD ${subtotal.toFixed(2)}`);
-  } else {
-    $('#total-unidades').text('Total: 0 unidades');
-    $('#subtotal-preview').text('Subtotal: USD 0.00');
-  }
-}
-
-// Manejar cambio de cantidad
-function manejarCambioCantidad() {
-  $('#cantidad').on('input', function() {
-    actualizarCalculosMayor();
-  });
-}
-
-// Limpiar campos dependientes
-function limpiarCamposDependientes() {
-  $('#tipo-venta').val('').prop('disabled', true);
-  $('#unidad').val('');
-  $('#precio').val('');
-  $('#cantidad').val('1').prop('disabled', true);
-  $('#btn-agregar').prop('disabled', true);
-  ocultarInfoMayor();
-}
-
-// Verificar stock disponible
-function verificarStock(productoId, cantidadSolicitada, tipoVenta) {
-  const producto = todosLosProductos.find(p => p.id === productoId);
-  if (!producto) return false;
-  
-  // Calcular unidades reales según tipo de venta
-  const unidadesReales = tipoVenta === 'mayor' 
-    ? cantidadSolicitada * producto.cantidad_por_empaque 
-    : cantidadSolicitada;
-  
-  // Calcular cantidad ya en el carrito
-  const itemEnCarrito = carrito.find(item => item.productoId === productoId && item.tipoVenta === tipoVenta);
-  const unidadesEnCarrito = itemEnCarrito ? itemEnCarrito.unidades : 0;
-  
-  return (unidadesEnCarrito + unidadesReales) <= producto.cantidad;
-}
-
-// Agregar producto al carrito
-function agregarAlCarrito(event) {
-  event.preventDefault();
-  
-  if (!productoSeleccionado) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Seleccione un producto',
-      text: 'Debe seleccionar un producto primero'
-    });
-    return;
-  }
-  
-  const tipoVenta = $('#tipo-venta').val();
-  const cantidad = parseInt($('#cantidad').val());
-  
-  if (!tipoVenta) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Seleccione tipo de venta',
-      text: 'Debe seleccionar el tipo de venta'
-    });
-    return;
-  }
-  
-  if (!cantidad || cantidad < 1) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Cantidad inválida',
-      text: 'Ingrese una cantidad válida'
-    });
-    return;
-  }
-  
-  // Verificar stock disponible
-  if (!verificarStock(productoSeleccionado.id, cantidad, tipoVenta)) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Stock insuficiente',
-      text: `No hay suficiente stock disponible para este producto`
-    });
-    return;
-  }
-  
-  let itemCarrito;
-  
-  if (tipoVenta === 'detal') {
-    itemCarrito = {
-      id: Date.now(),
-      productoId: productoSeleccionado.id,
-      nombre: productoSeleccionado.nombre,
-      marca: productoSeleccionado.marca,
-      tipoVenta: tipoVenta,
-      tipo: 'Al Detal',
-      cantidad: cantidad,
-      unidades: cantidad,
-      precioUnitario: productoSeleccionado.precio_venta,
-      subtotal: cantidad * productoSeleccionado.precio_venta
-    };
-  } else {
-    const totalUnidades = cantidad * productoSeleccionado.cantidad_por_empaque;
-    itemCarrito = {
-      id: Date.now(),
-      productoId: productoSeleccionado.id,
-      nombre: productoSeleccionado.nombre,
-      marca: productoSeleccionado.marca,
-      tipoVenta: tipoVenta,
-      tipo: `Al Mayor (${productoSeleccionado.empaque_mayor})`,
-      cantidad: cantidad,
-      unidades: totalUnidades,
-      precioUnitario: productoSeleccionado.precio_venta,
-      subtotal: totalUnidades * productoSeleccionado.precio_venta
-    };
-  }
-  
-  carrito.push(itemCarrito);
-  actualizarVistaCarrito();
-  limpiarFormulario();
-  
-  console.log('Item agregado al carrito:', itemCarrito);
-}
-
-// Actualizar vista del carrito
-function actualizarVistaCarrito() {
-  const carritoBody = document.getElementById('carrito-body');
-  carritoBody.innerHTML = '';
-  
-  let total = 0;
-  
-  if (carrito.length === 0) {
-    carritoBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No hay productos en el carrito</td></tr>';
-    $('#btn-finalizar').prop('disabled', true);
-  } else {
-    $('#btn-finalizar').prop('disabled', false);
-    
-    carrito.forEach((item, index) => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${item.nombre}<br><small class="text-muted">${item.marca}</small></td>
-        <td>${item.tipo}</td>
-        <td>${item.cantidad}</td>
-        <td>${item.unidades}</td>
-        <td>USD ${item.precioUnitario.toFixed(2)}</td>
-        <td>USD ${item.subtotal.toFixed(2)}</td>
-        <td>
-          <button type="button" class="btn btn-danger btn-sm" onclick="eliminarDelCarrito(${index})">
-            <i class="bi bi-trash"></i>
-          </button>
-        </td>
-      `;
-      carritoBody.appendChild(row);
-      total += item.subtotal;
-    });
-  }
-  
-  $('#total-pagar').text(`USD ${total.toFixed(2)}`);
-}
-
-// Eliminar item del carrito
-function eliminarDelCarrito(index) {
-  carrito.splice(index, 1);
-  actualizarVistaCarrito();
-}
-
-// Limpiar formulario
-function limpiarFormulario() {
-  $('#producto').val(null).trigger('change');
-  productoSeleccionado = null;
-  limpiarCamposDependientes();
-}
-
-// Función para generar el HTML de los productos para SweetAlert
-function generarDetalleProductos(productos) {
-  let html = '<div style="text-align: left; margin: 10px 0;">';
-  html += '<ul style="padding-left: 20px; margin: 0;">';
-  
-  productos.forEach(producto => {
-    html += `<li>${producto.nombre} - ${producto.tipo} - Cantidad: ${producto.cantidad} - USD. ${producto.subtotal.toFixed(2)}</li>`;
-  });
-  
-  html += '</ul></div>';
-  return html;
-}
-
-async function finalizarVentaEnSupabase(datosVenta) {
-  const loadingOverlay = document.getElementById('loadingOverlay');
-  
-  try {
-    loadingOverlay.style.display = 'flex';
-    
-    // Preparar datos para la tabla ventas
-    const ventaParaInsertar = {
-      fecha: datosVenta.fecha,
-      tipo_pago: datosVenta.tipoPago,
-      total: datosVenta.total
-    };
-    
-    // 1. Crear la venta principal
-    const { data: venta, error: errorVenta } = await supabaseClient
-      .from('ventas')
-      .insert(ventaParaInsertar)
-      .select()
-      .single();
-
-    if (errorVenta) {
-      console.error('Error al insertar venta:', errorVenta);
-      throw errorVenta;
-    }
-
-    // 2. Crear los detalles de la venta
-    const detallesVenta = datosVenta.productos.map(producto => ({
-      venta_id: venta.id,
-      producto_id: producto.productoId,
-      cantidad: producto.unidades, // Guardamos las unidades totales
-      tipo_venta: producto.tipoVenta,
-      precio_unitario: producto.precioUnitario
-      // Removemos subtotal si es una columna calculada
-    }));
-
-    const { error: errorDetalles } = await supabaseClient
-      .from('detalles_venta')
-      .insert(detallesVenta);
-
-    if (errorDetalles) {
-      console.error('Error al insertar detalles:', errorDetalles);
-      throw errorDetalles;
-    }
-
-    // 3. Actualizar stock de productos
-    for (const producto of datosVenta.productos) {
-      const productoActual = todosLosProductos.find(p => p.id === producto.productoId);
-      const nuevoStock = productoActual.cantidad - producto.unidades;
+    // Verificar stock disponible
+    function verificarStock(productoId, cantidadSolicitada, tipoVenta) {
+      const producto = todosLosProductos.find(p => p.id === productoId);
+      if (!producto) return false;
       
-      const { error: errorStock } = await supabaseClient
-        .from('productos')
-        .update({ cantidad: nuevoStock })
-        .eq('id', producto.productoId);
-
-      if (errorStock) throw errorStock;
+      // Calcular unidades reales según tipo de venta
+      const unidadesReales = tipoVenta === 'mayor' 
+        ? cantidadSolicitada * producto.cantidad_por_empaque 
+        : cantidadSolicitada;
+      
+      // Calcular cantidad ya en el carrito
+      const itemEnCarrito = carrito.find(item => item.productoId === productoId && item.tipoVenta === tipoVenta);
+      const unidadesEnCarrito = itemEnCarrito ? itemEnCarrito.unidades : 0;
+      
+      return (unidadesEnCarrito + unidadesReales) <= producto.cantidad;
     }
 
-    // 4. Actualizar datos locales
-    datosVenta.productos.forEach(productoVendido => {
-      const producto = todosLosProductos.find(p => p.id === productoVendido.productoId);
-      if (producto) {
-        producto.cantidad -= productoVendido.unidades;
+    // Agregar producto al carrito - VERSIÓN CORREGIDA
+    function agregarAlCarrito(event) {
+      event.preventDefault();
+      
+      if (!productoSeleccionado) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Seleccione un producto',
+          text: 'Debe seleccionar un producto primero'
+        });
+        return;
       }
-    });
-
-    loadingOverlay.style.display = 'none';
-    
-    // Mostrar alerta de éxito con SweetAlert con detalles completos
-    Swal.fire({
-      icon: 'success',
-      title: '¡Venta registrada exitosamente!',
-      html: `
-        <div style="text-align: left;">
-          <p><strong>Productos:</strong></p>
-          ${generarDetalleProductos(datosVenta.productos)}
-          <p><strong>Tipo de pago:</strong> ${datosVenta.tipoPago}</p>
-          <p><strong>Total:</strong> USD. ${datosVenta.total.toFixed(2)}</p>
-        </div>
-      `,
-      confirmButtonText: 'Aceptar'
-    });
-    
-    // Limpiar carrito y formulario
-    carrito = [];
-    actualizarVistaCarrito();
-    $('#form-finalizar-venta')[0].reset();
-    $('#fecha').val(new Date().toISOString().split('T')[0]);
-    
-    // Recargar select2 con stock actualizado
-    inicializarSelect2();
-
-  } catch (error) {
-    loadingOverlay.style.display = 'none';
-    console.error('Error al finalizar venta:', error);
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Error al registrar la venta: ' + error.message
-    });
-  }
-}
-
-// Inicializar cuando se carga el DOM
-$(document).ready(function() {
-  // Configurar fecha actual
-  $('#fecha').val(new Date().toISOString().split('T')[0]);
-  
-  // Inicializar funciones
-  cargarProductos();
-  manejarSeleccionProducto();
-  manejarTipoVenta();
-  manejarCambioCantidad();
-  
-  // Event listener para el formulario
-  $('#form-agregar-producto').on('submit', agregarAlCarrito);
-  
-  // Event listener para finalizar venta
-  $('#form-finalizar-venta').on('submit', function(e) {
-    e.preventDefault();
-    
-    const fecha = $('#fecha').val();
-    const tipoPago = $('#tipo-pago').val();
-    const total = carrito.reduce((sum, item) => sum + item.subtotal, 0);
-    
-    if (carrito.length === 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Carrito vacío',
-        text: 'No hay productos en el carrito'
-      });
-      return;
+      
+      if (!precioSeleccionado) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Seleccione un precio',
+          text: 'Debe seleccionar un precio para el producto'
+        });
+        return;
+      }
+      
+      const tipoVenta = $('#tipo-venta').val();
+      const cantidad = parseInt($('#cantidad').val());
+      
+      if (!tipoVenta) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Seleccione tipo de venta',
+          text: 'Debe seleccionar el tipo de venta'
+        });
+        return;
+      }
+      
+      if (!cantidad || cantidad < 1) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Cantidad inválida',
+          text: 'Ingrese una cantidad válida'
+        });
+        return;
+      }
+      
+      // Verificar stock disponible
+      if (!verificarStock(productoSeleccionado.id, cantidad, tipoVenta)) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Stock insuficiente',
+          text: `No hay suficiente stock disponible para este producto`
+        });
+        return;
+      }
+      
+      let itemCarrito;
+      
+      if (tipoVenta === 'detal') {
+        // Calcular subtotales
+        const subtotalBs = cantidad * precioSeleccionado;
+        const subtotalUSD = convertirBsAUsd(subtotalBs);
+        
+        itemCarrito = {
+          id: Date.now(),
+          productoId: productoSeleccionado.id,
+          nombre: productoSeleccionado.nombre,
+          marca: productoSeleccionado.marca || '',
+          tipoVenta: tipoVenta,
+          tipo: 'Al Detal',
+          cantidad: cantidad,
+          unidades: cantidad,
+          precioUnitarioBs: precioSeleccionado,
+          precioUnitarioUSD: convertirBsAUsd(precioSeleccionado),
+          subtotalBs: subtotalBs,
+          subtotalUSD: subtotalUSD,
+          empaqueMayor: null,
+          unidadesPorEmpaque: 1
+        };
+      } else {
+        const totalUnidades = cantidad * productoSeleccionado.cantidad_por_empaque;
+        // Calcular subtotales - CORREGIDO: El precio unitario ya es por unidad
+        const subtotalBs = totalUnidades * precioSeleccionado;
+        const subtotalUSD = convertirBsAUsd(subtotalBs);
+        
+        itemCarrito = {
+          id: Date.now(),
+          productoId: productoSeleccionado.id,
+          nombre: productoSeleccionado.nombre,
+          marca: productoSeleccionado.marca || '',
+          tipoVenta: tipoVenta,
+          tipo: `Al Mayor (${productoSeleccionado.empaque_mayor})`,
+          cantidad: cantidad, // Cantidad de paquetes
+          unidades: totalUnidades, // Total de unidades
+          precioUnitarioBs: precioSeleccionado, // Precio por unidad (ya no por paquete)
+          precioUnitarioUSD: convertirBsAUsd(precioSeleccionado),
+          subtotalBs: subtotalBs,
+          subtotalUSD: subtotalUSD,
+          empaqueMayor: productoSeleccionado.empaque_mayor,
+          unidadesPorEmpaque: productoSeleccionado.cantidad_por_empaque
+        };
+      }
+      
+      carrito.push(itemCarrito);
+      actualizarVistaCarrito();
+      limpiarFormulario();
     }
-    
-    if (!tipoPago) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Tipo de pago requerido',
-        text: 'Seleccione un tipo de pago'
-      });
-      return;
-    }
-    
-    // Confirmar venta con SweetAlert con detalles completos
-    Swal.fire({
-      title: '¿Confirmar venta?',
-      html: `
-        <div style="text-align: left;">
-          <p><strong>Productos:</strong></p>
-          ${generarDetalleProductos(carrito)}
-          <p><strong>Tipo de pago:</strong> ${tipoPago}</p>
-          <p><strong>Total a pagar:</strong> USD. ${total.toFixed(2)}</p>
-        </div>
-      `,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, confirmar venta',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        finalizarVentaEnSupabase({
-          fecha,
-          tipoPago,
-          productos: carrito,
-          total: total
+
+    // Actualizar vista del carrito - VERSIÓN CORREGIDA
+    function actualizarVistaCarrito() {
+      const carritoBody = document.getElementById('carrito-body');
+      carritoBody.innerHTML = '';
+      
+      let totalBs = 0;
+      let totalUSD = 0;
+      
+      if (carrito.length === 0) {
+        carritoBody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No hay productos en el carrito</td></tr>';
+        $('#btn-finalizar').prop('disabled', true);
+      } else {
+        $('#btn-finalizar').prop('disabled', false);
+        
+        carrito.forEach((item, index) => {
+          // Actualizar los valores en USD según la tasa actual
+          const precioUnitarioUSD = convertirBsAUsd(item.precioUnitarioBs);
+          const subtotalUSD = convertirBsAUsd(item.subtotalBs);
+          
+          const row = document.createElement('tr');
+          
+          let detalleUnidades = '';
+          if (item.tipoVenta === 'mayor') {
+            detalleUnidades = `<span class="detalle-unidades">${item.cantidad} ${item.empaqueMayor} × ${item.unidadesPorEmpaque} unidades = ${item.unidades} unidades</span>`;
+          }
+          
+          row.innerHTML = `
+            <td>${item.nombre}<br><small class="text-muted">${item.marca}</small>${detalleUnidades}</td>
+            <td>${item.tipo}</td>
+            <td>${item.cantidad}</td>
+            <td>${item.unidades}</td>
+            <td>BS ${item.precioUnitarioBs.toFixed(2)}<br><small class="text-muted">USD ${precioUnitarioUSD.toFixed(2)}</small></td>
+            <td>BS ${item.subtotalBs.toFixed(2)}<br><small class="text-muted">USD ${subtotalUSD.toFixed(2)}</small></td>
+            <td>
+              <button type="button" class="btn btn-danger btn-sm" onclick="eliminarDelCarrito(${index})">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          `;
+          carritoBody.appendChild(row);
+          totalBs += item.subtotalBs;
+          totalUSD += subtotalUSD;
         });
       }
+      
+      // Actualizar total en bolívares y dólares
+      $('#total-pagar').text(`BS ${totalBs.toFixed(2)}`);
+      $('#total-pagar-usd').text(`USD ${totalUSD.toFixed(2)}`);
+      
+      // Actualizar métodos de pago
+      actualizarMetodosPago();
+    }
+
+    // Eliminar item del carrito
+    function eliminarDelCarrito(index) {
+      carrito.splice(index, 1);
+      actualizarVistaCarrito();
+    }
+
+    // Limpiar formulario
+    function limpiarFormulario() {
+      $('#producto').val(null).trigger('change');
+      productoSeleccionado = null;
+      precioSeleccionado = null;
+      limpiarCamposDependientes();
+    }
+
+    // Calcular el total de la venta en BS
+    function calcularTotalVentaBs() {
+      return carrito.reduce((sum, item) => sum + item.subtotalBs, 0);
+    }
+
+    // Calcular el total de la venta en USD
+    function calcularTotalVentaUSD() {
+      const totalBs = calcularTotalVentaBs();
+      return convertirBsAUsd(totalBs);
+    }
+
+    // Calcular el total pagado en BS
+    function calcularTotalPagadoBs() {
+      return metodosPago.reduce((sum, metodo) => sum + metodo.montoBs, 0);
+    }
+
+    // Calcular el restante por pagar en BS
+    function calcularRestantePorPagar() {
+      const total = calcularTotalVentaBs();
+      const pagado = calcularTotalPagadoBs();
+      return total - pagado;
+    }
+
+    // Actualizar métodos de pago
+    function actualizarMetodosPago() {
+      const totalVentaBs = calcularTotalVentaBs();
+      const totalPagadoBs = calcularTotalPagadoBs();
+      const restante = calcularRestantePorPagar();
+      
+      // Actualizar el texto del restante por pagar
+      const restanteElement = document.getElementById('restante-pagar');
+      restanteElement.textContent = `Restante por pagar: BS ${restante.toFixed(2)} (USD ${convertirBsAUsd(restante).toFixed(2)})`;
+      
+      if (restante <= 0.01 && carrito.length > 0) {
+        restanteElement.className = 'pago-completado';
+        $('#btn-finalizar').prop('disabled', false);
+      } else {
+        restanteElement.className = 'restante-pendiente';
+        $('#btn-finalizar').prop('disabled', true);
+      }
+      
+      // Renderizar métodos de pago
+      const metodosPagoContainer = document.getElementById('metodos-pago');
+      metodosPagoContainer.innerHTML = '';
+      
+      if (metodosPago.length === 0) {
+        metodosPagoContainer.innerHTML = '<p class="text-center from-label">No se han agregado métodos de pago</p>';
+        return;
+      }
+      
+      metodosPago.forEach((metodo, index) => {
+        const metodoElement = document.createElement('div');
+        metodoElement.className = 'metodo-pago';
+        metodoElement.innerHTML = `
+          <div class="metodo-pago-header">
+            <div>
+              <strong>${metodo.tipo}</strong>
+            </div>
+            <div class="total-pago">
+              BS ${metodo.montoBs.toFixed(2)}<br>
+              <small>USD ${convertirBsAUsd(metodo.montoBs).toFixed(2)}</small>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarMetodoPago(${index})">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        `;
+        metodosPagoContainer.appendChild(metodoElement);
+      });
+    }
+
+    // Agregar método de pago
+    function agregarMetodoPago() {
+      const restante = calcularRestantePorPagar();
+      
+      if (restante <= 0) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Pago completo',
+          text: 'Ya se ha cubierto el total de la venta'
+        });
+        return;
+      }
+      
+      Swal.fire({
+        title: 'Agregar Método de Pago',
+        html: `
+          <div class="mb-3">
+            <label class="form-label">Tipo de Pago</label>
+            <select id="swal-tipo-pago" class="form-select">
+              <option value="Efectivo">Efectivo</option>
+              <option value="Dólares">Dólares</option>
+              <option value="Punto de venta">Punto de venta</option>
+              <option value="Pago móvil">Pago móvil</option>
+              <option value="Transferencia">Transferencia</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Monto (BS)</label>
+            <input type="number" step="0.01" min="0.01" max="${restante}" value="${restante.toFixed(2)}" id="swal-monto" class="form-control" style="width: 100%; font-size: 16px; padding: 12px;" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Monto en USD: <span id="swal-monto-usd">USD ${convertirBsAUsd(restante).toFixed(2)}</span></label>
+          </div>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Agregar',
+        cancelButtonText: 'Cancelar',
+        didOpen: () => {
+          // Actualizar monto en USD cuando cambia el monto en BS
+          document.getElementById('swal-monto').addEventListener('input', function() {
+            const montoBs = parseFloat(this.value) || 0;
+            const montoUSD = convertirBsAUsd(montoBs);
+            document.getElementById('swal-monto-usd').textContent = `USD ${montoUSD.toFixed(2)}`;
+          });
+        },
+        preConfirm: () => {
+          const tipo = document.getElementById('swal-tipo-pago').value;
+          const montoBs = parseFloat(document.getElementById('swal-monto').value);
+          
+          if (!montoBs || montoBs <= 0) {
+            Swal.showValidationMessage('Ingrese un monto válido');
+            return false;
+          }
+          
+          if (montoBs > restante + 0.01) {
+            Swal.showValidationMessage(`El monto no puede ser mayor al restante (BS ${restante.toFixed(2)})`);
+            return false;
+          }
+          
+          return { tipo, montoBs };
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const { tipo, montoBs } = result.value;
+          
+          // Agregar el método de pago
+          metodosPago.push({
+            tipo: tipo,
+            montoBs: montoBs
+          });
+          
+          actualizarMetodosPago();
+        }
+      });
+    }
+
+    // Eliminar método de pago
+    function eliminarMetodoPago(index) {
+      metodosPago.splice(index, 1);
+      actualizarMetodosPago();
+    }
+    
+    // Finalizar venta en Supabase - VERSIÓN CORREGIDA
+    async function finalizarVentaEnSupabase(datosVenta) {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      
+      try {
+        loadingOverlay.style.display = 'flex';
+        
+        // Obtener la tasa de cambio actual
+        const tasaCambio = obtenerTasaCambio();
+        
+        // Crear string con métodos de pago para el campo tipo_pago
+        const tiposPagoArray = metodosPago.map(pago => pago.tipo);
+        const tipoPagoString = tiposPagoArray.join(', ');
+        
+        // Preparar datos para la tabla ventas
+        const ventaParaInsertar = {
+          fecha: datosVenta.fecha,
+          tipo_pago: tipoPagoString,
+          total: parseFloat(datosVenta.totalBs.toFixed(2)),
+          tasa_cambio: parseFloat(tasaCambio),
+          total_usd: parseFloat(datosVenta.totalUSD.toFixed(2)),
+          created_at: new Date().toISOString()
+        };
+        
+        console.log('Datos de venta a insertar:', ventaParaInsertar);
+        
+        // 1. Crear la venta principal
+        const { data: venta, error: errorVenta } = await supabaseClient
+          .from('ventas')
+          .insert([ventaParaInsertar])
+          .select()
+          .single();
+
+        if (errorVenta) {
+          console.error('Error al insertar venta:', errorVenta);
+          throw new Error(`Error al crear venta: ${errorVenta.message}`);
+        }
+
+        console.log('Venta creada exitosamente:', venta);
+
+        // 2. Crear los detalles de la venta
+        const detallesVenta = datosVenta.productos.map(producto => {
+          return {
+            venta_id: venta.id,
+            producto_id: producto.productoId,
+            cantidad: parseInt(producto.unidades),
+            tipo_venta: producto.tipoVenta,
+            precio_unitario: parseFloat(producto.precioUnitarioBs.toFixed(2)),
+            created_at: new Date().toISOString()
+          };
+        });
+
+        console.log('Detalles de venta a insertar:', detallesVenta);
+
+        const { error: errorDetalles } = await supabaseClient
+          .from('detalles_venta')
+          .insert(detallesVenta);
+
+        if (errorDetalles) {
+          console.error('Error al insertar detalles:', errorDetalles);
+          throw new Error(`Error al crear detalles: ${errorDetalles.message}`);
+        }
+
+        // 3. Actualizar stock de productos
+        for (const producto of datosVenta.productos) {
+          const productoActual = todosLosProductos.find(p => p.id === producto.productoId);
+          if (!productoActual) {
+            throw new Error(`Producto con ID ${producto.productoId} no encontrado`);
+          }
+          
+          const nuevoStock = Math.max(0, productoActual.cantidad - producto.unidades);
+          
+          console.log(`Actualizando stock del producto ${producto.productoId}: ${productoActual.cantidad} -> ${nuevoStock}`);
+          
+          const { error: errorStock } = await supabaseClient
+            .from('productos')
+            .update({ cantidad: nuevoStock })
+            .eq('id', producto.productoId);
+
+          if (errorStock) {
+            console.error('Error al actualizar stock:', errorStock);
+            throw new Error(`Error al actualizar stock: ${errorStock.message}`);
+          }
+        }
+
+        // 4. Registrar métodos de pago
+        if (metodosPago.length > 0) {
+          const pagosVenta = metodosPago.map(metodo => ({
+            venta_id: venta.id,
+            metodo: metodo.tipo,
+            monto_bs: parseFloat(metodo.montoBs.toFixed(2)),
+            monto_usd: parseFloat(convertirBsAUsd(metodo.montoBs).toFixed(2)),
+            created_at: new Date().toISOString()
+          }));
+
+          console.log('Pagos a insertar:', pagosVenta);
+
+          const { error: errorPagos } = await supabaseClient
+            .from('pagos_venta')
+            .insert(pagosVenta);
+
+          if (errorPagos) {
+            console.error('Error al insertar pagos:', errorPagos);
+            throw new Error(`Error al registrar pagos: ${errorPagos.message}`);
+          }
+        }
+
+        loadingOverlay.style.display = 'none';
+        
+        // Mostrar alerta de éxito
+        await Swal.fire({
+          icon: 'success',
+          title: '¡Venta registrada exitosamente!',
+          html: `
+            <div style="text-align: left;">
+              <p><strong>Fecha:</strong> ${formatearFechaLocal(datosVenta.fecha)}</p>
+              <p><strong>Productos vendidos:</strong></p>
+              <div style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;">
+                ${datosVenta.productos.map(producto => `
+                  <div style="border-bottom: 1px solid #eee; padding: 5px 0;">
+                    <strong>${producto.nombre}${producto.marca ? ' - ' + producto.marca : ''}</strong><br>
+                    <span style="font-size: 0.9em;">
+                      ${producto.tipoVenta === 'mayor' 
+                        ? `${producto.cantidad} ${producto.empaqueMayor} × ${producto.unidadesPorEmpaque} und = ${producto.unidades} unidades` 
+                        : `${producto.cantidad} unidades`
+                      }<br>
+                      Precio: BS ${producto.precioUnitarioBs.toFixed(2)} c/u<br>
+                      Subtotal: BS ${producto.subtotalBs.toFixed(2)}
+                    </span>
+                  </div>
+                `).join('')}
+              </div>
+              <div style="background-color: #e8f5e8; padding: 10px; border-radius: 5px; border: 1px solid #c3e6c3;">
+                <p><strong>Total:</strong> BS. ${datosVenta.totalBs.toFixed(2)} (USD ${datosVenta.totalUSD.toFixed(2)})</p>
+              </div>
+            </div>
+          `,
+          confirmButtonText: 'Aceptar'
+        });
+        
+        // Limpiar carrito y formulario
+        carrito = [];
+        metodosPago = [];
+        actualizarVistaCarrito();
+        actualizarMetodosPago();
+        $('#form-finalizar-venta')[0].reset();
+        $('#fecha').val(new Date().toISOString().split('T')[0]);
+        
+        // Recargar productos para actualizar stock
+        await cargarProductos();
+
+      } catch (error) {
+        loadingOverlay.style.display = 'none';
+        console.error('Error al finalizar venta:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al registrar la venta',
+          text: error.message || 'Ocurrió un error desconocido',
+          footer: 'Por favor, verifique los datos e intente nuevamente'
+        });
+      }
+    }
+
+    // Inicializar cuando se carga el DOM
+    $(document).ready(function() {
+      // Configurar fecha actual
+      $('#fecha').val(new Date().toISOString().split('T')[0]);
+      
+      // Inicializar funciones
+      cargarProductos();
+      manejarSeleccionProducto();
+      manejarSeleccionPrecio();
+      manejarTipoVenta();
+      manejarCambioCantidad();
+      
+      // Event listener para el formulario
+      $('#form-agregar-producto').on('submit', agregarAlCarrito);
+      
+      // Event listener para agregar método de pago
+      $('#btn-agregar-metodo').on('click', agregarMetodoPago);
+      
+      // Event listener para cambio de tasa - ACTUALIZAR EN TIEMPO REAL
+      $('#tasa-cambio').on('input', function() {
+        const nuevaTasa = parseFloat($(this).val());
+        if (nuevaTasa && nuevaTasa > 0) {
+          // Actualizar todo en tiempo real
+          actualizarVistaCarrito();
+          actualizarMetodosPago();
+        }
+      });
+      
+      // Event listener para finalizar venta
+      $('#form-finalizar-venta').on('submit', async function(e) {
+        e.preventDefault();
+        
+        const fecha = $('#fecha').val();
+        const totalBs = calcularTotalVentaBs();
+        const totalUSD = calcularTotalVentaUSD();
+        
+        if (!fecha) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Fecha requerida',
+            text: 'Por favor seleccione una fecha para la venta'
+          });
+          return;
+        }
+        
+        if (carrito.length === 0) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Carrito vacío',
+            text: 'No hay productos en el carrito'
+          });
+          return;
+        }
+        
+        if (metodosPago.length === 0) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Sin método de pago',
+            text: 'Debe agregar al menos un método de pago'
+          });
+          return;
+        }
+        
+        const restante = calcularRestantePorPagar();
+        if (restante > 0.01) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Pago incompleto',
+            text: `Falta por pagar: BS ${restante.toFixed(2)}`
+          });
+          return;
+        }
+        
+        // Generar lista detallada de productos para la confirmación
+        const productosTexto = carrito.map(item => {
+          const marca = item.marca ? ` (${item.marca})` : '';
+          let detalle = `• ${item.nombre}${marca}<br>&nbsp;&nbsp;${item.tipo} - ${item.cantidad}`;
+          
+          if (item.tipoVenta === 'mayor') {
+            detalle += ` × ${item.unidadesPorEmpaque} unidades = ${item.unidades} unidades`;
+          }
+          
+          detalle += ` × BS ${item.precioUnitarioBs.toFixed(2)} = BS ${item.subtotalBs.toFixed(2)}`;
+          
+          return detalle;
+        }).join('<br>');
+        
+        // Obtener métodos de pago como texto para mostrar
+        const metodosPagoTexto = metodosPago.map(pago => 
+          `• ${pago.tipo}: BS ${pago.montoBs.toFixed(2)}`
+        ).join('<br>');
+        
+        // Confirmar venta con información detallada
+        const confirmResult = await Swal.fire({
+          title: '¿Confirmar venta?',
+          html: `
+            <div style="text-align: left; font-size: 0.95em;">
+              <p><strong>📅 Fecha:</strong> ${formatearFechaLocal(fecha)}</p>
+              <p><strong>🛒 Productos (${carrito.length} items):</strong></p>
+              <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px; background-color: #f8f9fa;">
+                ${productosTexto}
+              </div>
+              <p style="margin-top: 15px;"><strong>💳 Métodos de pago:</strong></p>
+              <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px; background-color: #f8f9fa;">
+                ${metodosPagoTexto}
+              </div>
+              <div style="margin-top: 15px; padding: 10px; background-color: #e8f5e8; border-radius: 5px; border: 1px solid #c3e6c3;">
+                <strong>💰 Total a pagar:</strong><br>
+                BS ${totalBs.toFixed(2)} (USD ${totalUSD.toFixed(2)})
+              </div>
+            </div>
+          `,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, confirmar venta',
+          cancelButtonText: 'Cancelar',
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          width: '600px'
+        });
+        
+        if (confirmResult.isConfirmed) {
+          await finalizarVentaEnSupabase({
+            fecha,
+            productos: carrito,
+            totalBs: totalBs,
+            totalUSD: totalUSD
+          });
+        }
+      });
+      
+      // Inicializar vista del carrito
+      actualizarVistaCarrito();
+      
+      console.log('Sistema de ventas inicializado correctamente');
     });
-  });
-  
-  // Inicializar vista del carrito
-  actualizarVistaCarrito();
-  
-  console.log('Sistema inicializado correctamente');
-});
+
+    // Hacer funciones globales para que estén disponibles en los eventos onclick
+    window.eliminarDelCarrito = eliminarDelCarrito;
+    window.eliminarMetodoPago = eliminarMetodoPago;
   </script>
 </body>
 </html>

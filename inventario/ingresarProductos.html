@@ -15,41 +15,38 @@
   
   <style>
     /* Estilos para los campos de entrada y selección */
-.form-control, .form-select, 
-.select2-container--default .select2-selection--single,
-.select2-container--default .select2-search__field {
-    background-color: #2a2a2a;
-    border: 1px solid #3105f1;
-    color: white !important; /* Texto blanco */
-}
+    .form-control, .form-select, 
+    .select2-container--default .select2-selection--single,
+    .select2-container--default .select2-search__field {
+        background-color: #2a2a2a;
+        border: 1px solid #3105f1;
+        color: white !important;
+    }
 
-/* Estilo específico para el texto en Select2 */
-.select2-container--default .select2-selection--single .select2-selection__rendered {
-    color: white !important;
-}
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: white !important;
+    }
 
-/* Estilo para el texto cuando se escribe en los inputs */
-.form-control:focus, .form-select:focus,
-.select2-container--default .select2-search__field:focus {
-    color: white !important;
-}
+    .form-control:focus, .form-select:focus,
+    .select2-container--default .select2-search__field:focus {
+        color: white !important;
+    }
 
-/* Estilo para el placeholder */
-.form-control::placeholder {
-    color: #ccc !important;
-    opacity: 1;
-}
+    .form-control::placeholder {
+        color: #ccc !important;
+        opacity: 1;
+    }
 
-/* Estilo para el dropdown de Select2 */
-.select2-container--default .select2-results__option {
-    background-color: #3105f1 !important;
-    color: white !important;
-}
+    .select2-container--default .select2-results__option {
+        background-color: #3105f1 !important;
+        color: white !important;
+    }
 
-.select2-container--default .select2-results__option--highlighted {
-    background-color: #041fbd !important;
-    color: white !important;
-}
+    .select2-container--default .select2-results__option--highlighted {
+        background-color: #041fbd !important;
+        color: white !important;
+    }
+    
     body {
       background-color: #000000;
       color: #ffffff;
@@ -70,7 +67,6 @@
       margin-bottom: 50px;
     }
 
-    /* Estilos para Select2 */
     .select2-container--default .select2-selection--single {
       background-color: #2a2a2a;
       border: 1px solid #3105f1;
@@ -102,7 +98,6 @@
       border: 1px solid #041fbd !important;
     }
 
-    /* Resto de estilos... */
     .form-control, .form-select {
       background-color: #2a2a2a;
       border: 1px solid #3105f1;
@@ -170,10 +165,40 @@
       filter: invert(1);
     }
 
-    /* Loading spinner */
     @keyframes spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
+    }
+    
+    .price-label {
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+      color: #ddd;
+    }
+    
+    .price-card {
+      background-color: #2a2a2a;
+      border: 1px solid #3105f1;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .price-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    
+    .price-title {
+      font-weight: bold;
+      color: #ffffff;
+    }
+    
+    .price-value {
+      font-size: 1.1rem;
+      color: #00ff00;
     }
   </style>
 </head>
@@ -187,7 +212,7 @@
     </div>
     <!-- Formulario de Inventario -->
     <div class="row justify-content-center">
-      <div class="col-12 col-md-8 col-lg-6">
+      <div class="col-12 col-md-10 col-lg-8">
         <div class="form-container">
           <h1 class="text-center mb-2">Registro de Productos</h1><br>
                     
@@ -202,298 +227,469 @@
             </div>
             
             <!-- Marca -->
-        <div class="mb-3">
-          <label for="brand" class="form-label">Marca</label>
-          <input type="text" class="form-control" id="brand" placeholder="Ej: Mary" required>
-        </div>
+            <div class="mb-3">
+              <label for="brand" class="form-label">Marca</label>
+              <input type="text" class="form-control" id="brand" placeholder="Ej: Mary" required>
+            </div>
 
-        <!-- Variante -->
-        <div class="mb-3">
-          <label for="variant" class="form-label">Variante</label>
-          <input type="text" class="form-control" id="variant" placeholder="Ej: Integral, Moreno, etc." required>
-        </div>
+            <!-- Variante -->
+            <div class="mb-3">
+              <label for="variant" class="form-label">Variante</label>
+              <input type="text" class="form-control" id="variant" placeholder="Ej: Integral, Moreno, etc." required>
+            </div>
 
-        <!-- Presentación -->
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="unit-presentation" class="form-label">Presentación Unitaria</label>
-            <input type="text" class="form-control" id="unit-presentation" placeholder="Ej: 900 gr, 1 lt" required>
+            <!-- Presentación -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="unit-presentation" class="form-label">Presentación Unitaria</label>
+                <input type="text" class="form-control" id="unit-presentation" placeholder="Ej: 900 gr, 1 lt" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="packaging" class="form-label">Unidad de Empaque Mayor</label>
+                <select class="form-select" id="packaging" required>
+                  <option value="">Seleccione</option>
+                  <option value="Caja">Caja</option>
+                  <option value="Paca">Unidad</option>
+                  <option value="Saco">Saco</option>
+                  <option value="Bulto">Bulto</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Cantidad por Empaque -->
+            <div class="mb-3">
+              <label for="package-quantity" class="form-label">Cantidad por Empaque</label>
+              <input type="number" class="form-control" id="package-quantity" min="1" placeholder="Ej: 24" required>
+            </div>
+
+            <!-- Cantidad de ingreso unitario -->
+            <div class="mb-3">
+              <label for="unit-count" class="form-label">Cantidad Ingresada (Unidades)</label>
+              <input type="number" class="form-control" id="unit-count" min="1" required>
+            </div>
+             <!--Tasa de cambio Bs a USD -->
+            <div class="mb-3">
+              <label for="unit-count" class="form-label">Tasa de Cambio (BS a USD)</label>
+               <input type="number" step="0.01" min="1" class="form-control" id="tasa-cambio" value="140" required>
+            </div>
+           
+
+             <!-- Precios -->
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <div class="price-card">
+                <div class="price-header">
+                  <span class="price-title">Precio de Compra (Bs)</span>
+                </div>
+                <input type="number" step="0.01" class="form-control price-input" id="purchase-price" placeholder="0.00" required data-usd-target="purchase-price-usd">
+                <div class="usd-conversion">
+                  <small>USD: <span id="purchase-price-usd">0.00</span></small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="price-card">
+                <div class="price-header">
+                  <span class="price-title">Precio de venta 1 (Bs)</span>
+                </div>
+                <input type="number" step="0.01" class="form-control price-input" id="sale-price-1" placeholder="0.00" required data-usd-target="sale-price-1-usd">
+                <div class="usd-conversion">
+                  <small>USD: <span id="sale-price-1-usd">0.00</span></small>
+                </div>
+              </div>
+              <div class="price-card">
+                <div class="price-header">
+                  <span class="price-title">Precio de venta 2 (Bs)</span>
+                </div>
+                <input type="number" step="0.01" class="form-control price-input" id="sale-price-2" placeholder="0.00" data-usd-target="sale-price-2-usd">
+                <div class="usd-conversion">
+                  <small>USD: <span id="sale-price-2-usd">0.00</span></small>
+                </div>
+              </div>
+              <div class="price-card">
+                <div class="price-header">
+                  <span class="price-title">Precio de venta 3 (Bs)</span>
+                </div>
+                <input type="number" step="0.01" class="form-control price-input" id="sale-price-3" placeholder="0.00" data-usd-target="sale-price-3-usd">
+                <div class="usd-conversion">
+                  <small>USD: <span id="sale-price-3-usd">0.00</span></small>
+                </div>
+              </div>
+              <div class="price-card">
+                <div class="price-header">
+                  <span class="price-title">Precio de venta 4 (Bs)</span>
+                </div>
+                <input type="number" step="0.01" class="form-control price-input" id="sale-price-4" placeholder="0.00" data-usd-target="sale-price-4-usd">
+                <div class="usd-conversion">
+                  <small>USD: <span id="sale-price-4-usd">0.00</span></small>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="col-md-6 mb-3">
-            <label for="packaging" class="form-label">Unidad de Empaque Mayor</label>
-            <select class="form-select" id="packaging" required>
-              <option value="">Seleccione</option>
-              <option value="Caja">Caja</option>
-              <option value="Paca">Paca</option>
-              <option value="Saco">Saco</option>
-              <option value="Bulto">Bulto</option>
-            </select>
-          </div>
-        </div>
+            <!-- Fecha -->
+            <div class="mb-3">
+              <label for="entry-date" class="form-label">Fecha de Ingreso</label>
+              <input type="date" class="form-control" id="entry-date" required>
+            </div>
 
-        <!-- Cantidad por Empaque -->
-        <div class="mb-3">
-          <label for="package-quantity" class="form-label">Cantidad por Empaque</label>
-          <input type="number" class="form-control" id="package-quantity" min="1" placeholder="Ej: 24" required>
-        </div>
+            <!-- Botones -->
+            <div class="text-center">
+              <button type="submit" class="btn btn-submit btn-lg">
+                Registrar Ingreso
+              </button>
+              <br><br>
+              <a href="menuProductos.html" class="btn btn-submit btn-lg">← Volver al Menú</a>
+            </div>
 
-        <!-- Cantidad de ingreso unitario -->
-        <div class="mb-3">
-          <label for="unit-count" class="form-label">Cantidad Ingresada (Unidades)</label>
-          <input type="number" class="form-control" id="unit-count" min="1" required>
-        </div>
+            <!-- Mensaje -->
+            <div class="text-center mt-3">
+              <p id="confirmation-message" class="confirmation-message hidden">
+                ¡Ingreso registrado exitosamente!
+              </p>
+            </div>
 
-        <!-- Precios -->
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="purchase-price" class="form-label">Precio de Compra (USD)</label>
-            <input type="number" step="0.01" class="form-control" id="purchase-price" required>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="sale-price" class="form-label">Precio de Venta (USD)</label>
-            <input type="number" step="0.01" class="form-control" id="sale-price" required>
-          </div>
+          </form>
         </div>
-
-        <!-- Fecha -->
-        <div class="mb-3">
-          <label for="entry-date" class="form-label">Fecha de Ingreso</label>
-          <input type="date" class="form-control" id="entry-date" required>
-        </div>
-
-        <!-- Botones -->
-        <div class="text-center">
-          <button type="submit" class="btn btn-submit btn-lg">
-            Registrar Ingreso
-          </button>
-          <br><br>
-          <a href="menuProductos.html" class="btn btn-submit btn-lg">← Volver al Menú</a>
-        </div>
-
-        <!-- Mensaje -->
-        <div class="text-center mt-3">
-          <p id="confirmation-message" class="confirmation-message hidden">
-            ¡Ingreso registrado exitosamente!
-          </p>
-        </div>
-
-      </form>
+      </div>
     </div>
-  </div>
-</div>
   </div>
 
   <!-- Bootstrap Bundle con Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   
-<script>
-  // ==========================
-  // Configuración de Supabase
-  // ==========================
-  const SUPABASE_URL = 'https://rirfvhvlmytnpqkcpxbx.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpcmZ2aHZsbXl0bnBxa2NweGJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0ODE2NDUsImV4cCI6MjA3MjA1NzY0NX0.5JLGuOIWNvKIESJG26JLOgRVCu0jVoH0ELZjQ63gV48';
+  <script>
+    // ==========================
+    // Configuración de Supabase
+    // ==========================
+    const SUPABASE_URL = 'https://rirfvhvlmytnpqkcpxbx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpcmZ2aHZsbXl0bnBxa2NweGJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0ODE2NDUsImV4cCI6MjA3MjA1NzY0NX0.5JLGuOIWNvKIESJG26JLOgRVCu0jVoH0ELZjQ63gV48';
 
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // ==========================
-  // Variables globales
-  // ==========================
-  let todosLosProductosMaestros = [];
+    // ==========================
+    // Variables globales
+    // ==========================
+let todosLosProductosMaestros = [];
 
-  // ==========================
-  // Función: cargar productos maestros
-  // ==========================
-  async function cargarProductosMaestros() {
-    try {
-      const { data: productos, error } = await supabaseClient
-        .from('masterproductos')
-        .select('*')
-        .order('nombre', { ascending: true });
+// ==========================
+// Función: cargar productos maestros
+// ==========================
+async function cargarProductosMaestros() {
+  try {
+    const { data: productos, error } = await supabaseClient
+      .from('masterproductos')
+      .select('*')
+      .order('nombre', { ascending: true });
 
-      if (error) throw error;
+    if (error) throw error;
 
-      todosLosProductosMaestros = productos || [];
-      inicializarSelect2();
+    todosLosProductosMaestros = productos || [];
+    inicializarSelect2();
 
-    } catch (error) {
-      console.error('Error al cargar productos maestros:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al cargar productos: ' + error.message
-      });
-    }
-  }
-
-  // ==========================
-  // Función: inicializar Select2
-  // ==========================
-  function inicializarSelect2() {
-    if (typeof jQuery === 'undefined') {
-      console.error('jQuery no está cargado');
-      return;
-    }
-    if (typeof $.fn.select2 === 'undefined') {
-      console.error('Select2 no está cargado');
-      return;
-    }
-
-    $('.js-product-search').select2({
-      placeholder: "Buscar producto...",
-      width: '100%',
-      language: "es",
-      data: todosLosProductosMaestros.map(producto => ({
-        id: producto.nombre,
-        text: producto.nombre,
-        nombre: producto.nombre
-      }))
+  } catch (error) {
+    console.error('Error al cargar productos maestros:', error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al cargar productos: ' + error.message
     });
   }
+}
 
-  // ==========================
-  // Función: validar precios
-  // ==========================
-  function validatePrices() {
-    const purchasePrice = parseFloat(document.getElementById("purchase-price").value);
-    const salePrice = parseFloat(document.getElementById("sale-price").value);
+// ==========================
+// Función: inicializar Select2
+// ==========================
+function inicializarSelect2() {
+  if (typeof jQuery === 'undefined') {
+    console.error('jQuery no está cargado');
+    return;
+  }
+  if (typeof $.fn.select2 === 'undefined') {
+    console.error('Select2 no está cargado');
+    return;
+  }
 
-    if (purchasePrice && salePrice && salePrice <= purchasePrice) {
+  $('.js-product-search').select2({
+    placeholder: "Buscar producto...",
+    width: '100%',
+    language: "es",
+    data: todosLosProductosMaestros.map(producto => ({
+      id: producto.nombre,
+      text: producto.nombre,
+      nombre: producto.nombre
+    }))
+  });
+}
+
+// ==========================
+// Función: validar precios
+// ==========================
+function validatePrices() {
+  const purchasePrice = parseFloat(document.getElementById("purchase-price").value);
+  const salePrice1 = parseFloat(document.getElementById("sale-price-1").value);
+  const salePrice2 = parseFloat(document.getElementById("sale-price-2").value) || 0;
+  const salePrice3 = parseFloat(document.getElementById("sale-price-3").value) || 0;
+  const salePrice4 = parseFloat(document.getElementById("sale-price-4").value) || 0;
+  
+  if (purchasePrice && salePrice1 && salePrice1 <= purchasePrice) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error en precios',
+      text: 'El precio de venta 1 debe ser mayor al de compra'
+    });
+    document.getElementById("sale-price-1").value = "";
+    return false;
+  }
+  
+  // Validar que los precios opcionales sean mayores al de compra si están completados
+  const salePrices = [salePrice2, salePrice3, salePrice4];
+  for (let i = 0; i < salePrices.length; i++) {
+    if (salePrices[i] > 0 && salePrices[i] <= purchasePrice) {
       Swal.fire({
         icon: 'error',
         title: 'Error en precios',
-        text: 'El precio de venta debe ser mayor al de compra'
+        text: `El precio de venta ${i+2} debe ser mayor al de compra`
       });
-      document.getElementById("sale-price").value = "";
+      document.getElementById(`sale-price-${i+2}`).value = "";
       return false;
     }
-    return true;
   }
+  
+  return true;
+}
 
-  // ==========================
-  // Evento: DOMContentLoaded
-  // ==========================
-  document.addEventListener("DOMContentLoaded", async function () {
-    // Fecha actual por defecto
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById("entry-date").value = today;
-
-    // Cargar productos maestros
-    await cargarProductosMaestros();
-
-    // Validaciones de precio
-    document.getElementById("sale-price").addEventListener("change", validatePrices);
-    document.getElementById("purchase-price").addEventListener("change", validatePrices);
-
-    // ==========================
-    // Evento: envío del formulario
-    // ==========================
-    document.getElementById('inventory-form').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      if (!validatePrices()) return;
-
-      // Validar campos requeridos
-      const requiredFields = [
-        'product-select',
-        'brand',
-        'variant',
-        'unit-presentation',
-        'packaging',
-        'package-quantity',
-        'unit-count',
-        'purchase-price',
-        'sale-price',
-        'entry-date'
-      ];
-      for (const fieldId of requiredFields) {
-        const field = document.getElementById(fieldId);
-        if (!field.value.trim()) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Campo requerido',
-            text: `El campo ${field.previousElementSibling?.textContent || fieldId} es requerido`
-          });
-          field.focus();
-          return;
-        }
-      }
-
-      // Construcción del objeto
-      const productData = {
-        nombre: document.getElementById('product-select').value.trim(),
-        marca: document.getElementById('brand').value.trim(),
-        categoria: document.getElementById('packaging').value.trim(), // mapeado como categoría
-        variante: document.getElementById('variant').value.trim(),
-        presentacion_unitaria: document.getElementById('unit-presentation').value.trim(),
-        empaque_mayor: document.getElementById('packaging').value.trim(), // mapeado como categoría
-        cantidad_por_empaque: parseInt(document.getElementById('package-quantity').value),
-        cantidad: parseInt(document.getElementById('unit-count').value),
-        precio_compra: parseFloat(document.getElementById('purchase-price').value),
-        precio_venta: parseFloat(document.getElementById('sale-price').value),
-        fecha_ingreso: document.getElementById('entry-date').value
-      };
-
-      // Validaciones extra
-      if (productData.precio_compra <= 0 || productData.precio_venta <= 0) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error en precios',
-          text: 'Los precios deben ser mayores a 0'
-        });
-        return;
-      }
-      if (productData.cantidad_ingresada < 0) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error en cantidad',
-          text: 'La cantidad no puede ser negativa'
-        });
-        return;
-      }
-
-      // Loading en el botón
-      const submitBtn = this.querySelector('button[type="submit"]');
-      const originalText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `
-        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        Procesando...
-      `;
-
-      try {
-        const { data, error } = await supabaseClient
-          .from('productos')
-          .insert([productData])
-          .select();
-
-        if (error) throw error;
-
-        Swal.fire({
-          icon: 'success',
-          title: '¡Éxito!',
-          text: 'Producto registrado correctamente',
-          timer: 2000,
-          showConfirmButton: false
-        });
-
-        // Reset formulario
-        this.reset();
-        document.getElementById("entry-date").value = today;
-        $('#product-select').val('').trigger('change');
-
-      } catch (error) {
-        console.error('Error al registrar producto:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Error al registrar producto: ' + error.message
-        });
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
-      }
-    });
+// ==========================
+// Función: calcular y mostrar precios en USD
+// ==========================
+function updateUsdPrices() {
+  // Obtener la tasa de cambio
+  const tasaCambio = parseFloat(document.getElementById('tasa-cambio').value) || 1;
+  
+  // Obtener todos los inputs de precio
+  const priceInputs = document.querySelectorAll('.price-input');
+  
+  // Calcular y actualizar cada precio en USD
+  priceInputs.forEach(input => {
+    const bsValue = parseFloat(input.value) || 0;
+    const usdValue = bsValue / tasaCambio;
+    const usdTargetId = input.getAttribute('data-usd-target');
+    const usdElement = document.getElementById(usdTargetId);
+    
+    if (usdElement) {
+      usdElement.textContent = usdValue.toFixed(2);
+    }
   });
-</script>
+}
+
+// ==========================
+// Evento: DOMContentLoaded
+// ==========================
+document.addEventListener("DOMContentLoaded", async function () {
+  // Fecha actual por defecto
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById("entry-date").value = today;
+
+  // Cargar productos maestros
+  await cargarProductosMaestros();
+
+  // Validaciones de precio
+  document.getElementById("purchase-price").addEventListener("change", validatePrices);
+  document.getElementById("sale-price-1").addEventListener("change", validatePrices);
+  document.getElementById("sale-price-2").addEventListener("change", validatePrices);
+  document.getElementById("sale-price-3").addEventListener("change", validatePrices);
+  document.getElementById("sale-price-4").addEventListener("change", validatePrices);
+
+  // Configurar event listeners para precios en USD
+  updateUsdPrices();
+  
+  // Event listener para la tasa de cambio
+  document.getElementById('tasa-cambio').addEventListener('input', updateUsdPrices);
+  
+  // Event listeners para los inputs de precio
+  const priceInputs = document.querySelectorAll('.price-input');
+  priceInputs.forEach(input => {
+    input.addEventListener('input', updateUsdPrices);
+  });
+
+  // ==========================
+  // Evento: envío del formulario
+  // ==========================
+  document.getElementById('inventory-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!validatePrices()) return;
+
+    // Validar campos requeridos
+    const requiredFields = [
+      'product-select',
+      'brand',
+      'variant',
+      'unit-presentation',
+      'packaging',
+      'package-quantity',
+      'unit-count',
+      'purchase-price',
+      'sale-price-1',
+      'entry-date',
+      'tasa-cambio'
+    ];
+    
+    for (const fieldId of requiredFields) {
+      const field = document.getElementById(fieldId);
+      if (!field.value.trim()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campo requerido',
+          text: `El campo ${field.previousElementSibling?.textContent || fieldId} es requerido`
+        });
+        field.focus();
+        return;
+      }
+    }
+
+    // Obtener la tasa de cambio
+    const tasaCambio = parseFloat(document.getElementById('tasa-cambio').value);
+
+    // Construcción del objeto con los precios en Bs y USD
+    const productData = {
+      nombre: document.getElementById('product-select').value.trim(),
+      marca: document.getElementById('brand').value.trim(),
+      categoria: document.getElementById('packaging').value.trim(), // Mantengo esto como estaba
+      variante: document.getElementById('variant').value.trim(),
+      presentacion_unitaria: document.getElementById('unit-presentation').value.trim(),
+      empaque_mayor: document.getElementById('packaging').value.trim(),
+      cantidad_por_empaque: parseInt(document.getElementById('package-quantity').value),
+      cantidad: parseInt(document.getElementById('unit-count').value),
+      // Precios en Bs
+      precio_compra: parseFloat(document.getElementById('purchase-price').value),
+      precio_venta_1: parseFloat(document.getElementById('sale-price-1').value),
+      precio_venta_2: document.getElementById('sale-price-2').value ? parseFloat(document.getElementById('sale-price-2').value) : null,
+      precio_venta_3: document.getElementById('sale-price-3').value ? parseFloat(document.getElementById('sale-price-3').value) : null,
+      precio_venta_4: document.getElementById('sale-price-4').value ? parseFloat(document.getElementById('sale-price-4').value) : null,
+      // Precios en USD - Corregido el cálculo
+      precio_compra_usd: parseFloat((parseFloat(document.getElementById('purchase-price').value) / tasaCambio).toFixed(2)),
+      precio_venta_1_usd: parseFloat((parseFloat(document.getElementById('sale-price-1').value) / tasaCambio).toFixed(2)),
+      precio_venta_2_usd: document.getElementById('sale-price-2').value ? parseFloat((parseFloat(document.getElementById('sale-price-2').value) / tasaCambio).toFixed(2)) : null,
+      precio_venta_3_usd: document.getElementById('sale-price-3').value ? parseFloat((parseFloat(document.getElementById('sale-price-3').value) / tasaCambio).toFixed(2)) : null,
+      precio_venta_4_usd: document.getElementById('sale-price-4').value ? parseFloat((parseFloat(document.getElementById('sale-price-4').value) / tasaCambio).toFixed(2)) : null,
+      // Tasa de cambio y fecha
+      tasa_cambio: tasaCambio,
+      fecha_ingreso: document.getElementById('entry-date').value
+    };
+
+    // Debug: Mostrar los valores calculados en consola
+    console.log('Datos del producto a enviar:', productData);
+    console.log('Precios USD calculados:', {
+      precio_compra_usd: productData.precio_compra_usd,
+      precio_venta_1_usd: productData.precio_venta_1_usd,
+      precio_venta_2_usd: productData.precio_venta_2_usd,
+      precio_venta_3_usd: productData.precio_venta_3_usd,
+      precio_venta_4_usd: productData.precio_venta_4_usd
+    });
+
+    // Validaciones extra
+    if (productData.precio_compra <= 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error en precios',
+        text: 'El precio de compra debe ser mayor a 0'
+      });
+      return;
+    }
+    
+    if (productData.precio_venta_1 <= 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error en precios',
+        text: 'El precio de venta 1 debe ser mayor a 0'
+      });
+      return;
+    }
+    
+    // Validar precios opcionales si están completados
+    if (productData.precio_venta_2 !== null && productData.precio_venta_2 <= 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error en precios',
+        text: 'El precio de venta 2 debe ser mayor a 0 si está completado'
+      });
+      return;
+    }
+    
+    if (productData.precio_venta_3 !== null && productData.precio_venta_3 <= 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error en precios',
+        text: 'El precio de venta 3 debe ser mayor a 0 si está completado'
+      });
+      return;
+    }
+    
+    if (productData.precio_venta_4 !== null && productData.precio_venta_4 <= 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error en precios',
+        text: 'El precio de venta 4 debe ser mayor a 0 si está completado'
+      });
+      return;
+    }
+    
+    if (productData.cantidad < 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error en cantidad',
+        text: 'La cantidad no puede ser negativa'
+      });
+      return;
+    }
+
+    // Loading en el botón
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      Procesando...
+    `;
+
+    try {
+      // Insertar en la base de datos
+      const { data, error } = await supabaseClient
+        .from('productos')
+        .insert([productData])
+        .select();
+
+      if (error) throw error;
+
+      console.log('Producto insertado exitosamente:', data);
+
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Producto registrado correctamente',
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+      // Reset formulario
+      this.reset();
+      document.getElementById("entry-date").value = today;
+      $('#product-select').val('').trigger('change');
+      updateUsdPrices(); // Actualizar displays USD
+
+    } catch (error) {
+      console.error('Error al registrar producto:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al registrar producto: ' + error.message
+      });
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    }
+  });
+});
+  </script>
 
 </body>
 </html>
