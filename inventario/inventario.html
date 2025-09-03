@@ -218,6 +218,38 @@
       color: var(--texto-blanco);
     }
 
+    /* Estilos para precios en modal de edición */
+    .price-label {
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+      color: #ddd;
+    }
+    
+    .price-card {
+      background-color: #2a2a2a;
+      border: 1px solid #3105f1;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .price-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    
+    .price-title {
+      font-weight: bold;
+      color: #ffffff;
+    }
+    
+    .price-value {
+      font-size: 1.1rem;
+      color: #00ff00;
+    }
+
     @keyframes spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
@@ -233,7 +265,7 @@
     </div>
     
     <div class="card-inventario">
-      <h2 class="title-inventario">INVENTARIO DE PRODUCTOS</h2>
+      <h2 class="title-inventario">PRODUCTOS INGRESADOS</h2>
       
       <div class="search-box">
         <input type="text" class="search-input" placeholder="Buscar producto..." id="buscadorInventario">
@@ -256,8 +288,8 @@
               <th>Marca</th>
               <th>Variante</th>
               <th>Presentación</th>
-              <th>Cant.</th>
-              <th>Precio</th>
+              <th>Cant. Ingresada</th>
+              <th>Precio Venta</th>
               <th>Opciones</th>
             </tr>
           </thead>
@@ -324,7 +356,7 @@
                 <select class="form-select" id="edit-packaging" required>
                   <option value="">Seleccione</option>
                   <option value="Caja">Caja</option>
-                  <option value="Paca">Paca</option>
+                  <option value="Paca">Unidad</option>
                   <option value="Saco">Saco</option>
                   <option value="Bulto">Bulto</option>
                 </select>
@@ -343,15 +375,62 @@
               <input type="number" class="form-control" id="edit-unit-count" min="0" required>
             </div>
 
+            <!-- Tasa de cambio Bs a USD -->
+            <div class="mb-3">
+              <label for="edit-tasa-cambio" class="form-label">Tasa de Cambio (BS a USD)</label>
+              <input type="number" step="0.01" min="1" class="form-control" id="edit-tasa-cambio" value="140" required>
+            </div>
+
             <!-- Precios -->
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label for="edit-purchase-price" class="form-label">Precio de Compra (USD)</label>
-                <input type="number" step="0.01" class="form-control" id="edit-purchase-price" required>
+                <div class="price-card">
+                  <div class="price-header">
+                    <span class="price-title">Precio de Compra (Bs)</span>
+                  </div>
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-purchase-price" placeholder="0.00" required data-usd-target="edit-purchase-price-usd">
+                  <div class="usd-conversion">
+                    <small>USD: <span id="edit-purchase-price-usd">0.00</span></small>
+                  </div>
+                </div>
               </div>
               <div class="col-md-6 mb-3">
-                <label for="edit-sale-price" class="form-label">Precio de Venta (USD)</label>
-                <input type="number" step="0.01" class="form-control" id="edit-sale-price" required>
+                <div class="price-card">
+                  <div class="price-header">
+                    <span class="price-title">Precio de venta 1 (Bs)</span>
+                  </div>
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-1" placeholder="0.00" required data-usd-target="edit-sale-price-1-usd">
+                  <div class="usd-conversion">
+                    <small>USD: <span id="edit-sale-price-1-usd">0.00</span></small>
+                  </div>
+                </div>
+                <div class="price-card">
+                  <div class="price-header">
+                    <span class="price-title">Precio de venta 2 (Bs)</span>
+                  </div>
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-2" placeholder="0.00" data-usd-target="edit-sale-price-2-usd">
+                  <div class="usd-conversion">
+                    <small>USD: <span id="edit-sale-price-2-usd">0.00</span></small>
+                  </div>
+                </div>
+                <div class="price-card">
+                  <div class="price-header">
+                    <span class="price-title">Precio de venta 3 (Bs)</span>
+                  </div>
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-3" placeholder="0.00" data-usd-target="edit-sale-price-3-usd">
+                  <div class="usd-conversion">
+                    <small>USD: <span id="edit-sale-price-3-usd">0.00</span></small>
+                  </div>
+                </div>
+                <div class="price-card">
+                  <div class="price-header">
+                    <span class="price-title">Precio de venta 4 (Bs)</span>
+                  </div>
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-4" placeholder="0.00" data-usd-target="edit-sale-price-4-usd">
+                  <div class="usd-conversion">
+                    <small>USD: <span id="edit-sale-price-4-usd">0.00</span></small>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -419,7 +498,16 @@
           cantidad_por_empaque: 50,
           cantidad: 25,
           precio_compra: 0.50,
-          precio_venta: 1.00,
+          precio_venta_1: 1.00,
+          precio_venta_2: 1.20,
+          precio_venta_3: 1.40,
+          precio_venta_4: 1.60,
+          precio_compra_usd: 0.0036,
+          precio_venta_1_usd: 0.0071,
+          precio_venta_2_usd: 0.0086,
+          precio_venta_3_usd: 0.0100,
+          precio_venta_4_usd: 0.0114,
+          tasa_cambio: 140,
           fecha_ingreso: "2025-01-15"
         },
         {
@@ -432,7 +520,16 @@
           cantidad_por_empaque: 12,
           cantidad: 8,
           precio_compra: 3.50,
-          precio_venta: 5.99,
+          precio_venta_1: 5.99,
+          precio_venta_2: 6.50,
+          precio_venta_3: 7.00,
+          precio_venta_4: null,
+          precio_compra_usd: 0.025,
+          precio_venta_1_usd: 0.0428,
+          precio_venta_2_usd: 0.0464,
+          precio_venta_3_usd: 0.0500,
+          precio_venta_4_usd: null,
+          tasa_cambio: 140,
           fecha_ingreso: "2025-01-10"
         }
       ];
@@ -540,7 +637,7 @@
           <td>${producto.variante || 'N/A'}</td>
           <td>${producto.presentacion_unitaria || 'N/A'}</td>
           <td ${stockClass}>${producto.cantidad || 0}</td>
-          <td>USD ${parseFloat(producto.precio_venta || 0).toFixed(2)}</td>
+          <td>Bs ${parseFloat(producto.precio_venta_1 || 0).toFixed(2)}</td>
           <td>
             <button type="button" class="btn btn-warning btn-sm btn-editar" data-id="${producto.id}" title="Editar">
               <i class="bi bi-pencil"></i>
@@ -608,6 +705,27 @@
       });
     }
 
+    // ==================== FUNCIÓN PARA ACTUALIZAR PRECIOS EN USD ====================
+    function actualizarPreciosUSD() {
+      // Obtener la tasa de cambio
+      const tasaCambio = parseFloat(document.getElementById('edit-tasa-cambio').value) || 1;
+      
+      // Obtener todos los inputs de precio
+      const priceInputs = document.querySelectorAll('#modalEditarProducto .price-input');
+      
+      // Calcular y actualizar cada precio en USD
+      priceInputs.forEach(input => {
+        const bsValue = parseFloat(input.value) || 0;
+        const usdValue = bsValue / tasaCambio;
+        const usdTargetId = input.getAttribute('data-usd-target');
+        const usdElement = document.getElementById(usdTargetId);
+        
+        if (usdElement) {
+          usdElement.textContent = usdValue.toFixed(2);
+        }
+      });
+    }
+
     // ==================== MODAL EDITAR ====================
     function abrirModalEditar(id) {
       console.log('✏️ Abriendo modal para editar producto ID:', id);
@@ -649,9 +767,19 @@
         
         document.getElementById("edit-package-quantity").value = producto.cantidad_por_empaque || '';
         document.getElementById("edit-unit-count").value = producto.cantidad || 0;
+        document.getElementById("edit-tasa-cambio").value = producto.tasa_cambio || 140;
+        
+        // Precios
         document.getElementById("edit-purchase-price").value = producto.precio_compra || 0;
-        document.getElementById("edit-sale-price").value = producto.precio_venta || 0;
+        document.getElementById("edit-sale-price-1").value = producto.precio_venta_1 || 0;
+        document.getElementById("edit-sale-price-2").value = producto.precio_venta_2 || '';
+        document.getElementById("edit-sale-price-3").value = producto.precio_venta_3 || '';
+        document.getElementById("edit-sale-price-4").value = producto.precio_venta_4 || '';
+        
         document.getElementById("edit-entry-date").value = producto.fecha_ingreso || new Date().toISOString().split('T')[0];
+        
+        // Actualizar precios en USD
+        actualizarPreciosUSD();
         
         console.log('✅ Datos cargados en el formulario');
       }, 200);
@@ -667,250 +795,266 @@
     // ==================== VALIDAR PRECIOS ====================
     function validarPreciosEdicion() {
       const precioCompra = parseFloat(document.getElementById("edit-purchase-price").value);
-      const precioVenta = parseFloat(document.getElementById("edit-sale-price").value);
-
-      if (precioCompra && precioVenta && precioVenta <= precioCompra) {
+      const precioVenta1 = parseFloat(document.getElementById("edit-sale-price-1").value);
+      const precioVenta2 = parseFloat(document.getElementById("edit-sale-price-2").value) || 0;
+      const precioVenta3 = parseFloat(document.getElementById("edit-sale-price-3").value) || 0;
+      const precioVenta4 = parseFloat(document.getElementById("edit-sale-price-4").value) || 0;
+      
+      if (precioCompra && precioVenta1 && precioVenta1 <= precioCompra) {
         Swal.fire({
           icon: 'error',
           title: 'Error en precios',
-          text: 'El precio de venta debe ser mayor al de compra'
+          text: 'El precio de venta 1 debe ser mayor al de compra'
         });
-        document.getElementById("edit-sale-price").value = "";
+        document.getElementById("edit-sale-price-1").value = "";
         return false;
       }
+      
+      // Validar que los precios opcionales sean mayores al de compra si están completados
+      const preciosVenta = [precioVenta2, precioVenta3, precioVenta4];
+      for (let i = 0; i < preciosVenta.length; i++) {
+        if (preciosVenta[i] > 0 && preciosVenta[i] <= precioCompra) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error en precios',
+            text: `El precio de venta ${i+2} debe ser mayor al de compra`
+          });
+          document.getElementById(`edit-sale-price-${i+2}`).value = "";
+          return false;
+        }
+      }
+      
       return true;
     }
 
-    // ==================== GUARDAR EDICIÓN ====================
-    async function guardarEdicion() {
-      console.log('💾 Iniciando guardado para producto ID:', productoEditando);
+// ==================== GUARDAR EDICIÓN SIMPLE ====================
+async function guardarEdicion() {
+  console.log('Iniciando guardado para producto ID:', productoEditando);
 
-      if (!productoEditando) {
-        console.error('❌ No hay producto seleccionado para editar');
-        Swal.fire({
-          title: 'Error',
-          text: 'No hay producto seleccionado para editar',
-          icon: 'error',
-          confirmButtonText: 'Aceptar'
-        });
-        return;
+  if (!productoEditando) {
+    Swal.fire({
+      title: 'Error',
+      text: 'No hay producto seleccionado para editar',
+      icon: 'error'
+    });
+    return;
+  }
+
+  // Validar precios
+  if (!validarPreciosEdicion()) {
+    return;
+  }
+
+  // Obtener datos del formulario
+  const nombre = $('.js-edit-product-search').val();
+  const marca = document.getElementById("edit-brand").value.trim();
+  const variante = document.getElementById("edit-variant").value.trim();
+  const presentacionUnitaria = document.getElementById("edit-unit-presentation").value.trim();
+  const empaqueMayor = document.getElementById("edit-packaging").value;
+  const cantidadPorEmpaque = parseInt(document.getElementById("edit-package-quantity").value);
+  const cantidad = parseInt(document.getElementById("edit-unit-count").value);
+  const tasaCambio = parseFloat(document.getElementById("edit-tasa-cambio").value);
+  const precioCompra = parseFloat(document.getElementById("edit-purchase-price").value);
+  const precioVenta1 = parseFloat(document.getElementById("edit-sale-price-1").value);
+  const precioVenta2 = document.getElementById("edit-sale-price-2").value ? parseFloat(document.getElementById("edit-sale-price-2").value) : null;
+  const precioVenta3 = document.getElementById("edit-sale-price-3").value ? parseFloat(document.getElementById("edit-sale-price-3").value) : null;
+  const precioVenta4 = document.getElementById("edit-sale-price-4").value ? parseFloat(document.getElementById("edit-sale-price-4").value) : null;
+  const fechaIngreso = document.getElementById("edit-entry-date").value;
+
+  // Validar campos requeridos
+  if (!nombre || !marca || !variante || !presentacionUnitaria || !empaqueMayor || 
+      isNaN(cantidadPorEmpaque) || isNaN(cantidad) || isNaN(tasaCambio) || 
+      isNaN(precioCompra) || isNaN(precioVenta1) || !fechaIngreso) {
+    Swal.fire({
+      title: 'Error',
+      text: 'Complete todos los campos requeridos',
+      icon: 'error'
+    });
+    return;
+  }
+
+  // Preparar datos para actualizar
+  const dataActualizada = {
+    nombre: nombre,
+    marca: marca,
+    variante: variante,
+    presentacion_unitaria: presentacionUnitaria,
+    empaque_mayor: empaqueMayor,
+    cantidad_por_empaque: cantidadPorEmpaque,
+    cantidad: cantidad,
+    tasa_cambio: tasaCambio,
+    precio_compra: precioCompra,
+    precio_venta_1: precioVenta1,
+    precio_venta_2: precioVenta2,
+    precio_venta_3: precioVenta3,
+    precio_venta_4: precioVenta4,
+    precio_compra_usd: precioCompra / tasaCambio,
+    precio_venta_1_usd: precioVenta1 / tasaCambio,
+    precio_venta_2_usd: precioVenta2 ? precioVenta2 / tasaCambio : null,
+    precio_venta_3_usd: precioVenta3 ? precioVenta3 / tasaCambio : null,
+    precio_venta_4_usd: precioVenta4 ? precioVenta4 / tasaCambio : null,
+    fecha_ingreso: fechaIngreso
+  };
+
+  console.log('Datos a actualizar:', dataActualizada);
+
+  try {
+    if (supabaseClient) {
+      // Actualizar en Supabase - SIN .single()
+      const { data, error } = await supabaseClient
+        .from('productos')
+        .update(dataActualizada)
+        .eq('id', productoEditando);
+
+      if (error) {
+        throw error;
       }
 
-      // Validar precios
-      if (!validarPreciosEdicion()) {
-        return;
-      }
-
-      // Obtener datos del formulario
-      const nombre = $('.js-edit-product-search').val();
-      const marca = document.getElementById("edit-brand").value.trim();
-      const variante = document.getElementById("edit-variant").value.trim();
-      const presentacionUnitaria = document.getElementById("edit-unit-presentation").value.trim();
-      const empaqueMayor = document.getElementById("edit-packaging").value;
-      const cantidadPorEmpaque = document.getElementById("edit-package-quantity").value;
-      const cantidad = document.getElementById("edit-unit-count").value;
-      const precioCompra = document.getElementById("edit-purchase-price").value;
-      const precioVenta = document.getElementById("edit-sale-price").value;
-      const fechaIngreso = document.getElementById("edit-entry-date").value;
-
-      console.log('📋 Datos del formulario obtenidos:', {
-        nombre,
-        marca,
-        variante,
-        presentacionUnitaria,
-        empaqueMayor,
-        cantidadPorEmpaque,
-        cantidad,
-        precioCompra,
-        precioVenta,
-        fechaIngreso
-      });
-
-      // Validar campos requeridos
-      if (!nombre || !marca || !variante || !presentacionUnitaria || !empaqueMayor || 
-          cantidadPorEmpaque === '' || cantidad === '' || precioCompra === '' || 
-          precioVenta === '' || !fechaIngreso) {
-        Swal.fire({
-          title: 'Error',
-          text: 'Por favor, complete todos los campos',
-          icon: 'error',
-          confirmButtonText: 'Aceptar'
-        });
-        console.log('❌ Campos incompletos');
-        return;
-      }
-
-      const dataActualizada = {
-        nombre: nombre,
-        marca: marca,
-        variante: variante,
-        presentacion_unitaria: presentacionUnitaria,
-        empaque_mayor: empaqueMayor,
-        cantidad_por_empaque: parseInt(cantidadPorEmpaque),
-        cantidad: parseInt(cantidad),
-        precio_compra: parseFloat(precioCompra),
-        precio_venta: parseFloat(precioVenta),
-        fecha_ingreso: fechaIngreso
-      };
-
-      console.log('📝 Datos para actualizar:', dataActualizada);
-
-      try {
-        if (supabaseClient) {
-          console.log('🔄 Actualizando en Supabase...');
-          const { error } = await supabaseClient
-            .from('productos')
-            .update(dataActualizada)
-            .eq('id', productoEditando);
-
-          if (error) {
-            console.error('❌ Error de Supabase:', error);
-            throw error;
-          }
-          console.log('✅ Producto actualizado en Supabase exitosamente');
-        } else {
-          throw new Error('Sin conexión a base de datos');
-        }
-      } catch (error) {
-        console.warn('⚠️ Error al actualizar en Supabase:', error.message);
-        console.log('🔄 Actualizando localmente...');
-      }
-
-      // Actualizar localmente SIEMPRE (tanto si Supabase funciona como si no)
+      console.log('Actualizado en Supabase');
+      
+      // Actualizar localmente
       const index = todosLosProductos.findIndex(p => p.id === productoEditando);
       if (index !== -1) {
-        // Crear una copia del producto actual con los datos actualizados
-        todosLosProductos[index] = { 
-          ...todosLosProductos[index], 
-          ...dataActualizada 
-        };
-        console.log('✅ Producto actualizado localmente:', todosLosProductos[index]);
-      } else {
-        console.error('❌ No se encontró el producto en el array local');
-      }
-
-      Swal.fire({
-        title: 'Éxito',
-        text: 'Producto actualizado correctamente',
-        icon: 'success',
-        confirmButtonText: 'Aceptar'
-      });
-      
-      // Cerrar modal
-      const modalElement = document.getElementById("modalEditarProducto");
-      const modal = bootstrap.Modal.getInstance(modalElement);
-      if (modal) {
-        modal.hide();
+        todosLosProductos[index] = { ...todosLosProductos[index], ...dataActualizada };
+        mostrarProductos(todosLosProductos);
       }
       
-      // Actualizar vista con los datos actuales
-      mostrarProductos(todosLosProductos);
-      
-      // Limpiar la variable de producto editando
-      productoEditando = null;
-      
-      console.log('✅ Edición completada exitosamente');
+    } else {
+      // Solo actualizar localmente
+      const index = todosLosProductos.findIndex(p => p.id === productoEditando);
+      if (index !== -1) {
+        todosLosProductos[index] = { ...todosLosProductos[index], ...dataActualizada };
+        mostrarProductos(todosLosProductos);
+      }
     }
 
-    // ==================== CONFIRMAR ELIMINACIÓN ====================
-    function confirmarEliminacion(id) {
-      console.log('🗑️ Confirmando eliminación para producto ID:', id);
+    Swal.fire({
+      title: 'Éxito',
+      text: 'Producto actualizado correctamente',
+      icon: 'success'
+    });
+
+    // Cerrar modal
+    const modalElement = document.getElementById("modalEditarProducto");
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    if (modal) {
+      modal.hide();
+    }
+
+    productoEditando = null;
+    
+  } catch (error) {
+    console.error('Error al actualizar:', error);
+    Swal.fire({
+      title: 'Error',
+      text: 'No se pudo actualizar el producto: ' + error.message,
+      icon: 'error'
+    });
+  }
+}
+    // ==================== ELIMINAR PRODUCTO ====================
+    async function confirmarEliminacion(id) {
+      console.log('🗑️ Confirmando eliminación de producto ID:', id);
       
       const producto = todosLosProductos.find(p => p.id === id);
       if (!producto) {
-        console.error('❌ Producto no encontrado con ID:', id);
+        console.error('❌ Producto no encontrado');
         return;
       }
-
-      Swal.fire({
+      
+      const { value: confirmar } = await Swal.fire({
         title: '¿Estás seguro?',
-        text: `¿Deseas eliminar "${producto.nombre}"? Esta acción no se puede deshacer.`,
+        text: `Vas a eliminar "${producto.nombre} - ${producto.marca}". Esta acción no se puede deshacer.`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Sí, eliminarlo',
+        confirmButtonText: 'Sí, eliminar',
         cancelButtonText: 'Cancelar'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          eliminarProducto(id);
-        }
       });
+      
+      if (confirmar) {
+        console.log('✅ Confirmada eliminación de producto ID:', id);
+        eliminarProducto(id);
+      } else {
+        console.log('❌ Eliminación cancelada');
+      }
     }
 
-    // ==================== ELIMINAR PRODUCTO ====================
     async function eliminarProducto(id) {
       console.log('🗑️ Eliminando producto ID:', id);
       
       try {
         if (supabaseClient) {
+          // Eliminar de Supabase
           const { error } = await supabaseClient
             .from('productos')
             .delete()
             .eq('id', id);
-
+          
           if (error) throw error;
+          
           console.log('✅ Producto eliminado de Supabase');
+          Swal.fire({
+            icon: 'success',
+            title: '¡Eliminado!',
+            text: 'El producto ha sido eliminado correctamente',
+            timer: 2000,
+            showConfirmButton: false
+          });
         } else {
-          throw new Error('Sin conexión a base de datos');
+          // Eliminar de datos locales
+          todosLosProductos = todosLosProductos.filter(p => p.id !== id);
+          console.log('✅ Producto eliminado localmente');
+          Swal.fire({
+            icon: 'success',
+            title: '¡Eliminado!',
+            text: 'El producto ha sido eliminado correctamente (modo demo)',
+            timer: 2000,
+            showConfirmButton: false
+          });
         }
+        
+        // Recargar inventario
+        cargarInventario();
+        
       } catch (error) {
-        console.warn('⚠️ Error al eliminar de Supabase:', error.message);
-        console.log('🔄 Eliminando localmente...');
+        console.error('❌ Error al eliminar producto:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo eliminar el producto: ' + error.message
+        });
       }
+    }
 
-      // Eliminar localmente
-      const index = todosLosProductos.findIndex(p => p.id === id);
-      if (index !== -1) {
-        todosLosProductos.splice(index, 1);
+    // ==================== FILTRAR PRODUCTOS ====================
+    function filtrarProductos() {
+      const textoBusqueda = document.getElementById('buscadorInventario').value.toLowerCase();
+      
+      if (!textoBusqueda) {
         mostrarProductos(todosLosProductos);
-        console.log('✅ Producto eliminado localmente del array');
+        return;
       }
-
-      Swal.fire({
-        title: 'Eliminado',
-        text: 'El producto fue eliminado exitosamente',
-        icon: 'success',
-        confirmButtonText: 'Aceptar'
+      
+      const productosFiltrados = todosLosProductos.filter(producto => {
+        return (
+          (producto.nombre && producto.nombre.toLowerCase().includes(textoBusqueda)) ||
+          (producto.marca && producto.marca.toLowerCase().includes(textoBusqueda)) ||
+          (producto.variante && producto.variante.toLowerCase().includes(textoBusqueda)) ||
+          (producto.presentacion_unitaria && producto.presentacion_unitaria.toLowerCase().includes(textoBusqueda))
+        );
       });
       
-      console.log('✅ Eliminación completada');
-    }
-
-    // ==================== BÚSQUEDA ====================
-    function buscarProductos(searchValue) {
-      const productosFiltrados = todosLosProductos.filter(producto => {
-        const search = searchValue.toLowerCase();
-        return (producto.nombre && producto.nombre.toLowerCase().includes(search)) ||
-               (producto.marca && producto.marca.toLowerCase().includes(search)) ||
-               (producto.variante && producto.variante.toLowerCase().includes(search));
-      });
-
       mostrarProductos(productosFiltrados);
-
-      const tableContainer = document.getElementById('tableContainer');
-      const emptyMessage = document.getElementById('emptyMessage');
-
-      if (productosFiltrados.length === 0 && searchValue.trim() !== '') {
-        tableContainer.style.display = 'none';
-        emptyMessage.innerHTML = '<p>No se encontraron productos que coincidan con tu búsqueda.</p>';
-        emptyMessage.style.display = 'block';
-      } else if (productosFiltrados.length === 0) {
-        tableContainer.style.display = 'none';
-        emptyMessage.innerHTML = '<p>No se encontraron productos en el inventario.</p>';
-        emptyMessage.style.display = 'block';
-      } else {
-        tableContainer.style.display = 'block';
-        emptyMessage.style.display = 'none';
-      }
     }
 
-    // ==================== INICIALIZACIÓN AL CARGAR ====================
+    // ==================== INICIALIZACIÓN ====================
     document.addEventListener('DOMContentLoaded', async function() {
       console.log('🚀 Inicializando aplicación...');
       
       // Inicializar Supabase
-      const supabaseDisponible = inicializarSupabase();
+      const supabaseConectado = inicializarSupabase();
       
       // Cargar productos maestros
       await cargarProductosMaestros();
@@ -919,35 +1063,20 @@
       await cargarInventario();
       
       // Configurar buscador
-      const buscador = document.getElementById('buscadorInventario');
-      if (buscador) {
-        buscador.addEventListener('input', function() {
-          buscarProductos(this.value);
-        });
-        console.log('✅ Buscador configurado');
-      }
-
-      // Configurar botón de guardar en modal
-      const btnGuardar = document.getElementById("btnGuardarEdicion");
-      if (btnGuardar) {
-        btnGuardar.addEventListener("click", function(e) {
-          e.preventDefault();
-          console.log('🔄 Clic en guardar edición');
-          guardarEdicion();
-        });
-        console.log('✅ Botón guardar configurado');
-      }
-
-      // Configurar validaciones de precio en modal de edición
-      const editSalePrice = document.getElementById("edit-sale-price");
-      const editPurchasePrice = document.getElementById("edit-purchase-price");
+      document.getElementById('buscadorInventario').addEventListener('input', filtrarProductos);
       
-      if (editSalePrice && editPurchasePrice) {
-        editSalePrice.addEventListener("blur", validarPreciosEdicion);
-        editPurchasePrice.addEventListener("blur", validarPreciosEdicion);
-        console.log('✅ Validaciones de precio configuradas');
-      }
-
+      // Configurar botón de guardar edición
+      document.getElementById('btnGuardarEdicion').addEventListener('click', guardarEdicion);
+      
+      // Configurar eventos para actualizar precios en USD cuando cambia la tasa
+      document.getElementById('edit-tasa-cambio').addEventListener('input', actualizarPreciosUSD);
+      
+      // Configurar eventos para actualizar precios en USD cuando cambian los precios en BS
+      const priceInputs = document.querySelectorAll('#modalEditarProducto .price-input');
+      priceInputs.forEach(input => {
+        input.addEventListener('input', actualizarPreciosUSD);
+      });
+      
       console.log('✅ Aplicación inicializada correctamente');
     });
   </script>
