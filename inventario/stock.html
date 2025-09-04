@@ -132,6 +132,19 @@
       .table-inventario th {
         font-size: 0.95rem;
       }
+      
+      .summary-cards {
+        flex-direction: column;
+      }
+      
+      .summary-card {
+        min-width: 100%;
+      }
+      
+      /* Ocultar algunas columnas en móviles */
+      .hide-on-mobile {
+        display: none;
+      }
     }
 
     /* Estilos para las tarjetas de resumen */
@@ -250,6 +263,12 @@
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+    
+    .moneda-tag {
+      font-size: 0.8rem;
+      color: #aaa;
+      margin-left: 3px;
+    }
   </style>
 </head>
 <body>
@@ -280,20 +299,22 @@
             <i class="fas fa-money-bill-wave"></i>
           </div>
           <div class="summary-content">
-            <div class="summary-title">Capital Invertido</div>
-            <div class="summary-value" id="capitalInvertido">USD. 0.00</div>
+            <div class="summary-title">Capital Invertido (BS)</div>
+            <div class="summary-value" id="capitalInvertidoBs">0.00</div>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="summary-icon">
+            <i class="fas fa-dollar-sign"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-title">Capital Invertido (USD)</div>
+            <div class="summary-value" id="capitalInvertidoUsd">0.00</div>
           </div>
         </div>
 
-        <div class="summary-card">
-          <div class="summary-icon">
-            <i class="fas fa-chart-line"></i>
-          </div>
-          <div class="summary-content">
-            <div class="summary-title">Ganancia Potencial</div>
-            <div class="summary-value" id="gananciaInventario">USD. 0.00</div>
-          </div>
-        </div>
+        
 
         <div class="summary-card warning" id="cardBajoStock">
           <div class="summary-icon">
@@ -340,14 +361,16 @@
         <table class="table-inventario">
           <thead>
             <tr>
-              <th>Producto</th>
+              <th>Rubro</th>
               <th>Marca</th>
-              <th>Categoría</th>
-              <th>Stock</th>
-              <th>P. Compra</th>
-              <th>P. Venta</th>
-              <th>Ganancia</th>
-              <th>Capital Invertido</th>
+              <th>Variante</th>
+              <th>Presentación Comercial</th>
+              <th>Existencia Unidad</th>
+              <th>Unidades por Bulto</th>
+              <th>Existencia Bulto</th>
+              <th>Compra BS</th>
+              <th>Compra USD</th>
+              
             </tr>
           </thead>
           <tbody id="tablaInventario">
@@ -428,22 +451,45 @@
 
         // Variables para estadísticas
         let totalProductos = 0;
-        let capitalInvertido = 0;
+        let capitalInvertidoBs = 0;
+        let capitalInvertidoUsd = 0;
         let gananciaTotal = 0;
         let productosBajoStock = 0;
         let productosStockCero = 0;
 
-        // Calcular el inventario (entradas - salidas)
+        // Calcular el inventario (cantidad inicial - ventas)
         const inventario = productos.map(producto => {
           const stockVendido = stockVendidoPorProducto[producto.id] || 0;
-          const stockDisponible = producto.cantidad - stockVendido;
-          const valorCompra = stockDisponible * producto.precio_compra;
-          const valorVenta = stockDisponible * producto.precio_venta;
-          const ganancia = valorVenta - valorCompra;
+
+          // LÓGICA CORREGIDA para el trigger existente:
+          // Si el producto tiene cantidad 0 pero hay ventas, el stock inicial era igual a las ventas
+          // Si el producto tiene cantidad > 0, el stock inicial es cantidad + ventas
+          const stockInicial = producto.cantidad === 0 && stockVendido > 0 ? 
+                              stockVendido : 
+                              producto.cantidad + stockVendido;
+  
+          const stockDisponible = stockInicial - stockVendido;
+          
+
+        // Calcular bultos disponibles
+          const cantidadPorEmpaque = producto.cantidad_por_empaque || 1; // Si no tiene valor, usar 1
+          const bultosDisponibles = cantidadPorEmpaque > 0 ? 
+                                  (stockDisponible / cantidadPorEmpaque) : 
+                                  stockDisponible;
+                  
+          // Calcular valores en ambas monedas
+          const valorCompraBs = stockDisponible * (producto.precio_compra || 0);
+          const valorCompraUsd = stockDisponible * (producto.precio_compra_usd || 0);
+          const valorVenta = stockDisponible * (producto.precio_venta || 0);
+          const ganancia = valorVenta - valorCompraUsd; // Asumiendo que la ganancia se calcula en USD
           
           // Actualizar estadísticas
-          totalProductos += stockDisponible;
-          capitalInvertido += valorCompra;
+          if (stockDisponible > 0) {
+            totalProductos++;
+          }
+          
+          capitalInvertidoBs += valorCompraBs;
+          capitalInvertidoUsd += valorCompraUsd;
           gananciaTotal += ganancia;
 
           // Contar productos con stock bajo o cero
@@ -456,7 +502,9 @@
           return {
             ...producto,
             stock_disponible: stockDisponible,
-            valor_compra_total: valorCompra,
+            bultos_disponibles: bultosDisponibles,
+            valor_compra_bs: valorCompraBs,
+            valor_compra_usd: valorCompraUsd,
             valor_venta_total: valorVenta,
             ganancia_total: ganancia
           };
@@ -467,8 +515,8 @@
 
         // Actualizar tarjetas de resumen
         document.getElementById('totalProductos').textContent = totalProductos;
-        document.getElementById('capitalInvertido').textContent = `USD. ${capitalInvertido.toFixed(2)}`;
-        document.getElementById('gananciaInventario').textContent = `USD. ${gananciaTotal.toFixed(2)}`;
+        document.getElementById('capitalInvertidoBs').textContent = capitalInvertidoBs.toFixed(2);
+        document.getElementById('capitalInvertidoUsd').textContent = capitalInvertidoUsd.toFixed(2);
         document.getElementById('productosBajoStock').textContent = productosBajoStock;
         document.getElementById('productosStockCero').textContent = productosStockCero;
 
@@ -538,18 +586,20 @@
         }
         
         row.innerHTML = `
-          <td ${rowClass}>${item.nombre}</td>
-          <td ${rowClass}>${item.marca}</td>
-          <td ${rowClass}>${item.categoria}</td>
+          <td ${rowClass}>${item.nombre || 'N/A'}</td>
+          <td ${rowClass}>${item.marca || 'N/A'}</td>
+          <td ${rowClass}>${item.variante || 'N/A'}</td>
+          <td ${rowClass}>${item.presentacion_unitaria || 'N/A'}</td>
           <td ${rowClass}>
             ${item.stock_disponible}
             ${item.stock_disponible <= 0 ? '<span class="badge-alerta">AGOTADO</span>' : 
               item.stock_disponible < 10 ? '<span class="badge-alerta">BAJO</span>' : ''}
           </td>
-          <td ${rowClass}>USD. ${parseFloat(item.precio_compra).toFixed(2)}</td>
-          <td ${rowClass}>USD. ${parseFloat(item.precio_venta).toFixed(2)}</td>
-          <td ${rowClass}>USD. ${item.ganancia_total.toFixed(2)}</td>
-          <td ${rowClass}>USD. ${item.valor_compra_total.toFixed(2)}</td>
+          <td ${rowClass}>${item.cantidad_por_empaque || 'N/A'}</td>
+          <td ${rowClass}>${item.bultos_disponibles.toFixed(2)}</td>
+          <td ${rowClass}>${(item.precio_compra || 0).toFixed(2)}<span class="moneda-tag">BS</span></td>
+          <td ${rowClass}>${(item.precio_compra_usd || 0).toFixed(2)}<span class="moneda-tag">USD</span></td>
+          
         `;
         
         tabla.appendChild(row);
@@ -559,9 +609,9 @@
     // Función de búsqueda
     function buscarProductos(searchValue) {
       const productosFiltrados = inventarioCompleto.filter(item => {
-        const nombre = item.nombre.toLowerCase();
-        const marca = item.marca.toLowerCase();
-        const categoria = item.categoria.toLowerCase();
+        const nombre = (item.nombre || '').toLowerCase();
+        const marca = (item.marca || '').toLowerCase();
+        const categoria = (item.categoria || '').toLowerCase();
         const search = searchValue.toLowerCase();
         
         return nombre.includes(search) || 
