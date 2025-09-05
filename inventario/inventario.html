@@ -260,7 +260,7 @@
   <div class="container-mobile">
     <div class="row">
       <div class="col-12 text-center logo-container">
-        <img alt="Logo" src="logo.png" class="img-fluid" height="200px" width="200px">
+        <img alt="Logo" src="logo.png" class="img-fluid" height="150px" width="350px">
       </div>
     </div>
     
@@ -386,22 +386,22 @@
               <div class="col-md-6 mb-3">
                 <div class="price-card">
                   <div class="price-header">
-                    <span class="price-title">Precio de Compra (Bs)</span>
+                    <span class="price-title">Precio de Compra (USD)</span>
                   </div>
-                  <input type="number" step="0.01" class="form-control price-input" id="edit-purchase-price" placeholder="0.00" required data-usd-target="edit-purchase-price-usd">
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-purchase-price" placeholder="0.00" required data-bs-target="edit-purchase-price-bs">
                   <div class="usd-conversion">
-                    <small>USD: <span id="edit-purchase-price-usd">0.00</span></small>
+                    <small>Bs: <span id="edit-purchase-price-bs">0.00</span></small>
                   </div>
                 </div>
               </div>
               <div class="col-md-6 mb-3">
                 <div class="price-card">
                   <div class="price-header">
-                    <span class="price-title">Precio de venta 1 (Bs)</span>
+                    <span class="price-title">Precio de venta 1 (USD)</span>
                   </div>
-                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-1" placeholder="0.00" required data-usd-target="edit-sale-price-1-usd">
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-1" placeholder="0.00" required data-bs-target="edit-sale-price-1-bs">
                   <div class="usd-conversion">
-                    <small>USD: <span id="edit-sale-price-1-usd">0.00</span></small>
+                    <small>Bs: <span id="edit-sale-price-1-bs">0.00</span></small>
                   </div>
                 </div>
                 <div class="price-card">
@@ -497,16 +497,16 @@
           empaque_mayor: "Caja",
           cantidad_por_empaque: 50,
           cantidad: 25,
-          precio_compra: 0.50,
-          precio_venta_1: 1.00,
-          precio_venta_2: 1.20,
-          precio_venta_3: 1.40,
-          precio_venta_4: 1.60,
-          precio_compra_usd: 0.0036,
-          precio_venta_1_usd: 0.0071,
-          precio_venta_2_usd: 0.0086,
-          precio_venta_3_usd: 0.0100,
-          precio_venta_4_usd: 0.0114,
+          precio_compra: 70.00,
+          precio_venta_1: 140.00,
+          precio_venta_2: 168.00,
+          precio_venta_3: 196.00,
+          precio_venta_4: 224.00,
+          precio_compra_usd: 0.50,
+          precio_venta_1_usd: 1.00,
+          precio_venta_2_usd: 1.20,
+          precio_venta_3_usd: 1.40,
+          precio_venta_4_usd: 1.60,
           tasa_cambio: 140,
           fecha_ingreso: "2025-01-15"
         },
@@ -519,15 +519,15 @@
           empaque_mayor: "Paca",
           cantidad_por_empaque: 12,
           cantidad: 8,
-          precio_compra: 3.50,
-          precio_venta_1: 5.99,
-          precio_venta_2: 6.50,
-          precio_venta_3: 7.00,
+          precio_compra: 490.00,
+          precio_venta_1: 838.60,
+          precio_venta_2: 910.00,
+          precio_venta_3: 980.00,
           precio_venta_4: null,
-          precio_compra_usd: 0.025,
-          precio_venta_1_usd: 0.0428,
-          precio_venta_2_usd: 0.0464,
-          precio_venta_3_usd: 0.0500,
+          precio_compra_usd: 3.50,
+          precio_venta_1_usd: 5.99,
+          precio_venta_2_usd: 6.50,
+          precio_venta_3_usd: 7.00,
           precio_venta_4_usd: null,
           tasa_cambio: 140,
           fecha_ingreso: "2025-01-10"
@@ -705,23 +705,32 @@
       });
     }
 
-    // ==================== FUNCIÓN PARA ACTUALIZAR PRECIOS EN USD ====================
-    function actualizarPreciosUSD() {
-      // Obtener la tasa de cambio
+    // ==================== FUNCIÓN PARA ACTUALIZAR PRECIOS ====================
+    function actualizarPrecios() {
       const tasaCambio = parseFloat(document.getElementById('edit-tasa-cambio').value) || 1;
-      
-      // Obtener todos los inputs de precio
       const priceInputs = document.querySelectorAll('#modalEditarProducto .price-input');
       
-      // Calcular y actualizar cada precio en USD
       priceInputs.forEach(input => {
-        const bsValue = parseFloat(input.value) || 0;
-        const usdValue = bsValue / tasaCambio;
-        const usdTargetId = input.getAttribute('data-usd-target');
-        const usdElement = document.getElementById(usdTargetId);
+        const inputValue = parseFloat(input.value) || 0;
         
-        if (usdElement) {
-          usdElement.textContent = usdValue.toFixed(2);
+        // USD → BS (para precio compra y venta 1)
+        const bsTargetId = input.getAttribute('data-bs-target');
+        if (bsTargetId) {
+          const bsValue = inputValue * tasaCambio;
+          const bsElement = document.getElementById(bsTargetId);
+          if (bsElement) {
+            bsElement.textContent = bsValue.toFixed(2);
+          }
+        }
+        
+        // BS → USD (para ventas 2, 3, 4)
+        const usdTargetId = input.getAttribute('data-usd-target');
+        if (usdTargetId) {
+          const usdValue = inputValue / tasaCambio;
+          const usdElement = document.getElementById(usdTargetId);
+          if (usdElement) {
+            usdElement.textContent = usdValue.toFixed(2);
+          }
         }
       });
     }
@@ -769,17 +778,17 @@
         document.getElementById("edit-unit-count").value = producto.cantidad || 0;
         document.getElementById("edit-tasa-cambio").value = producto.tasa_cambio || 140;
         
-        // Precios
-        document.getElementById("edit-purchase-price").value = producto.precio_compra || 0;
-        document.getElementById("edit-sale-price-1").value = producto.precio_venta_1 || 0;
+        // Precios (cargar en USD para compra y venta 1)
+        document.getElementById("edit-purchase-price").value = producto.precio_compra_usd || 0;
+        document.getElementById("edit-sale-price-1").value = producto.precio_venta_1_usd || 0;
         document.getElementById("edit-sale-price-2").value = producto.precio_venta_2 || '';
         document.getElementById("edit-sale-price-3").value = producto.precio_venta_3 || '';
         document.getElementById("edit-sale-price-4").value = producto.precio_venta_4 || '';
         
         document.getElementById("edit-entry-date").value = producto.fecha_ingreso || new Date().toISOString().split('T')[0];
         
-        // Actualizar precios en USD
-        actualizarPreciosUSD();
+        // Actualizar precios
+        actualizarPrecios();
         
         console.log('✅ Datos cargados en el formulario');
       }, 200);
@@ -800,6 +809,7 @@
       const precioVenta3 = parseFloat(document.getElementById("edit-sale-price-3").value) || 0;
       const precioVenta4 = parseFloat(document.getElementById("edit-sale-price-4").value) || 0;
       
+      // Validar que precio de venta 1 sea mayor al de compra (ambos en USD)
       if (precioCompra && precioVenta1 && precioVenta1 <= precioCompra) {
         Swal.fire({
           icon: 'error',
@@ -810,148 +820,174 @@
         return false;
       }
       
-      // Validar que los precios opcionales sean mayores al de compra si están completados
-      const preciosVenta = [precioVenta2, precioVenta3, precioVenta4];
-      for (let i = 0; i < preciosVenta.length; i++) {
-        if (preciosVenta[i] > 0 && preciosVenta[i] <= precioCompra) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error en precios',
-            text: `El precio de venta ${i+2} debe ser mayor al de compra`
-          });
-          document.getElementById(`edit-sale-price-${i+2}`).value = "";
-          return false;
-        }
+      // Validar precios opcionales (convertir a USD para comparar)
+      const tasaCambio = parseFloat(document.getElementById('edit-tasa-cambio').value) || 1;
+      const purchasePriceUSD = precioCompra;
+      
+      if (precioVenta2 > 0 && (precioVenta2 / tasaCambio) <= purchasePriceUSD) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error en precios',
+          text: 'El precio de venta 2 debe ser mayor al de compra'
+        });
+        document.getElementById("edit-sale-price-2").value = "";
+        return false;
+      }
+      
+      if (precioVenta3 > 0 && (precioVenta3 / tasaCambio) <= purchasePriceUSD) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error en precios',
+          text: 'El precio de venta 3 debe ser mayor al de compra'
+        });
+        document.getElementById("edit-sale-price-3").value = "";
+        return false;
+      }
+      
+      if (precioVenta4 > 0 && (precioVenta4 / tasaCambio) <= purchasePriceUSD) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error en precios',
+          text: 'El precio de venta 4 debe ser mayor al de compra'
+        });
+        document.getElementById("edit-sale-price-4").value = "";
+        return false;
       }
       
       return true;
     }
 
-// ==================== GUARDAR EDICIÓN SIMPLE ====================
-async function guardarEdicion() {
-  console.log('Iniciando guardado para producto ID:', productoEditando);
+    // ==================== GUARDAR EDICIÓN ====================
+    async function guardarEdicion() {
+      console.log('Iniciando guardado para producto ID:', productoEditando);
 
-  if (!productoEditando) {
-    Swal.fire({
-      title: 'Error',
-      text: 'No hay producto seleccionado para editar',
-      icon: 'error'
-    });
-    return;
-  }
-
-  // Validar precios
-  if (!validarPreciosEdicion()) {
-    return;
-  }
-
-  // Obtener datos del formulario
-  const nombre = $('.js-edit-product-search').val();
-  const marca = document.getElementById("edit-brand").value.trim();
-  const variante = document.getElementById("edit-variant").value.trim();
-  const presentacionUnitaria = document.getElementById("edit-unit-presentation").value.trim();
-  const empaqueMayor = document.getElementById("edit-packaging").value;
-  const cantidadPorEmpaque = parseInt(document.getElementById("edit-package-quantity").value);
-  const cantidad = parseInt(document.getElementById("edit-unit-count").value);
-  const tasaCambio = parseFloat(document.getElementById("edit-tasa-cambio").value);
-  const precioCompra = parseFloat(document.getElementById("edit-purchase-price").value);
-  const precioVenta1 = parseFloat(document.getElementById("edit-sale-price-1").value);
-  const precioVenta2 = document.getElementById("edit-sale-price-2").value ? parseFloat(document.getElementById("edit-sale-price-2").value) : null;
-  const precioVenta3 = document.getElementById("edit-sale-price-3").value ? parseFloat(document.getElementById("edit-sale-price-3").value) : null;
-  const precioVenta4 = document.getElementById("edit-sale-price-4").value ? parseFloat(document.getElementById("edit-sale-price-4").value) : null;
-  const fechaIngreso = document.getElementById("edit-entry-date").value;
-
-  // Validar campos requeridos
-  if (!nombre || !marca || !variante || !presentacionUnitaria || !empaqueMayor || 
-      isNaN(cantidadPorEmpaque) || isNaN(cantidad) || isNaN(tasaCambio) || 
-      isNaN(precioCompra) || isNaN(precioVenta1) || !fechaIngreso) {
-    Swal.fire({
-      title: 'Error',
-      text: 'Complete todos los campos requeridos',
-      icon: 'error'
-    });
-    return;
-  }
-
-  // Preparar datos para actualizar
-  const dataActualizada = {
-    nombre: nombre,
-    marca: marca,
-    variante: variante,
-    presentacion_unitaria: presentacionUnitaria,
-    empaque_mayor: empaqueMayor,
-    cantidad_por_empaque: cantidadPorEmpaque,
-    cantidad: cantidad,
-    tasa_cambio: tasaCambio,
-    precio_compra: precioCompra,
-    precio_venta_1: precioVenta1,
-    precio_venta_2: precioVenta2,
-    precio_venta_3: precioVenta3,
-    precio_venta_4: precioVenta4,
-    precio_compra_usd: precioCompra / tasaCambio,
-    precio_venta_1_usd: precioVenta1 / tasaCambio,
-    precio_venta_2_usd: precioVenta2 ? precioVenta2 / tasaCambio : null,
-    precio_venta_3_usd: precioVenta3 ? precioVenta3 / tasaCambio : null,
-    precio_venta_4_usd: precioVenta4 ? precioVenta4 / tasaCambio : null,
-    fecha_ingreso: fechaIngreso
-  };
-
-  console.log('Datos a actualizar:', dataActualizada);
-
-  try {
-    if (supabaseClient) {
-      // Actualizar en Supabase - SIN .single()
-      const { data, error } = await supabaseClient
-        .from('productos')
-        .update(dataActualizada)
-        .eq('id', productoEditando);
-
-      if (error) {
-        throw error;
+      if (!productoEditando) {
+        Swal.fire({
+          title: 'Error',
+          text: 'No hay producto seleccionado para editar',
+          icon: 'error'
+        });
+        return;
       }
 
-      console.log('Actualizado en Supabase');
-      
-      // Actualizar localmente
-      const index = todosLosProductos.findIndex(p => p.id === productoEditando);
-      if (index !== -1) {
-        todosLosProductos[index] = { ...todosLosProductos[index], ...dataActualizada };
-        mostrarProductos(todosLosProductos);
+      // Validar precios
+      if (!validarPreciosEdicion()) {
+        return;
       }
+
+      // Obtener datos del formulario
+      const nombre = $('.js-edit-product-search').val();
+      const marca = document.getElementById("edit-brand").value.trim();
+      const variante = document.getElementById("edit-variant").value.trim();
+      const presentacionUnitaria = document.getElementById("edit-unit-presentation").value.trim();
+      const empaqueMayor = document.getElementById("edit-packaging").value;
+      const cantidadPorEmpaque = parseInt(document.getElementById("edit-package-quantity").value);
+      const cantidad = parseInt(document.getElementById("edit-unit-count").value);
+      const tasaCambio = parseFloat(document.getElementById("edit-tasa-cambio").value);
       
-    } else {
-      // Solo actualizar localmente
-      const index = todosLosProductos.findIndex(p => p.id === productoEditando);
-      if (index !== -1) {
-        todosLosProductos[index] = { ...todosLosProductos[index], ...dataActualizada };
-        mostrarProductos(todosLosProductos);
+      // Precios (compra y venta 1 en USD, otros en Bs)
+      const precioCompraUSD = parseFloat(document.getElementById("edit-purchase-price").value);
+      const precioVenta1USD = parseFloat(document.getElementById("edit-sale-price-1").value);
+      const precioVenta2 = document.getElementById("edit-sale-price-2").value ? parseFloat(document.getElementById("edit-sale-price-2").value) : null;
+      const precioVenta3 = document.getElementById("edit-sale-price-3").value ? parseFloat(document.getElementById("edit-sale-price-3").value) : null;
+      const precioVenta4 = document.getElementById("edit-sale-price-4").value ? parseFloat(document.getElementById("edit-sale-price-4").value) : null;
+      
+      const fechaIngreso = document.getElementById("edit-entry-date").value;
+
+      // Validar campos requeridos
+      if (!nombre || !marca || !variante || !presentacionUnitaria || !empaqueMayor || 
+          isNaN(cantidadPorEmpaque) || isNaN(cantidad) || isNaN(tasaCambio) || 
+          isNaN(precioCompraUSD) || isNaN(precioVenta1USD) || !fechaIngreso) {
+        Swal.fire({
+          title: 'Error',
+          text: 'Complete todos los campos requeridos',
+          icon: 'error'
+        });
+        return;
+      }
+
+      // Preparar datos para actualizar (convertir USD a Bs para compra y venta 1)
+      const dataActualizada = {
+        nombre: nombre,
+        marca: marca,
+        variante: variante,
+        presentacion_unitaria: presentacionUnitaria,
+        empaque_mayor: empaqueMayor,
+        cantidad_por_empaque: cantidadPorEmpaque,
+        cantidad: cantidad,
+        tasa_cambio: tasaCambio,
+        // Precios en Bs (convertidos desde USD)
+        precio_compra: precioCompraUSD * tasaCambio,
+        precio_venta_1: precioVenta1USD * tasaCambio,
+        precio_venta_2: precioVenta2,
+        precio_venta_3: precioVenta3,
+        precio_venta_4: precioVenta4,
+        // Precios en USD (originales para compra y venta 1)
+        precio_compra_usd: precioCompraUSD,
+        precio_venta_1_usd: precioVenta1USD,
+        precio_venta_2_usd: precioVenta2 ? precioVenta2 / tasaCambio : null,
+        precio_venta_3_usd: precioVenta3 ? precioVenta3 / tasaCambio : null,
+        precio_venta_4_usd: precioVenta4 ? precioVenta4 / tasaCambio : null,
+        fecha_ingreso: fechaIngreso
+      };
+
+      console.log('Datos a actualizar:', dataActualizada);
+
+      try {
+        if (supabaseClient) {
+          // Actualizar en Supabase - SIN .single()
+          const { data, error } = await supabaseClient
+            .from('productos')
+            .update(dataActualizada)
+            .eq('id', productoEditando);
+
+          if (error) {
+            throw error;
+          }
+
+          console.log('Actualizado en Supabase');
+          
+          // Actualizar localmente
+          const index = todosLosProductos.findIndex(p => p.id === productoEditando);
+          if (index !== -1) {
+            todosLosProductos[index] = { ...todosLosProductos[index], ...dataActualizada };
+            mostrarProductos(todosLosProductos);
+          }
+          
+        } else {
+          // Solo actualizar localmente
+          const index = todosLosProductos.findIndex(p => p.id === productoEditando);
+          if (index !== -1) {
+            todosLosProductos[index] = { ...todosLosProductos[index], ...dataActualizada };
+            mostrarProductos(todosLosProductos);
+          }
+        }
+
+        Swal.fire({
+          title: 'Éxito',
+          text: 'Producto actualizado correctamente',
+          icon: 'success'
+        });
+
+        // Cerrar modal
+        const modalElement = document.getElementById("modalEditarProducto");
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+          modal.hide();
+        }
+
+        productoEditando = null;
+        
+      } catch (error) {
+        console.error('Error al actualizar:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudo actualizar el producto: ' + error.message,
+          icon: 'error'
+        });
       }
     }
 
-    Swal.fire({
-      title: 'Éxito',
-      text: 'Producto actualizado correctamente',
-      icon: 'success'
-    });
-
-    // Cerrar modal
-    const modalElement = document.getElementById("modalEditarProducto");
-    const modal = bootstrap.Modal.getInstance(modalElement);
-    if (modal) {
-      modal.hide();
-    }
-
-    productoEditando = null;
-    
-  } catch (error) {
-    console.error('Error al actualizar:', error);
-    Swal.fire({
-      title: 'Error',
-      text: 'No se pudo actualizar el producto: ' + error.message,
-      icon: 'error'
-    });
-  }
-}
     // ==================== ELIMINAR PRODUCTO ====================
     async function confirmarEliminacion(id) {
       console.log('🗑️ Confirmando eliminación de producto ID:', id);
@@ -1068,13 +1104,13 @@ async function guardarEdicion() {
       // Configurar botón de guardar edición
       document.getElementById('btnGuardarEdicion').addEventListener('click', guardarEdicion);
       
-      // Configurar eventos para actualizar precios en USD cuando cambia la tasa
-      document.getElementById('edit-tasa-cambio').addEventListener('input', actualizarPreciosUSD);
+      // Configurar eventos para actualizar precios cuando cambia la tasa
+      document.getElementById('edit-tasa-cambio').addEventListener('input', actualizarPrecios);
       
-      // Configurar eventos para actualizar precios en USD cuando cambian los precios en BS
+      // Configurar eventos para actualizar precios cuando cambian los inputs
       const priceInputs = document.querySelectorAll('#modalEditarProducto .price-input');
       priceInputs.forEach(input => {
-        input.addEventListener('input', actualizarPreciosUSD);
+        input.addEventListener('input', actualizarPrecios);
       });
       
       console.log('✅ Aplicación inicializada correctamente');
