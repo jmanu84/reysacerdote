@@ -815,23 +815,23 @@
         // Actualizar tarjetas de resumen
         document.getElementById('totalVentas').textContent = totalVentas;
         document.getElementById('montoTotal').innerHTML = `
-          <div class="moneda-bs">Bs. ${montoTotalBs.toFixed(2)}</div>
+          
           <div class="moneda-usd">USD. ${montoTotalUsd.toFixed(2)}</div>
         `;
         document.getElementById('ventasPunto').innerHTML = `
-          <div class="moneda-bs">Bs. ${ventasPuntoBs.toFixed(2)}</div>
+          
           <div class="moneda-usd">USD. ${ventasPuntoUsd.toFixed(2)}</div>
         `;
         document.getElementById('ventasEfectivo').innerHTML = `
-          <div class="moneda-bs">Bs. ${ventasEfectivoBs.toFixed(2)}</div>
+          
           <div class="moneda-usd">USD. ${ventasEfectivoUsd.toFixed(2)}</div>
         `;
         document.getElementById('ventasMovil').innerHTML = `
-          <div class="moneda-bs">Bs. ${ventasMovilBs.toFixed(2)}</div>
+          
           <div class="moneda-usd">USD. ${ventasMovilUsd.toFixed(2)}</div>
         `;
         document.getElementById('ventasDolares').innerHTML = `
-          <div class="moneda-bs">Bs. ${ventasDolaresBs.toFixed(2)}</div>
+          
           <div class="moneda-usd">USD. ${ventasDolaresUsd.toFixed(2)}</div>
         `;
 
@@ -891,7 +891,6 @@
             marca: productosMap[item.producto_id]?.marca || 'Sin marca',
             id: item.producto_id,
             cantidad: 0,
-            subtotal_bs: 0,
             subtotal_usd: 0
           };
         }
@@ -907,7 +906,7 @@
         const proporcion = item.subtotal / totalVentaBs;
         
         // Asignar el subtotal en bolívares y dólares según la proporción
-        productosAgrupados[item.producto_id].subtotal_bs += item.subtotal;
+        
         productosAgrupados[item.producto_id].subtotal_usd += totalVentaUsd * proporcion;
       });
       
@@ -946,7 +945,7 @@
           </div>
           <div class="producto-total">
             <div class="total-label">Total Ventas</div>
-            <div class="total-value moneda-bs">Bs. ${producto.subtotal_bs.toFixed(2)}</div>
+            
             <div class="total-value moneda-usd">USD. ${producto.subtotal_usd.toFixed(2)}</div>
           </div>
         `;
@@ -997,11 +996,11 @@
           <td>${item.venta.tipo_pago}</td>
           <td>${item.cantidad}</td>
           <td>
-            <div class="moneda-bs">Bs. ${item.precio_unitario.toFixed(2)}</div>
+            
             <div class="moneda-usd">USD. ${precioUnitarioUsd.toFixed(2)}</div>
           </td>
           <td>
-            <div class="moneda-bs">Bs. ${item.subtotal.toFixed(2)}</div>
+            
             <div class="moneda-usd">USD. ${subtotalUsd.toFixed(2)}</div>
           </td>
           <td>
