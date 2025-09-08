@@ -7,6 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
+    
     :root {
       --verde-farmacia: #05642d;
       --fondo-oscuro: #1a1a1a;
@@ -370,10 +371,6 @@
       font-weight: bold;
     }
     
-    .moneda-bs {
-      color: #28a745; /* Verde para bolívares */
-    }
-    
     .moneda-usd {
       color: #17a2b8; /* Azul claro para dólares */
     }
@@ -479,7 +476,7 @@
               </div>
               <div class="summary-content">
                 <div class="summary-title">Monto Total</div>
-                <div class="summary-value" id="montoTotal">Bs. 0.00</div>
+                <div class="summary-value" id="montoTotal">$ 0.00</div>
               </div>
             </div>
 
@@ -489,7 +486,7 @@
               </div>
               <div class="summary-content">
                 <div class="summary-title">Punto de Venta</div>
-                <div class="summary-value" id="ventasPunto">Bs. 0.00</div>
+                <div class="summary-value" id="ventasPunto">$ 0.00</div>
               </div>
             </div>
 
@@ -499,7 +496,7 @@
               </div>
               <div class="summary-content">
                 <div class="summary-title">Efectivo</div>
-                <div class="summary-value" id="ventasEfectivo">Bs. 0.00</div>
+                <div class="summary-value" id="ventasEfectivo">$ 0.00</div>
               </div>
             </div>
 
@@ -509,7 +506,7 @@
               </div>
               <div class="summary-content">
                 <div class="summary-title">Pago Móvil</div>
-                <div class="summary-value" id="ventasMovil">Bs. 0.00</div>
+                <div class="summary-value" id="ventasMovil">$ 0.00</div>
               </div>
             </div>
 
@@ -519,7 +516,7 @@
               </div>
               <div class="summary-content">
                 <div class="summary-title">Dólares</div>
-                <div class="summary-value" id="ventasDolares">Bs. 0.00</div>
+                <div class="summary-value" id="ventasDolares">$ 0.00</div>
               </div>
             </div>
           </div>
@@ -528,7 +525,6 @@
           <div class="filtros-fechas" id="filtrosFechas" style="display: none;">
             <div class="filtros-rapidos-fechas">
               <button class="btn-filtro active" data-fecha-filtro="all">Todas las fechas</button>
-              <button class="btn-filtro" data-fecha-filtro="semana">Esta semana</button>
               <button class="btn-filtro" data-fecha-filtro="mes">Este mes</button>
             </div>
             
@@ -666,9 +662,12 @@
     let fechaFinRango = null;
     let ventaAEliminar = null;
 
-    // Función para formatear fecha (solo fecha, sin hora)
+    // Función para formatear fecha (solo fecha, sin hora) - CORREGIDA
     function formatearFecha(fechaStr) {
+      // Ajustar por zona horaria: añadir el offset para evitar el problema de un día menos
       const fecha = new Date(fechaStr);
+      fecha.setMinutes(fecha.getMinutes() + fecha.getTimezoneOffset());
+      
       const dia = fecha.getDate().toString().padStart(2, '0');
       const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
       const año = fecha.getFullYear();
@@ -689,15 +688,15 @@
       return fin;
     }
 
-    // Función para obtener el inicio de la semana
+    // Función para obtener el inicio de la semana (lunes)
     function inicioDeSemana() {
       const hoy = new Date();
       const dia = hoy.getDay();
-      const diff = hoy.getDate() - dia + (dia === 0 ? -6 : 1);
+      const diff = hoy.getDate() - dia + (dia === 0 ? -6 : 1); // Ajuste para que la semana empiece en lunes
       return inicioDelDia(new Date(hoy.setDate(diff)));
     }
 
-    // Función para obtener el fin de la semana
+    // Función para obtener el fin de la semana (domingo)
     function finDeSemana() {
       const inicio = inicioDeSemana();
       const fin = new Date(inicio);
@@ -739,9 +738,9 @@
         filtrosRapidos.style.display = 'none';
         filtrosFechas.style.display = 'none';
 
-        // Obtener datos en paralelo
+        // Obtener datos en paralelo - AÑADIR CANTIDAD_POR_EMPAQUE Y PRECIO_VENTA_1_USD
         const [productosResponse, ventasResponse, detallesResponse, pagosResponse] = await Promise.all([
-          supabaseClient.from('productos').select('id, nombre, marca'),
+          supabaseClient.from('productos').select('id, nombre, marca, cantidad_por_empaque, precio_venta_1_usd'),
           supabaseClient.from('ventas').select('*').order('fecha', { ascending: false }),
           supabaseClient.from('detalles_venta').select('*'),
           supabaseClient.from('pagos_venta').select('*')
@@ -752,12 +751,14 @@
         if (detallesResponse.error) throw detallesResponse.error;
         if (pagosResponse.error) throw pagosResponse.error;
 
-        // Crear mapa de productos para búsqueda rápida
+        // Crear mapa de productos para búsqueda rápida - AÑADIR CANTIDAD_POR_EMPAQUE Y PRECIO_USD
         productosMap = {};
         productosResponse.data.forEach(producto => {
           productosMap[producto.id] = {
             nombre: producto.nombre,
-            marca: producto.marca || 'Sin marca'
+            marca: producto.marca || 'Sin marca',
+            cantidad_por_empaque: producto.cantidad_por_empaque || 1,
+            precio_usd: producto.precio_venta_1_usd || 0
           };
         });
 
@@ -771,15 +772,10 @@
 
         // Calcular estadísticas
         let totalVentas = 0;
-        let montoTotalBs = 0;
         let montoTotalUsd = 0;
-        let ventasPuntoBs = 0;
         let ventasPuntoUsd = 0;
-        let ventasEfectivoBs = 0;
         let ventasEfectivoUsd = 0;
-        let ventasMovilBs = 0;
         let ventasMovilUsd = 0;
-        let ventasDolaresBs = 0;
         let ventasDolaresUsd = 0;
 
         // Contar ventas únicas (una venta puede tener múltiples productos)
@@ -790,50 +786,30 @@
         pagosVentas.forEach(pago => {
           switch(pago.metodo) {
             case 'Punto de venta':
-              ventasPuntoBs += pago.monto_bs;
               ventasPuntoUsd += pago.monto_usd;
               break;
             case 'Efectivo':
-              ventasEfectivoBs += pago.monto_bs;
               ventasEfectivoUsd += pago.monto_usd;
               break;
             case 'Pago móvil':
-              ventasMovilBs += pago.monto_bs;
               ventasMovilUsd += pago.monto_usd;
               break;
             case 'Dólares':
-              ventasDolaresBs += pago.monto_bs;
               ventasDolaresUsd += pago.monto_usd;
               break;
           }
         });
 
         // Calcular monto total sumando todos los pagos
-        montoTotalBs = ventasPuntoBs + ventasEfectivoBs + ventasMovilBs + ventasDolaresBs;
         montoTotalUsd = ventasPuntoUsd + ventasEfectivoUsd + ventasMovilUsd + ventasDolaresUsd;
 
         // Actualizar tarjetas de resumen
         document.getElementById('totalVentas').textContent = totalVentas;
-        document.getElementById('montoTotal').innerHTML = `
-          
-          <div class="moneda-usd">USD. ${montoTotalUsd.toFixed(2)}</div>
-        `;
-        document.getElementById('ventasPunto').innerHTML = `
-          
-          <div class="moneda-usd">USD. ${ventasPuntoUsd.toFixed(2)}</div>
-        `;
-        document.getElementById('ventasEfectivo').innerHTML = `
-          
-          <div class="moneda-usd">USD. ${ventasEfectivoUsd.toFixed(2)}</div>
-        `;
-        document.getElementById('ventasMovil').innerHTML = `
-          
-          <div class="moneda-usd">USD. ${ventasMovilUsd.toFixed(2)}</div>
-        `;
-        document.getElementById('ventasDolares').innerHTML = `
-          
-          <div class="moneda-usd">USD. ${ventasDolaresUsd.toFixed(2)}</div>
-        `;
+        document.getElementById('montoTotal').textContent = `$ ${montoTotalUsd.toFixed(2)}`;
+        document.getElementById('ventasPunto').textContent = `$ ${ventasPuntoUsd.toFixed(2)}`;
+        document.getElementById('ventasEfectivo').textContent = `$ ${ventasEfectivoUsd.toFixed(2)}`;
+        document.getElementById('ventasMovil').textContent = `$ ${ventasMovilUsd.toFixed(2)}`;
+        document.getElementById('ventasDolares').textContent = `$ ${ventasDolaresUsd.toFixed(2)}`;
 
         summaryCards.style.display = 'flex';
         filtrosRapidos.style.display = 'flex';
@@ -887,7 +863,7 @@
       detallesFiltrados.forEach(item => {
         if (!productosAgrupados[item.producto_id]) {
           productosAgrupados[item.producto_id] = {
-            nombre: productosMap[item.producto_id]?.nombre ,
+            nombre: productosMap[item.producto_id]?.nombre,
             marca: productosMap[item.producto_id]?.marca || 'Sin marca',
             id: item.producto_id,
             cantidad: 0,
@@ -897,41 +873,29 @@
         
         productosAgrupados[item.producto_id].cantidad += item.cantidad;
         
-        // Obtener los pagos asociados a esta venta
-        const pagosDeVenta = pagosVentas.filter(pago => pago.venta_id === item.venta_id);
+        // Obtener información del producto
+        const productoInfo = productosMap[item.producto_id];
+        const cantidadPorEmpaque = productoInfo?.cantidad_por_empaque || 1;
+        const precioUsd = productoInfo?.precio_usd || 0;
         
-        // Calcular la proporción de este producto en la venta
-        const totalVentaBs = item.venta.total;
-        const totalVentaUsd = item.venta.total_usd;
-        const proporcion = item.subtotal / totalVentaBs;
+        // Calcular precio unitario CORREGIDO: dividir precio_usd por cantidad_por_empaque
+        const precioUnitarioUsd = precioUsd / cantidadPorEmpaque;
         
-        // Asignar el subtotal en bolívares y dólares según la proporción
+        // Calcular subtotal CORREGIDO: precio unitario * cantidad
+        const subtotalUsd = precioUnitarioUsd * item.cantidad;
         
-        productosAgrupados[item.producto_id].subtotal_usd += totalVentaUsd * proporcion;
+        productosAgrupados[item.producto_id].subtotal_usd += subtotalUsd;
       });
       
-      // Convertir a array y ordenar por subtotal (mayor a menor)
-      const productosArray = Object.values(productosAgrupados);
-      productosArray.sort((a, b) => b.subtotal_bs - a.subtotal_bs);
-      
-      if (productosArray.length === 0) {
-        document.getElementById('emptyMessage').style.display = 'block';
-        document.getElementById('emptyMessage').innerHTML = 
-          '<p>No hay ventas que coincidan con los filtros seleccionados.</p>';
-        return;
-      }
-      
-      document.getElementById('emptyMessage').style.display = 'none';
-
       // Crear tarjetas para cada producto
-      productosArray.forEach(producto => {
+      Object.values(productosAgrupados).forEach(producto => {
         const card = document.createElement('div');
         card.className = 'producto-card';
         
         card.innerHTML = `
           <div class="producto-header">
             <h3 class="producto-nombre">${producto.nombre}</h3>
-            
+            <span class="producto-id">ID: ${producto.id.substring(0, 8)}</span>
           </div>
           <div class="producto-details">
             <div class="producto-detail">
@@ -944,9 +908,8 @@
             </div>
           </div>
           <div class="producto-total">
-            <div class="total-label">Total Ventas</div>
-            
-            <div class="total-value moneda-usd">USD. ${producto.subtotal_usd.toFixed(2)}</div>
+            <div class="total-label">Total de Venta</div>
+            <div class="total-value moneda-usd">$ ${producto.subtotal_usd.toFixed(2)}</div>
           </div>
         `;
         
@@ -954,7 +917,7 @@
       });
     }
 
-    // Función para mostrar detalles de ventas en la tabla
+    // Función para mostrar detalles de ventas en tabla
     function mostrarDetallesVentas() {
       const tablaVentas = document.getElementById('tablaVentas');
       tablaVentas.innerHTML = '';
@@ -971,38 +934,39 @@
       // Filtrar según los filtros seleccionados
       let detallesFiltrados = aplicarFiltros(detallesConVenta);
       
-      if (detallesFiltrados.length === 0) {
-        document.getElementById('emptyMessage').style.display = 'block';
-        document.getElementById('emptyMessage').innerHTML = 
-          '<p>No hay ventas que coincidan con los filtros seleccionados.</p>';
-        return;
-      }
+      // Ordenar por fecha (más reciente primero)
+      detallesFiltrados.sort((a, b) => new Date(b.venta.fecha) - new Date(a.venta.fecha));
       
-      document.getElementById('emptyMessage').style.display = 'none';
-
-      // Llenar la tabla
+      // Crear filas para cada detalle
       detallesFiltrados.forEach(item => {
         const fila = document.createElement('tr');
         
-        // Calcular la proporción de este producto en la venta
-        const proporcion = item.subtotal / item.venta.total;
-        const precioUnitarioUsd = (item.venta.total_usd * proporcion) / item.cantidad;
-        const subtotalUsd = item.venta.total_usd * proporcion;
+        // Obtener información del producto
+        const productoInfo = productosMap[item.producto_id];
+        const cantidadPorEmpaque = productoInfo?.cantidad_por_empaque || 1;
+        const precioUsd = productoInfo?.precio_usd || 0;
+        
+        // Calcular precio unitario CORREGIDO: dividir precio_usd por cantidad_por_empaque
+        const precioUnitarioUsd = precioUsd / cantidadPorEmpaque;
+        
+        // Calcular subtotal CORREGIDO: precio unitario * cantidad
+        const subtotalUsd = precioUnitarioUsd * item.cantidad;
+        
+        // Obtener tipo de pago (usamos el primer pago de la venta)
+        const pagosDeVenta = pagosVentas.filter(p => p.venta_id === item.venta_id);
+        const tipoPago = pagosDeVenta.length > 0 ? pagosDeVenta[0].metodo : 'No especificado';
+        
+        // Fecha CORREGIDA: usar formatearFecha que ajusta por zona horaria
+        const fechaVenta = formatearFecha(item.venta.fecha);
         
         fila.innerHTML = `
-          <td>${formatearFecha(item.venta.fecha)}</td>
-          <td>${productosMap[item.producto_id]?.nombre || `Producto ID: ${item.producto_id.substring(0, 8)}...`}</td>
-          <td>${productosMap[item.producto_id]?.marca || 'Sin marca'}</td>
-          <td>${item.venta.tipo_pago}</td>
+          <td>${fechaVenta}</td>
+          <td>${productoInfo?.nombre || 'Producto no encontrado'}</td>
+          <td>${productoInfo?.marca || 'Sin marca'}</td>
+          <td>${tipoPago}</td>
           <td>${item.cantidad}</td>
-          <td>
-            
-            <div class="moneda-usd">USD. ${precioUnitarioUsd.toFixed(2)}</div>
-          </td>
-          <td>
-            
-            <div class="moneda-usd">USD. ${subtotalUsd.toFixed(2)}</div>
-          </td>
+          <td class="moneda-usd">$ ${precioUnitarioUsd.toFixed(2)}</td>
+          <td class="moneda-usd">$ ${subtotalUsd.toFixed(2)}</td>
           <td>
             <button class="btn-eliminar" data-venta-id="${item.venta_id}">
               <i class="fas fa-trash-alt"></i>
@@ -1025,45 +989,60 @@
     // Función para aplicar filtros
     function aplicarFiltros(detalles) {
       // Primero aplicar filtro de fecha
-      let filtradosPorFecha = detalles;
+      let detallesFiltrados = filtrarPorFecha(detalles);
       
-      if (filtroFechaTipo !== 'all') {
-        filtradosPorFecha = detalles.filter(item => {
-          const fechaVenta = new Date(item.venta.fecha);
-          
-          switch(filtroFechaTipo) {
-            case 'hoy':
-              return fechaVenta >= inicioDelDia() && fechaVenta <= finDelDia();
-            case 'semana':
-              return fechaVenta >= inicioDeSemana() && fechaVenta <= finDeSemana();
-            case 'mes':
-              return fechaVenta >= inicioDeMes() && fechaVenta <= finDeMes();
-            case 'rango':
-              if (fechaInicioRango && fechaFinRango) {
-                const inicio = inicioDelDia(new Date(fechaInicioRango));
-                const fin = finDelDia(new Date(fechaFinRango));
-                return fechaVenta >= inicio && fechaVenta <= fin;
-              }
-              return true;
-            default:
-              return true;
-          }
+      // Luego aplicar filtro de tipo de pago
+      if (filtroActual !== 'all') {
+        detallesFiltrados = detallesFiltrados.filter(item => {
+          const pagosDeVenta = pagosVentas.filter(p => p.venta_id === item.venta_id);
+          return pagosDeVenta.some(pago => pago.metodo === filtroActual);
         });
       }
       
-      // Luego aplicar filtro de tipo de pago
-      if (filtroActual === 'all') {
-        return filtradosPorFecha;
+      return detallesFiltrados;
+    }
+
+    // Función para filtrar por fecha
+    function filtrarPorFecha(detalles) {
+      switch(filtroFechaTipo) {
+        case 'hoy':
+          const hoyInicio = inicioDelDia();
+          const hoyFin = finDelDia();
+          return detalles.filter(item => {
+            const fechaVenta = new Date(item.venta.fecha);
+            return fechaVenta >= hoyInicio && fechaVenta <= hoyFin;
+          });
+          
+        case 'semana':
+          const semanaInicio = inicioDeSemana();
+          const semanaFin = finDeSemana();
+          return detalles.filter(item => {
+            const fechaVenta = new Date(item.venta.fecha);
+            return fechaVenta >= semanaInicio && fechaVenta <= semanaFin;
+          });
+          
+        case 'mes':
+          const mesInicio = inicioDeMes();
+          const mesFin = finDeMes();
+          return detalles.filter(item => {
+            const fechaVenta = new Date(item.venta.fecha);
+            return fechaVenta >= mesInicio && fechaVenta <= mesFin;
+          });
+          
+        case 'rango':
+          if (fechaInicioRango && fechaFinRango) {
+            const inicio = inicioDelDia(new Date(fechaInicioRango));
+            const fin = finDelDia(new Date(fechaFinRango));
+            return detalles.filter(item => {
+              const fechaVenta = new Date(item.venta.fecha);
+              return fechaVenta >= inicio && fechaVenta <= fin;
+            });
+          }
+          return detalles;
+          
+        default: // 'all'
+          return detalles;
       }
-      
-      // Para pagos mixtos, incluir ventas que tengan al menos un pago del tipo seleccionado
-      return filtradosPorFecha.filter(item => {
-        // Obtener todos los pagos para esta venta
-        const pagosDeVenta = pagosVentas.filter(pago => pago.venta_id === item.venta_id);
-        
-        // Verificar si alguno de los pagos coincide con el filtro
-        return pagosDeVenta.some(pago => pago.metodo === filtroActual);
-      });
     }
 
     // Función para confirmar eliminación de venta
@@ -1148,29 +1127,29 @@
             marca: productosMap[item.producto_id]?.marca || 'Sin marca',
             id: item.producto_id,
             cantidad: 0,
-            subtotal_bs: 0,
             subtotal_usd: 0
           };
         }
         
         productosAgrupados[item.producto_id].cantidad += item.cantidad;
         
-        // Obtener los pagos asociados a esta venta
-        const pagosDeVenta = pagosVentas.filter(pago => pago.venta_id === item.venta_id);
+        // Obtener información del producto
+        const productoInfo = productosMap[item.producto_id];
+        const cantidadPorEmpaque = productoInfo?.cantidad_por_empaque || 1;
+        const precioUsd = productoInfo?.precio_usd || 0;
         
-        // Calcular la proporción de este producto en la venta
-        const totalVentaBs = item.venta.total;
-        const totalVentaUsd = item.venta.total_usd;
-        const proporcion = item.subtotal / totalVentaBs;
+        // Calcular precio unitario CORREGIDO: dividir precio_usd por cantidad_por_empaque
+        const precioUnitarioUsd = precioUsd / cantidadPorEmpaque;
         
-        // Asignar el subtotal en bolívares y dólares según la proporción
-        productosAgrupados[item.producto_id].subtotal_bs += item.subtotal;
-        productosAgrupados[item.producto_id].subtotal_usd += totalVentaUsd * proporcion;
+        // Calcular subtotal CORREGIDO: precio unitario * cantidad
+        const subtotalUsd = precioUnitarioUsd * item.cantidad;
+        
+        productosAgrupados[item.producto_id].subtotal_usd += subtotalUsd;
       });
       
       // Convertir a array y ordenar por subtotal (mayor a menor)
       const productosArray = Object.values(productosAgrupados);
-      productosArray.sort((a, b) => b.subtotal_bs - a.subtotal_bs);
+      productosArray.sort((a, b) => b.subtotal_usd - a.subtotal_usd);
       
       if (productosArray.length === 0) {
         productosGrid.innerHTML = '<p class="text-center">No se encontraron productos que coincidan con la búsqueda.</p>';
@@ -1199,8 +1178,7 @@
           </div>
           <div class="producto-total">
             <div class="total-label">Total Ventas</div>
-            <div class="total-value moneda-bs">Bs. ${producto.subtotal_bs.toFixed(2)}</div>
-            <div class="total-value moneda-usd">USD. ${producto.subtotal_usd.toFixed(2)}</div>
+            <div class="total-value moneda-usd">$ ${producto.subtotal_usd.toFixed(2)}</div>
           </div>
         `;
         
