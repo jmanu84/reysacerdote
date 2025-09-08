@@ -481,7 +481,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
-    // Configuración de Supabase
+   // Configuración de Supabase
     const SUPABASE_URL = 'https://rirfvhvlmytnpqkcpxbx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpcmZ2aHZsbXl0bnBxa2NweGJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0ODE2NDUsImV4cCI6MjA3MjA1NzY0NX0.5JLGuOIWNvKIESJG26JLOgRVCu0jVoH0ELZjQ63gV48';
     
@@ -1085,7 +1085,7 @@
       const restanteElement = document.getElementById('restante-pagar');
       restanteElement.textContent = `Restante por pagar: USD ${restanteUSD.toFixed(2)} (BS ${restanteBs.toFixed(2)})`;
       
-      // CORRECCIÓN: Usar un umbral de tolerancia para evitar problemas de redondeo
+      // Usar un umbral de tolerancia para evitar problemas de redondeo
       if (Math.abs(restanteBs) <= 0.01 && carrito.length > 0) {
         restanteElement.className = 'pago-completado';
         $('#btn-finalizar').prop('disabled', false);
@@ -1126,7 +1126,7 @@
       });
     }
 
-    // Agregar método de pago
+    // Agregar método de pago - VERSIÓN MODIFICADA
     function agregarMetodoPago() {
       const restanteBs = calcularRestantePorPagar();
       const restanteUSD = convertirBsAUsd(restanteBs);
@@ -1140,52 +1140,120 @@
         return;
       }
       
+      // Crear el HTML del modal según el tipo de pago
+      let modalHTML = `
+        <div class="mb-3">
+          <label class="form-label">Tipo de Pago</label>
+          <select id="swal-tipo-pago" class="form-select">
+            <option value="Efectivo">Efectivo</option>
+            <option value="Dólares">Dólares</option>
+            <option value="Punto de venta">Punto de venta</option>
+            <option value="Pago móvil">Pago móvil</option>
+            <option value="Transferencia">Transferencia</option>
+          </select>
+        </div>
+      `;
+      
+      // Función para actualizar la interfaz según el tipo de pago seleccionado
+      const actualizarInterfazPago = (tipoPago) => {
+        const montoBsElement = document.getElementById('swal-monto-bs');
+        const montoUsdElement = document.getElementById('swal-monto-usd');
+        const montoLabel = document.getElementById('swal-monto-label');
+        const montoConversion = document.getElementById('swal-monto-conversion');
+        
+        if (tipoPago === 'Dólares') {
+          // Para pago en dólares: mostrar campo USD y conversión a BS
+          montoLabel.textContent = 'Monto (USD)';
+          montoUsdElement.max = restanteUSD;
+          montoUsdElement.value = restanteUSD.toFixed(2);
+          
+          const montoBs = convertirUsdABs(parseFloat(montoUsdElement.value) || 0);
+          montoConversion.innerHTML = `Monto en BS: <span id="swal-monto-bs">BS ${montoBs.toFixed(2)}</span>`;
+        } else {
+          // Para otros métodos: mostrar campo BS y conversión a USD
+          montoLabel.textContent = 'Monto (BS)';
+          montoUsdElement.max = restanteBs;
+          montoUsdElement.value = restanteBs.toFixed(2);
+          
+          const montoUSD = convertirBsAUsd(parseFloat(montoUsdElement.value) || 0);
+          montoConversion.innerHTML = `Monto en USD: <span id="swal-monto-bs">USD ${montoUSD.toFixed(2)}</span>`;
+        }
+      };
+      
+      // Agregar campos de monto según el tipo de pago
+      modalHTML += `
+        <div class="mb-3">
+          <label class="form-label" id="swal-monto-label">Monto (BS)</label>
+          <input type="number" step="0.01" min="0.01" max="${restanteBs}" value="${restanteBs.toFixed(2)}" id="swal-monto-usd" class="form-control" style="width: 100%; font-size: 16px; padding: 12px;" required>
+        </div>
+        <div class="mb-3" id="swal-monto-conversion">
+          Monto en USD: <span id="swal-monto-bs">${restanteUSD.toFixed(2)}</span>
+        </div>
+      `;
+      
       Swal.fire({
         title: 'Agregar Método de Pago',
-        html: `
-          <div class="mb-3">
-            <label class="form-label">Tipo de Pago</label>
-            <select id="swal-tipo-pago" class="form-select">
-              <option value="Efectivo">Efectivo</option>
-              <option value="Dólares">Dólares</option>
-              <option value="Punto de venta">Punto de venta</option>
-              <option value="Pago móvil">Pago móvil</option>
-              <option value="Transferencia">Transferencia</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Monto (USD)</label>
-            <input type="number" step="0.01" min="0.01" max="${restanteUSD}" value="${restanteUSD.toFixed(2)}" id="swal-monto-usd" class="form-control" style="width: 100%; font-size: 16px; padding: 12px;" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Monto en BS: <span id="swal-monto-bs">BS ${restanteBs.toFixed(2)}</span></label>
-          </div>
-        `,
+        html: modalHTML,
         focusConfirm: false,
         showCancelButton: true,
         confirmButtonText: 'Agregar',
         cancelButtonText: 'Cancelar',
         didOpen: () => {
-          // Actualizar monto en BS cuando cambia el monto en USD
-          document.getElementById('swal-monto-usd').addEventListener('input', function() {
-            const montoUSD = parseFloat(this.value) || 0;
-            const montoBs = convertirUsdABs(montoUSD);
-            document.getElementById('swal-monto-bs').textContent = `BS ${montoBs.toFixed(2)}`;
+          // Configurar evento para cambiar entre USD y BS según el tipo de pago
+          const tipoPagoSelect = document.getElementById('swal-tipo-pago');
+          const montoInput = document.getElementById('swal-monto-usd');
+          
+          // Inicializar la interfaz
+          actualizarInterfazPago(tipoPagoSelect.value);
+          
+          // Evento cuando cambia el tipo de pago
+          tipoPagoSelect.addEventListener('change', function() {
+            actualizarInterfazPago(this.value);
+          });
+          
+          // Evento cuando cambia el monto
+          montoInput.addEventListener('input', function() {
+            const tipoPago = document.getElementById('swal-tipo-pago').value;
+            const monto = parseFloat(this.value) || 0;
+            
+            if (tipoPago === 'Dólares') {
+              // Si es pago en dólares, calcular BS
+              const montoBs = convertirUsdABs(monto);
+              document.getElementById('swal-monto-bs').textContent = `BS ${montoBs.toFixed(2)}`;
+            } else {
+              // Para otros métodos, calcular USD
+              const montoUSD = convertirBsAUsd(monto);
+              document.getElementById('swal-monto-bs').textContent = `USD ${montoUSD.toFixed(2)}`;
+            }
           });
         },
         preConfirm: () => {
           const tipo = document.getElementById('swal-tipo-pago').value;
-          const montoUSD = parseFloat(document.getElementById('swal-monto-usd').value);
+          const monto = parseFloat(document.getElementById('swal-monto-usd').value);
           
-          if (!montoUSD || montoUSD <= 0) {
+          if (!monto || monto <= 0) {
             Swal.showValidationMessage('Ingrese un monto válido');
             return false;
           }
           
-          const montoBs = convertirUsdABs(montoUSD);
+          let montoBs, montoUSD;
           
-          if (montoBs > restanteBs + 0.01) {
+          if (tipo === 'Dólares') {
+            // Para pago en dólares: el monto ingresado es en USD
+            montoUSD = monto;
+            montoBs = convertirUsdABs(monto);
+          } else {
+            // Para otros métodos: el monto ingresado es en BS
+            montoBs = monto;
+            montoUSD = convertirBsAUsd(monto);
+          }
+          
+          // Validar que no exceda el restante por pagar
+          if (tipo === 'Dólares' && montoUSD > restanteUSD + 0.01) {
             Swal.showValidationMessage(`El monto no puede ser mayor al restante (USD ${restanteUSD.toFixed(2)})`);
+            return false;
+          } else if (tipo !== 'Dólares' && montoBs > restanteBs + 0.01) {
+            Swal.showValidationMessage(`El monto no puede ser mayor al restante (BS ${restanteBs.toFixed(2)})`);
             return false;
           }
           
@@ -1439,7 +1507,7 @@
         }
         
         const restante = calcularRestantePorPagar();
-        // CORRECCIÓN: Usar un umbral de tolerancia para evitar problemas de redondeo
+        // Usar un umbral de tolerancia para evitar problemas de redondeo
         if (restante > 0.01) {
           Swal.fire({
             icon: 'warning',
