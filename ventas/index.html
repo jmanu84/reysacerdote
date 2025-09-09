@@ -162,6 +162,11 @@
       font-size: 1.3rem;
       font-weight: bold;
     }
+    
+    .summary-subvalue {
+      font-size: 0.9rem;
+      color: #aaa;
+    }
 
     /* Filtros rápidos */
     .filtros-rapidos {
@@ -286,7 +291,7 @@
       border-color: #eee;
     }
 
-    /* Tarjetas de productos */
+    /* Tarjetas de productos - ESTILOS MODIFICADOS */
     .productos-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -307,63 +312,46 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
     
-    .producto-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 12px;
-    }
-    
     .producto-nombre {
       font-size: 1.1rem;
       font-weight: bold;
-      margin: 0;
-      flex: 1;
-      margin-right: 10px;
-    }
-    
-    .producto-id {
-      font-size: 0.7rem;
-      color: #888;
-      background-color: #333;
-      padding: 2px 6px;
-      border-radius: 10px;
-    }
-    
-    .producto-details {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    
-    .producto-detail {
+      margin: 0 0 15px 0;
       text-align: center;
+      border-bottom: 1px solid #444;
+      padding-bottom: 10px;
+    }
+    
+    .producto-tabla {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+    
+    .producto-tabla th {
+      text-align: left;
       padding: 8px;
       background-color: #333;
-      border-radius: 6px;
     }
     
-    .detail-label {
-      font-size: 0.8rem;
-      color: #aaa;
-      margin-bottom: 4px;
+    .producto-tabla td {
+      padding: 8px;
+      border-bottom: 1px solid #444;
     }
     
-    .detail-value {
-      font-size: 1rem;
-      font-weight: bold;
+    .producto-tabla tr:last-child td {
+      border-bottom: none;
     }
     
     .producto-total {
-      margin-top: 12px;
+      text-align: center;
       padding-top: 10px;
       border-top: 1px solid #444;
-      text-align: center;
     }
     
     .total-label {
       font-size: 0.9rem;
       color: #aaa;
+      margin-bottom: 5px;
     }
     
     .total-value {
@@ -373,6 +361,10 @@
     
     .moneda-usd {
       color: #17a2b8; /* Azul claro para dólares */
+    }
+    
+    .moneda-bs {
+      color: #28a745; /* Verde para bolívares */
     }
     
     /* Ajustes para pantallas pequeñas */
@@ -417,6 +409,10 @@
       
       .table-ventas th {
         font-size: 0.95rem;
+      }
+      
+      .summary-card {
+        min-width: 100%;
       }
     }
     
@@ -476,7 +472,8 @@
               </div>
               <div class="summary-content">
                 <div class="summary-title">Monto Total</div>
-                <div class="summary-value" id="montoTotal">$ 0.00</div>
+                <div class="summary-value moneda-usd" id="montoTotalUSD">$ 0.00</div>
+                <div class="summary-subvalue moneda-bs" id="montoTotalBS">Bs 0.00</div>
               </div>
             </div>
 
@@ -486,7 +483,7 @@
               </div>
               <div class="summary-content">
                 <div class="summary-title">Punto de Venta</div>
-                <div class="summary-value" id="ventasPunto">$ 0.00</div>
+                <div class="summary-value moneda-bs" id="ventasPunto">Bs 0.00</div>
               </div>
             </div>
 
@@ -496,7 +493,7 @@
               </div>
               <div class="summary-content">
                 <div class="summary-title">Efectivo</div>
-                <div class="summary-value" id="ventasEfectivo">$ 0.00</div>
+                <div class="summary-value moneda-bs" id="ventasEfectivo">Bs 0.00</div>
               </div>
             </div>
 
@@ -506,7 +503,7 @@
               </div>
               <div class="summary-content">
                 <div class="summary-title">Pago Móvil</div>
-                <div class="summary-value" id="ventasMovil">$ 0.00</div>
+                <div class="summary-value moneda-bs" id="ventasMovil">Bs 0.00</div>
               </div>
             </div>
 
@@ -516,7 +513,7 @@
               </div>
               <div class="summary-content">
                 <div class="summary-title">Dólares</div>
-                <div class="summary-value" id="ventasDolares">$ 0.00</div>
+                <div class="summary-value moneda-usd" id="ventasDolares">$ 0.00</div>
               </div>
             </div>
           </div>
@@ -643,10 +640,10 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // Configuración de Supabase
+   // Configuración de Supabase
     const SUPABASE_URL = 'https://rirfvhvlmytnpqkcpxbx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpcmZ2aHZsbXl0bnBxa2NweGJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0ODE2NDUsImV4cCI6MjA3MjA1NzY0NX0.5JLGuOIWNvKIESJG26JLOgRVCu0jVoH0ELZjQ63gV48';
-    
+     
     // Inicializar Supabase
     const { createClient } = supabase;
     const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -738,7 +735,7 @@
         filtrosRapidos.style.display = 'none';
         filtrosFechas.style.display = 'none';
 
-        // Obtener datos en paralelo - AÑADIR CANTIDAD_POR_EMPAQUE Y PRECIO_VENTA_1_USD
+        // Obtener datos en paralelo
         const [productosResponse, ventasResponse, detallesResponse, pagosResponse] = await Promise.all([
           supabaseClient.from('productos').select('id, nombre, marca, cantidad_por_empaque, precio_venta_1_usd'),
           supabaseClient.from('ventas').select('*').order('fecha', { ascending: false }),
@@ -751,7 +748,7 @@
         if (detallesResponse.error) throw detallesResponse.error;
         if (pagosResponse.error) throw pagosResponse.error;
 
-        // Crear mapa de productos para búsqueda rápida - AÑADIR CANTIDAD_POR_EMPAQUE Y PRECIO_USD
+        // Crear mapa de productos para búsqueda rápida
         productosMap = {};
         productosResponse.data.forEach(producto => {
           productosMap[producto.id] = {
@@ -773,10 +770,17 @@
         // Calcular estadísticas
         let totalVentas = 0;
         let montoTotalUsd = 0;
-        let ventasPuntoUsd = 0;
-        let ventasEfectivoUsd = 0;
-        let ventasMovilUsd = 0;
+        let montoTotalBs = 0;
+        let ventasPuntoBs = 0;
+        let ventasEfectivoBs = 0;
+        let ventasMovilBs = 0;
         let ventasDolaresUsd = 0;
+
+        // Calcular montos totales desde la tabla ventas
+        ventasCompletas.forEach(venta => {
+          montoTotalUsd += venta.total_usd || 0;
+          montoTotalBs += venta.total || 0;
+        });
 
         // Contar ventas únicas (una venta puede tener múltiples productos)
         const ventasUnicas = new Set(detallesVentas.map(d => d.venta_id));
@@ -786,29 +790,27 @@
         pagosVentas.forEach(pago => {
           switch(pago.metodo) {
             case 'Punto de venta':
-              ventasPuntoUsd += pago.monto_usd;
+              ventasPuntoBs += pago.monto_bs || 0;
               break;
             case 'Efectivo':
-              ventasEfectivoUsd += pago.monto_usd;
+              ventasEfectivoBs += pago.monto_bs || 0;
               break;
             case 'Pago móvil':
-              ventasMovilUsd += pago.monto_usd;
+              ventasMovilBs += pago.monto_bs || 0;
               break;
             case 'Dólares':
-              ventasDolaresUsd += pago.monto_usd;
+              ventasDolaresUsd += pago.monto_usd || 0;
               break;
           }
         });
 
-        // Calcular monto total sumando todos los pagos
-        montoTotalUsd = ventasPuntoUsd + ventasEfectivoUsd + ventasMovilUsd + ventasDolaresUsd;
-
         // Actualizar tarjetas de resumen
         document.getElementById('totalVentas').textContent = totalVentas;
-        document.getElementById('montoTotal').textContent = `$ ${montoTotalUsd.toFixed(2)}`;
-        document.getElementById('ventasPunto').textContent = `$ ${ventasPuntoUsd.toFixed(2)}`;
-        document.getElementById('ventasEfectivo').textContent = `$ ${ventasEfectivoUsd.toFixed(2)}`;
-        document.getElementById('ventasMovil').textContent = `$ ${ventasMovilUsd.toFixed(2)}`;
+        document.getElementById('montoTotalUSD').textContent = `$ ${montoTotalUsd.toFixed(2)}`;
+        document.getElementById('montoTotalBS').textContent = `Bs ${montoTotalBs.toFixed(2)}`;
+        document.getElementById('ventasPunto').textContent = `Bs ${ventasPuntoBs.toFixed(2)}`;
+        document.getElementById('ventasEfectivo').textContent = `Bs ${ventasEfectivoBs.toFixed(2)}`;
+        document.getElementById('ventasMovil').textContent = `Bs ${ventasMovilBs.toFixed(2)}`;
         document.getElementById('ventasDolares').textContent = `$ ${ventasDolaresUsd.toFixed(2)}`;
 
         summaryCards.style.display = 'flex';
@@ -840,7 +842,7 @@
       }
     }
 
-    // Función para agrupar y mostrar productos
+    // Función para agrupar y mostrar productos - MODIFICADA
     function mostrarProductosAgrupados() {
       const productosGrid = document.getElementById('productosGrid');
       productosGrid.innerHTML = '';
@@ -867,6 +869,7 @@
             marca: productosMap[item.producto_id]?.marca || 'Sin marca',
             id: item.producto_id,
             cantidad: 0,
+            subtotal_bs: 0,
             subtotal_usd: 0
           };
         }
@@ -880,36 +883,51 @@
         
         // Calcular precio unitario CORREGIDO: dividir precio_usd por cantidad_por_empaque
         const precioUnitarioUsd = precioUsd / cantidadPorEmpaque;
+        const subtotalUsd = item.cantidad * precioUnitarioUsd;
         
-        // Calcular subtotal CORREGIDO: precio unitario * cantidad
-        const subtotalUsd = precioUnitarioUsd * item.cantidad;
+        // Buscar la venta asociada para obtener el tipo de cambio
+        const ventaAsociada = ventasCompletas.find(v => v.id === item.venta_id);
+        const tipoCambio = ventaAsociada?.tasa_cambio || 36.5; // Valor por defecto si no existe
+        
+        // Calcular subtotal en BS
+        const subtotalBs = subtotalUsd * tipoCambio;
         
         productosAgrupados[item.producto_id].subtotal_usd += subtotalUsd;
+        productosAgrupados[item.producto_id].subtotal_bs += subtotalBs;
       });
       
-      // Crear tarjetas para cada producto
-      Object.values(productosAgrupados).forEach(producto => {
+      // Convertir a array y ordenar por subtotal (mayor a menor)
+      const productosArray = Object.values(productosAgrupados);
+      productosArray.sort((a, b) => b.subtotal_bs - a.subtotal_bs);
+      
+      // Crear tarjetas para cada producto - MODIFICADO según la imagen
+      productosArray.forEach(producto => {
         const card = document.createElement('div');
         card.className = 'producto-card';
         
         card.innerHTML = `
-          <div class="producto-header">
-            <h3 class="producto-nombre">${producto.nombre}</h3>
-            <span class="producto-id">ID: ${producto.id.substring(0, 8)}</span>
-          </div>
-          <div class="producto-details">
-            <div class="producto-detail">
-              <div class="detail-label">Marca</div>
-              <div class="detail-value">${producto.marca}</div>
-            </div>
-            <div class="producto-detail">
-              <div class="detail-label">Cantidad Vendida</div>
-              <div class="detail-value">${producto.cantidad}</div>
-            </div>
-          </div>
+          <h3 class="producto-nombre">${producto.nombre}</h3>
+          <table class="producto-tabla">
+            <tr>
+              <th>Marca</th>
+              <td>${producto.marca}</td>
+            </tr>
+            <tr>
+              <th>Cantidad Vendida</th>
+              <td>${producto.cantidad}</td>
+            </tr>
+            <tr>
+              <th>Subtotal USD</th>
+              <td class="moneda-usd">$ ${producto.subtotal_usd.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <th>Subtotal BS</th>
+              <td class="moneda-bs">Bs ${producto.subtotal_bs.toFixed(2)}</td>
+            </tr>
+          </table>
           <div class="producto-total">
-            <div class="total-label">Total de Venta</div>
-            <div class="total-value moneda-usd">$ ${producto.subtotal_usd.toFixed(2)}</div>
+            <div class="total-label">Total Vendido</div>
+            <div class="total-value moneda-bs">Bs ${producto.subtotal_bs.toFixed(2)}</div>
           </div>
         `;
         
@@ -934,10 +952,7 @@
       // Filtrar según los filtros seleccionados
       let detallesFiltrados = aplicarFiltros(detallesConVenta);
       
-      // Ordenar por fecha (más reciente primero)
-      detallesFiltrados.sort((a, b) => new Date(b.venta.fecha) - new Date(a.venta.fecha));
-      
-      // Crear filas para cada detalle
+      // Crear filas de la tabla
       detallesFiltrados.forEach(item => {
         const fila = document.createElement('tr');
         
@@ -948,28 +963,30 @@
         
         // Calcular precio unitario CORREGIDO: dividir precio_usd por cantidad_por_empaque
         const precioUnitarioUsd = precioUsd / cantidadPorEmpaque;
+        const subtotalUsd = item.cantidad * precioUnitarioUsd;
         
-        // Calcular subtotal CORREGIDO: precio unitario * cantidad
-        const subtotalUsd = precioUnitarioUsd * item.cantidad;
+        // Buscar la venta asociada para obtener el tipo de cambio
+        const ventaAsociada = ventasCompletas.find(v => v.id === item.venta_id);
+        const tipoCambio = ventaAsociada?.tasa_cambio || 36.5; // Valor por defecto si no existe
         
-        // Obtener tipo de pago (usamos el primer pago de la venta)
-        const pagosDeVenta = pagosVentas.filter(p => p.venta_id === item.venta_id);
-        const tipoPago = pagosDeVenta.length > 0 ? pagosDeVenta[0].metodo : 'No especificado';
+        // Calcular subtotal en BS
+        const subtotalBs = subtotalUsd * tipoCambio;
         
-        // Fecha CORREGIDA: usar formatearFecha que ajusta por zona horaria
-        const fechaVenta = formatearFecha(item.venta.fecha);
+        // Obtener método de pago
+        const pagoAsociado = pagosVentas.find(p => p.venta_id === item.venta_id);
+        const metodoPago = pagoAsociado?.metodo || 'Desconocido';
         
         fila.innerHTML = `
-          <td>${fechaVenta}</td>
+          <td>${formatearFecha(item.venta?.fecha)}</td>
           <td>${productoInfo?.nombre || 'Producto no encontrado'}</td>
           <td>${productoInfo?.marca || 'Sin marca'}</td>
-          <td>${tipoPago}</td>
+          <td>${metodoPago}</td>
           <td>${item.cantidad}</td>
           <td class="moneda-usd">$ ${precioUnitarioUsd.toFixed(2)}</td>
-          <td class="moneda-usd">$ ${subtotalUsd.toFixed(2)}</td>
+          <td class="moneda-bs">Bs ${subtotalBs.toFixed(2)}</td>
           <td>
-            <button class="btn-eliminar" data-venta-id="${item.venta_id}">
-              <i class="fas fa-trash-alt"></i>
+            <button class="btn-eliminar" data-id="${item.id}">
+              <i class="fas fa-trash"></i>
             </button>
           </td>
         `;
@@ -979,87 +996,73 @@
       
       // Agregar event listeners a los botones de eliminar
       document.querySelectorAll('.btn-eliminar').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const ventaId = e.currentTarget.getAttribute('data-venta-id');
-          confirmarEliminarVenta(ventaId);
+        btn.addEventListener('click', function() {
+          const detalleId = this.getAttribute('data-id');
+          const detalle = detallesVentas.find(d => d.id == detalleId);
+          
+          if (detalle) {
+            ventaAEliminar = detalle.venta_id;
+            const modal = new bootstrap.Modal(document.getElementById('confirmarEliminarModal'));
+            modal.show();
+          }
         });
       });
     }
 
-    // Función para aplicar filtros
+    // Función para aplicar filtros a los detalles
     function aplicarFiltros(detalles) {
-      // Primero aplicar filtro de fecha
-      let detallesFiltrados = filtrarPorFecha(detalles);
+      let filtrados = [...detalles];
       
-      // Luego aplicar filtro de tipo de pago
+      // Aplicar filtro por tipo de pago
       if (filtroActual !== 'all') {
-        detallesFiltrados = detallesFiltrados.filter(item => {
-          const pagosDeVenta = pagosVentas.filter(p => p.venta_id === item.venta_id);
-          return pagosDeVenta.some(pago => pago.metodo === filtroActual);
+        filtrados = filtrados.filter(item => {
+          const pagoAsociado = pagosVentas.find(p => p.venta_id === item.venta_id);
+          return pagoAsociado?.metodo === filtroActual;
         });
       }
       
-      return detallesFiltrados;
-    }
-
-    // Función para filtrar por fecha
-    function filtrarPorFecha(detalles) {
-      switch(filtroFechaTipo) {
-        case 'hoy':
-          const hoyInicio = inicioDelDia();
-          const hoyFin = finDelDia();
-          return detalles.filter(item => {
-            const fechaVenta = new Date(item.venta.fecha);
-            return fechaVenta >= hoyInicio && fechaVenta <= hoyFin;
+      // Aplicar filtro por fecha
+      if (filtroFechaTipo !== 'all') {
+        let fechaInicio, fechaFin;
+        
+        switch(filtroFechaTipo) {
+          case 'hoy':
+            fechaInicio = inicioDelDia();
+            fechaFin = finDelDia();
+            break;
+          case 'semana':
+            fechaInicio = inicioDeSemana();
+            fechaFin = finDeSemana();
+            break;
+          case 'mes':
+            fechaInicio = inicioDeMes();
+            fechaFin = finDeMes();
+            break;
+          case 'rango':
+            if (fechaInicioRango && fechaFinRango) {
+              fechaInicio = inicioDelDia(new Date(fechaInicioRango));
+              fechaFin = finDelDia(new Date(fechaFinRango));
+            }
+            break;
+        }
+        
+        if (fechaInicio && fechaFin) {
+          filtrados = filtrados.filter(item => {
+            const fechaVenta = new Date(item.venta?.fecha);
+            return fechaVenta >= fechaInicio && fechaVenta <= fechaFin;
           });
-          
-        case 'semana':
-          const semanaInicio = inicioDeSemana();
-          const semanaFin = finDeSemana();
-          return detalles.filter(item => {
-            const fechaVenta = new Date(item.venta.fecha);
-            return fechaVenta >= semanaInicio && fechaVenta <= semanaFin;
-          });
-          
-        case 'mes':
-          const mesInicio = inicioDeMes();
-          const mesFin = finDeMes();
-          return detalles.filter(item => {
-            const fechaVenta = new Date(item.venta.fecha);
-            return fechaVenta >= mesInicio && fechaVenta <= mesFin;
-          });
-          
-        case 'rango':
-          if (fechaInicioRango && fechaFinRango) {
-            const inicio = inicioDelDia(new Date(fechaInicioRango));
-            const fin = finDelDia(new Date(fechaFinRango));
-            return detalles.filter(item => {
-              const fechaVenta = new Date(item.venta.fecha);
-              return fechaVenta >= inicio && fechaVenta <= fin;
-            });
-          }
-          return detalles;
-          
-        default: // 'all'
-          return detalles;
+        }
       }
-    }
-
-    // Función para confirmar eliminación de venta
-    function confirmarEliminarVenta(ventaId) {
-      ventaAEliminar = ventaId;
       
-      // Mostrar modal de confirmación
-      const modal = new bootstrap.Modal(document.getElementById('confirmarEliminarModal'));
-      modal.show();
+      return filtrados;
     }
 
-    // Función para eliminar venta y sus detalles
+    // Función para eliminar una venta
     async function eliminarVenta() {
       if (!ventaAEliminar) return;
       
       try {
-        // Eliminar detalles de venta
+        // Eliminar detalles de venta asociados
         const { error: errorDetalles } = await supabaseClient
           .from('detalles_venta')
           .delete()
@@ -1067,7 +1070,7 @@
           
         if (errorDetalles) throw errorDetalles;
         
-        // Eliminar pagos de venta
+        // Eliminar pagos asociados
         const { error: errorPagos } = await supabaseClient
           .from('pagos_venta')
           .delete()
@@ -1075,7 +1078,7 @@
           
         if (errorPagos) throw errorPagos;
         
-        // Eliminar venta
+        // Eliminar la venta
         const { error: errorVenta } = await supabaseClient
           .from('ventas')
           .delete()
@@ -1090,184 +1093,96 @@
         const modal = bootstrap.Modal.getInstance(document.getElementById('confirmarEliminarModal'));
         modal.hide();
         
-        // Mostrar mensaje de éxito
-        alert('Venta eliminada correctamente.');
-        
       } catch (error) {
         console.error('Error al eliminar venta:', error);
-        alert('Error al eliminar la venta. Por favor, inténtalo de nuevo.');
+        alert('Error al eliminar la venta. Por favor, intenta nuevamente.');
       }
     }
 
-    // Función para buscar productos
-    function buscarProductos(termino) {
-      // Convertir término a minúsculas para búsqueda case-insensitive
-      const terminoLower = termino.toLowerCase();
-      
-      // Filtrar detalles de venta por término de búsqueda
-      const detallesFiltrados = detallesVentas.filter(detalle => {
-        const producto = productosMap[detalle.producto_id];
-        if (!producto) return false;
-        
-        return producto.nombre.toLowerCase().includes(terminoLower) || 
-               producto.marca.toLowerCase().includes(terminoLower);
-      });
-      
-      // Actualizar vista de productos
-      const productosGrid = document.getElementById('productosGrid');
-      productosGrid.innerHTML = '';
-      
-      // Agrupar por producto
-      const productosAgrupados = {};
-      
-      detallesFiltrados.forEach(item => {
-        if (!productosAgrupados[item.producto_id]) {
-          productosAgrupados[item.producto_id] = {
-            nombre: productosMap[item.producto_id]?.nombre || `Producto ID: ${item.producto_id.substring(0, 8)}...`,
-            marca: productosMap[item.producto_id]?.marca || 'Sin marca',
-            id: item.producto_id,
-            cantidad: 0,
-            subtotal_usd: 0
-          };
-        }
-        
-        productosAgrupados[item.producto_id].cantidad += item.cantidad;
-        
-        // Obtener información del producto
-        const productoInfo = productosMap[item.producto_id];
-        const cantidadPorEmpaque = productoInfo?.cantidad_por_empaque || 1;
-        const precioUsd = productoInfo?.precio_usd || 0;
-        
-        // Calcular precio unitario CORREGIDO: dividir precio_usd por cantidad_por_empaque
-        const precioUnitarioUsd = precioUsd / cantidadPorEmpaque;
-        
-        // Calcular subtotal CORREGIDO: precio unitario * cantidad
-        const subtotalUsd = precioUnitarioUsd * item.cantidad;
-        
-        productosAgrupados[item.producto_id].subtotal_usd += subtotalUsd;
-      });
-      
-      // Convertir a array y ordenar por subtotal (mayor a menor)
-      const productosArray = Object.values(productosAgrupados);
-      productosArray.sort((a, b) => b.subtotal_usd - a.subtotal_usd);
-      
-      if (productosArray.length === 0) {
-        productosGrid.innerHTML = '<p class="text-center">No se encontraron productos que coincidan con la búsqueda.</p>';
-        return;
-      }
-      
-      // Crear tarjetas para cada producto
-      productosArray.forEach(producto => {
-        const card = document.createElement('div');
-        card.className = 'producto-card';
-        
-        card.innerHTML = `
-          <div class="producto-header">
-            <h3 class="producto-nombre">${producto.nombre}</h3>
-            <span class="producto-id">ID: ${producto.id.substring(0, 8)}</span>
-          </div>
-          <div class="producto-details">
-            <div class="producto-detail">
-              <div class="detail-label">Marca</div>
-              <div class="detail-value">${producto.marca}</div>
-            </div>
-            <div class="producto-detail">
-              <div class="detail-label">Cantidad Vendida</div>
-              <div class="detail-value">${producto.cantidad}</div>
-            </div>
-          </div>
-          <div class="producto-total">
-            <div class="total-label">Total Ventas</div>
-            <div class="total-value moneda-usd">$ ${producto.subtotal_usd.toFixed(2)}</div>
-          </div>
-        `;
-        
-        productosGrid.appendChild(card);
-      });
-    }
-
-    // Inicializar eventos cuando el DOM esté cargado
+    // Inicializar la aplicación cuando se carga la página
     document.addEventListener('DOMContentLoaded', function() {
       // Cargar datos iniciales
       cargarDatos();
       
-      // Event listeners para filtros rápidos
+      // Configurar buscador
+      const buscador = document.getElementById('buscadorVentas');
+      buscador.addEventListener('input', function() {
+        mostrarProductosAgrupados();
+        mostrarDetallesVentas();
+      });
+      
+      // Configurar filtros rápidos
       document.querySelectorAll('[data-filter]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          // Actualizar clase activa
+        btn.addEventListener('click', function() {
+          // Actualizar estado activo
           document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
-          e.target.classList.add('active');
+          this.classList.add('active');
           
-          // Actualizar filtro
-          filtroActual = e.target.getAttribute('data-filter');
-          
-          // Aplicar filtros
+          // Aplicar filtro
+          filtroActual = this.getAttribute('data-filter');
           mostrarProductosAgrupados();
           mostrarDetallesVentas();
         });
       });
       
-      // Event listeners para filtros de fecha
+      // Configurar filtros de fecha
       document.querySelectorAll('[data-fecha-filtro]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          // Actualizar clase activa
+        btn.addEventListener('click', function() {
+          // Actualizar estado activo
           document.querySelectorAll('[data-fecha-filtro]').forEach(b => b.classList.remove('active'));
-          e.target.classList.add('active');
+          this.classList.add('active');
           
-          // Actualizar filtro de fecha
-          filtroFechaTipo = e.target.getAttribute('data-fecha-filtro');
-          fechaInicioRango = null;
-          fechaFinRango = null;
+          // Aplicar filtro de fecha
+          const filtro = this.getAttribute('data-fecha-filtro');
           
-          // Aplicar filtros
+          if (filtro === 'all') {
+            filtroFechaTipo = 'all';
+          } else if (filtro === 'mes') {
+            filtroFechaTipo = 'mes';
+          }
+          
           mostrarProductosAgrupados();
           mostrarDetallesVentas();
         });
       });
       
-      // Event listeners para rango de fechas
-      document.getElementById('aplicarRango').addEventListener('click', () => {
-        fechaInicioRango = document.getElementById('fechaInicio').value;
-        fechaFinRango = document.getElementById('fechaFin').value;
+      // Configurar rango de fechas personalizado
+      document.getElementById('aplicarRango').addEventListener('click', function() {
+        const fechaInicio = document.getElementById('fechaInicio').value;
+        const fechaFin = document.getElementById('fechaFin').value;
         
-        if (fechaInicioRango && fechaFinRango) {
+        if (fechaInicio && fechaFin) {
+          fechaInicioRango = fechaInicio;
+          fechaFinRango = fechaFin;
           filtroFechaTipo = 'rango';
           
-          // Actualizar clase activa
+          // Actualizar estado activo
           document.querySelectorAll('[data-fecha-filtro]').forEach(b => b.classList.remove('active'));
           
-          // Aplicar filtros
           mostrarProductosAgrupados();
           mostrarDetallesVentas();
-        } else {
-          alert('Por favor, selecciona ambas fechas.');
         }
       });
       
-      document.getElementById('aplicarRangoMobile').addEventListener('click', () => {
-        fechaInicioRango = document.getElementById('fechaInicioMobile').value;
-        fechaFinRango = document.getElementById('fechaFinMobile').value;
+      // Configurar rango de fechas personalizado (versión móvil)
+      document.getElementById('aplicarRangoMobile').addEventListener('click', function() {
+        const fechaInicio = document.getElementById('fechaInicioMobile').value;
+        const fechaFin = document.getElementById('fechaFinMobile').value;
         
-        if (fechaInicioRango && fechaFinRango) {
+        if (fechaInicio && fechaFin) {
+          fechaInicioRango = fechaInicio;
+          fechaFinRango = fechaFin;
           filtroFechaTipo = 'rango';
           
-          // Actualizar clase activa
+          // Actualizar estado activo
           document.querySelectorAll('[data-fecha-filtro]').forEach(b => b.classList.remove('active'));
           
-          // Aplicar filtros
           mostrarProductosAgrupados();
           mostrarDetallesVentas();
-        } else {
-          alert('Por favor, selecciona ambas fechas.');
         }
       });
       
-      // Event listener para búsqueda
-      document.getElementById('buscadorVentas').addEventListener('input', (e) => {
-        buscarProductos(e.target.value);
-      });
-      
-      // Event listener para confirmar eliminación
+      // Configurar confirmación de eliminación
       document.getElementById('confirmarEliminarBtn').addEventListener('click', eliminarVenta);
     });
   </script>
