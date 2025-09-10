@@ -870,129 +870,127 @@
       });
     }
 
-    // Agregar producto al carrito
-    function agregarAlCarrito() {
-      $('#form-agregar-producto').on('submit', function(e) {
-        e.preventDefault();
-        
-        const productoId = $('#producto').val();
-        const tipoVenta = $('#tipo-venta').val();
-        const cantidad = parseInt($('#cantidad').val()) || 0;
-        
-        if (!productoId || !tipoVenta || !precioSeleccionado || cantidad <= 0) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Complete todos los campos correctamente'
-          });
-          return;
-        }
-        
-        // Verificar stock disponible
-        if (cantidad > productoSeleccionado.cantidad) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Stock insuficiente',
-            text: `Solo hay ${productoSeleccionado.cantidad} unidades disponibles`
-          });
-          return;
-        }
-        
-        // Calcular subtotal
-        let subtotal = redondearADosDecimales(precioSeleccionado * cantidad);
-        let subtotalUSD = 0;
-        let subtotalBS = 0;
-        
-        if (monedaPrecioSeleccionado === 'USD') {
-          subtotalUSD = subtotal;
-          subtotalBS = convertirUsdABs(subtotal);
-        } else {
-          subtotalBS = subtotal;
-          subtotalUSD = convertirBsAUsd(subtotal);
-        }
-        
-        // Calcular unidades totales
-        let unidades = cantidad;
-        if (tipoVenta === 'mayor') {
-          unidades = productoSeleccionado.cantidad_por_empaque * cantidad;
-        }
-        
-        // Agregar al carrito
-        const itemCarrito = {
-          producto_id: productoSeleccionado.id,
-          nombre: productoSeleccionado.nombre,
-          marca: productoSeleccionado.marca || '',
-          tipo_venta: tipoVenta,
-          cantidad: cantidad,
-          unidades: unidades,
-          precio_unitario: precioSeleccionado,
-          moneda_precio: monedaPrecioSeleccionado,
-          subtotal_usd: subtotalUSD,
-          subtotal_bs: subtotalBS,
-          empaque_mayor: tipoVenta === 'mayor' ? productoSeleccionado.empaque_mayor : 'Unidad',
-          unidades_por_empaque: tipoVenta === 'mayor' ? productoSeleccionado.cantidad_por_empaque : 1
-        };
-        
-        carrito.push(itemCarrito);
-        console.log('Producto agregado al carrito:', itemCarrito);
-        
-        // Actualizar vista del carrito
-        actualizarCarrito();
-        
-        // Limpiar formulario
-        $('#producto').val('').trigger('change');
-        productoSeleccionado = null;
-        precioSeleccionado = null;
-        monedaPrecioSeleccionado = '';
-        limpiarCamposDependientes();
-        
-        // Mostrar mensaje de éxito
-        Swal.fire({
-          icon: 'success',
-          title: 'Producto agregado',
-          text: 'El producto se ha agregado al carrito correctamente',
-          timer: 1500,
-          showConfirmButton: false
-        });
-      });
+
+ // Agregar producto al carrito (normalizado a USD siempre)
+function agregarAlCarrito() {
+  $('#form-agregar-producto').on('submit', function(e) {
+    e.preventDefault();
+
+    const productoId = $('#producto').val();
+    const tipoVenta = $('#tipo-venta').val();
+    const cantidad = parseInt($('#cantidad').val()) || 0;
+    const tasa = obtenerTasaCambio();
+
+    if (!productoId || !tipoVenta || !precioSeleccionado || cantidad <= 0) {
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Complete todos los campos correctamente' });
+      return;
     }
 
-    // Actualizar vista del carrito
-    function actualizarCarrito() {
-      const carritoBody = $('#carrito-body');
-      carritoBody.empty();
-      
-      if (carrito.length === 0) {
-        carritoBody.append('<tr><td colspan="7" class="text-center text-muted">No hay productos en el carrito</td></tr>');
-      } else {
-        carrito.forEach((item, index) => {
-          let detalleUnidades = '';
-          if (item.tipo_venta === 'mayor') {
-            detalleUnidades = `<span class="detalle-unidades">${item.cantidad} ${item.empaque_mayor} × ${item.unidades_por_empaque} unidades = ${item.unidades} unidades</span>`;
-          }
-          
-          const fila = `
-            <tr>
-              <td>${item.nombre}<br><small class="text-muted">${item.marca}</small>${detalleUnidades}</td>
-              <td>${item.tipo_venta === 'mayor' ? 'Al Mayor' : 'Al Detal'}</td>
-              <td>${item.cantidad}</td>
-              <td>${item.unidades}</td>
-              <td>${item.moneda_precio === 'USD' ? 'USD' : 'BS'} ${item.precio_unitario.toFixed(2)}</td>
-              <td>USD ${item.subtotal_usd.toFixed(2)}<br><small class="detalle-unidades">BS ${item.subtotal_bs.toFixed(2)}</small></td>
-              <td>
-                <button type="button" class="btn btn-danger btn-sm" onclick="eliminarDelCarrito(${index})">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </td>
-            </tr>
-          `;
-          carritoBody.append(fila);
-        });
-      }
-      
-      // Actualizar totales
-      actualizarTotales();
+    // Verificar stock disponible
+    if (cantidad > productoSeleccionado.cantidad) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Stock insuficiente',
+        text: `Solo hay ${productoSeleccionado.cantidad} unidades disponibles`
+      });
+      return;
     }
+
+    // Calcular unidades totales
+    let unidades = cantidad;
+    if (tipoVenta === 'mayor') {
+      unidades = productoSeleccionado.cantidad_por_empaque * cantidad;
+    }
+
+    // Normalizar precios
+    let precioUnitarioUSD = 0;
+    let precioUnitarioBS = 0;
+    if (monedaPrecioSeleccionado === 'USD') {
+      precioUnitarioUSD = precioSeleccionado;
+      precioUnitarioBS = precioSeleccionado * tasa;
+    } else {
+      precioUnitarioBS = precioSeleccionado;
+      precioUnitarioUSD = precioSeleccionado / tasa;
+    }
+
+    // Subtotales (en USD base)
+    const subtotalUSD = precioUnitarioUSD * cantidad;
+    const subtotalBS = subtotalUSD * tasa;
+
+    // Agregar al carrito
+    const itemCarrito = {
+      producto_id: productoSeleccionado.id,
+      nombre: productoSeleccionado.nombre,
+      marca: productoSeleccionado.marca || '',
+      tipo_venta: tipoVenta,
+      cantidad,
+      unidades,
+      precio_unitario_usd: precioUnitarioUSD,
+      precio_unitario_bs: precioUnitarioBS,
+      subtotal_usd: subtotalUSD,
+      subtotal_bs: subtotalBS,
+      moneda_precio: 'USD', // Siempre normalizado
+      empaque_mayor: tipoVenta === 'mayor' ? productoSeleccionado.empaque_mayor : 'Unidad',
+      unidades_por_empaque: tipoVenta === 'mayor' ? productoSeleccionado.cantidad_por_empaque : 1
+    };
+
+    carrito.push(itemCarrito);
+    console.log('Producto agregado al carrito (normalizado):', itemCarrito);
+
+    actualizarCarrito();
+
+    // Reset formulario
+    $('#producto').val('').trigger('change');
+    productoSeleccionado = null;
+    precioSeleccionado = null;
+    monedaPrecioSeleccionado = '';
+    limpiarCamposDependientes();
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Producto agregado',
+      text: 'El producto se ha agregado al carrito correctamente',
+      timer: 1500,
+      showConfirmButton: false
+    });
+  });
+}
+
+// Actualizar vista del carrito
+function actualizarCarrito() {
+  const carritoBody = $('#carrito-body');
+  carritoBody.empty();
+
+  if (carrito.length === 0) {
+    carritoBody.append('<tr><td colspan="7" class="text-center text-muted">No hay productos en el carrito</td></tr>');
+  } else {
+    carrito.forEach((item, index) => {
+      let detalleUnidades = '';
+      if (item.tipo_venta === 'mayor') {
+        detalleUnidades = `<span class="detalle-unidades">${item.cantidad} ${item.empaque_mayor} × ${item.unidades_por_empaque} unidades = ${item.unidades} unidades</span>`;
+      }
+
+      const fila = `
+        <tr>
+          <td>${item.nombre}<br><small class="text-muted">${item.marca}</small>${detalleUnidades}</td>
+          <td>${item.tipo_venta === 'mayor' ? 'Al Mayor' : 'Al Detal'}</td>
+          <td>${item.cantidad}</td>
+          <td>${item.unidades}</td>
+          <td>USD ${item.precio_unitario_usd.toFixed(2)}<br><small class="detalle-unidades">BS ${item.precio_unitario_bs.toFixed(2)}</small></td>
+          <td>USD ${item.subtotal_usd.toFixed(2)}<br><small class="detalle-unidades">BS ${item.subtotal_bs.toFixed(2)}</small></td>
+          <td>
+            <button type="button" class="btn btn-danger btn-sm" onclick="eliminarDelCarrito(${index})">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+      carritoBody.append(fila);
+    });
+  }
+
+  actualizarTotales();
+}
 
     // Eliminar producto del carrito
     function eliminarDelCarrito(index) {
@@ -1074,158 +1072,212 @@
       });
     }
 
-    // Actualizar restante por pagar
-    function actualizarRestantePagar() {
-      const totalPagarUSD = parseFloat($('#total-pagar-usd').text().replace('USD. ', '')) || 0;
-      let totalPagadoUSD = 0;
-      
-      // Calcular total pagado en USD
-      $('.metodo-pago').each(function() {
-        const monto = parseFloat($(this).find('.metodo-pago-monto').val()) || 0;
-        const moneda = $(this).find('.metodo-pago-moneda').val();
-        
-        if (moneda === 'BS') {
-          totalPagadoUSD = redondearADosDecimales(totalPagadoUSD + convertirBsAUsd(monto));
-        } else {
-          totalPagadoUSD = redondearADosDecimales(totalPagadoUSD + monto);
-        }
-      });
-      
-      // Calcular restante
-      const restanteUSD = redondearADosDecimales(totalPagarUSD - totalPagadoUSD);
-      const restanteBS = convertirUsdABs(restanteUSD);
-      
-      // Actualizar UI
-      const restanteElement = $('#restante-pagar');
-      restanteElement.text(`Restante por pagar: USD ${restanteUSD.toFixed(2)} (BS ${restanteBS.toFixed(2)})`);
-      
-      // Cambiar color según si está pagado completamente
-      if (sonIgualesMonetariamente(restanteUSD, 0)) {
-        restanteElement.removeClass('restante-pendiente').addClass('pago-completado');
-        restanteElement.html(`<i class="bi bi-check-circle-fill"></i> Pago completado`);
-      } else if (restanteUSD < 0) {
-        restanteElement.removeClass('pago-completado').addClass('restante-pendiente');
-        restanteElement.text(`Cambio a devolver: USD ${Math.abs(restanteUSD).toFixed(2)} (BS ${Math.abs(restanteBS).toFixed(2)})`);
-      } else {
-        restanteElement.removeClass('pago-completado').addClass('restante-pendiente');
-        restanteElement.text(`Restante por pagar: USD ${restanteUSD.toFixed(2)} (BS ${restanteBS.toFixed(2)})`);
-      }
+function actualizarRestantePagar() {
+  const totalPagarUSD = parseFloat($('#total-pagar-usd').text().replace('USD. ', '')) || 0;
+  const totalPagarBS  = parseFloat($('#total-pagar').text().replace('BS. ', '')) || 0;
+
+  let totalPagadoUSD = 0;
+  let totalPagadoBS  = 0;
+  const tasa = obtenerTasaCambio();
+
+  $('.metodo-pago').each(function () {
+    const monto = parseFloat($(this).find('.metodo-pago-monto').val()) || 0;
+    const moneda = $(this).find('.metodo-pago-moneda').val();
+
+    if (moneda === 'BS') {
+      totalPagadoBS  += monto;
+      totalPagadoUSD += monto / tasa;
+    } else {
+      totalPagadoUSD += monto;
+      totalPagadoBS  += monto * tasa;
+    }
+  });
+
+  let restanteUSD = totalPagarUSD - totalPagadoUSD;
+  let restanteBS  = totalPagarBS - totalPagadoBS;
+
+  // Limpieza flotantes
+  if (Math.abs(restanteUSD) < 0.01) restanteUSD = 0;
+  if (Math.abs(restanteBS) < 0.01) restanteBS = 0;
+
+  const restanteElement = $('#restante-pagar');
+
+  if (restanteUSD === 0 && restanteBS === 0) {
+    // ✅ Pago completado
+    restanteElement.removeClass('restante-pendiente').addClass('pago-completado');
+    restanteElement.html(`<i class="bi bi-check-circle-fill"></i> Pago completado`);
+  } else if (restanteUSD < 0 || restanteBS < 0) {
+    // Cambio
+    restanteElement.removeClass('pago-completado').addClass('restante-pendiente');
+    restanteElement.text(
+      `Cambio a devolver: USD ${Math.abs(restanteUSD).toFixed(2)} (BS ${Math.abs(restanteBS).toFixed(2)})`
+    );
+  } else {
+    // Aún falta pagar
+    restanteElement.removeClass('pago-completado').addClass('restante-pendiente');
+    restanteElement.text(
+      `Restante por pagar: USD ${restanteUSD.toFixed(2)} (BS ${restanteBS.toFixed(2)})`
+    );
+  }
+}
+
+function finalizarVenta() {
+  $('#form-finalizar-venta').off('submit').on('submit', async function (e) {
+    e.preventDefault();
+
+    const TOLERANCIA = 0.01;
+
+    function cleanCantidad(n) {
+      if (!isFinite(n)) return 0;
+      if (Math.abs(n) < TOLERANCIA) return 0;
+      return n;
     }
 
-// Finalizar venta
-function finalizarVenta() {
-  $('#form-finalizar-venta').on('submit', async function(e) {
-    e.preventDefault();
-    
-    // Validar que hay productos en el carrito
-    if (carrito.length === 0) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No hay productos en el carrito'
-      });
+    function formatBsDisplay(x) {
+      if (x === null || x === undefined || isNaN(x)) return '0.00';
+      return Number(x).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatUsdDisplay(x) {
+      if (x === null || x === undefined || isNaN(x)) return '0.00';
+      return Number(x).toFixed(2);
+    }
+
+    // --- 1) Validar carrito ---
+    if (!Array.isArray(carrito) || carrito.length === 0) {
+      Swal.fire({ icon: 'error', title: 'Error', text: 'No hay productos en el carrito' });
       return;
     }
-    
-    // Validar fecha
+
+    // --- 2) Validar fecha ---
     const fechaVenta = $('#fecha').val();
     if (!fechaVenta) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Seleccione una fecha para la venta'
-      });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Seleccione una fecha para la venta' });
       return;
     }
-    
-    // Validar métodos de pago
+
+    // --- 3) Recolectar métodos de pago ---
     const metodosPagoActuales = [];
     let hayMetodosInvalidos = false;
-    
-    $('.metodo-pago').each(function() {
-      const tipo = $(this).find('.metodo-pago-tipo').val();
-      const monto = parseFloat($(this).find('.metodo-pago-monto').val()) || 0;
+
+    $('.metodo-pago').each(function () {
+      const tipo   = $(this).find('.metodo-pago-tipo').val();
+      const monto  = parseFloat($(this).find('.metodo-pago-monto').val()) || 0;
       const moneda = $(this).find('.metodo-pago-moneda').val();
-      
+
       if (!tipo || monto <= 0) {
         hayMetodosInvalidos = true;
-        return false; // Salir del each
+        return false;
       }
-      
-      metodosPagoActuales.push({
-        tipo: tipo,
-        monto: monto,
-        moneda: moneda
-      });
+
+      metodosPagoActuales.push({ tipo, monto, moneda });
     });
-    
+
     if (hayMetodosInvalidos || metodosPagoActuales.length === 0) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Complete correctamente todos los métodos de pago'
-      });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Complete correctamente los métodos de pago' });
       return;
     }
-    
-    // Validar que el pago cubra el total
-    const totalPagarUSD = parseFloat($('#total-pagar-usd').text().replace('USD. ', '')) || 0;
+
+    // --- 4) Totales desde carrito ---
+    let totalPagarUSD = 0;
+    let totalPagarBS  = 0;
+
+    for (const it of carrito) {
+      totalPagarUSD += Number(it.subtotal_usd || 0);
+      totalPagarBS  += Number(it.subtotal_bs || 0);
+    }
+
+    $('#total-pagar-usd').text(`USD. ${formatUsdDisplay(totalPagarUSD)}`);
+    $('#total-pagar').text(`BS. ${formatBsDisplay(totalPagarBS)}`);
+
+    // --- 5) Calcular pagos ---
+    const tasa = obtenerTasaCambio();
     let totalPagadoUSD = 0;
-    
-    metodosPagoActuales.forEach(metodo => {
-      if (metodo.moneda === 'BS') {
-        totalPagadoUSD = redondearADosDecimales(totalPagadoUSD + convertirBsAUsd(metodo.monto));
+    let totalPagadoBS  = 0;
+
+    const pagosProcesados = metodosPagoActuales.map(m => {
+      const monto = Number(m.monto || 0);
+      let monto_usd = 0;
+      let monto_bs  = 0;
+
+      if (m.moneda === 'BS') {
+        monto_bs = monto;
+        monto_usd = monto / tasa;
       } else {
-        totalPagadoUSD = redondearADosDecimales(totalPagadoUSD + metodo.monto);
+        monto_usd = monto;
+        monto_bs  = monto * tasa;
       }
+
+      totalPagadoUSD += monto_usd;
+      totalPagadoBS  += monto_bs;
+
+      return {
+        tipo: m.tipo,
+        moneda_original: m.moneda,
+        monto_original: monto,
+        monto_usd,
+        monto_bs
+      };
     });
-    
-    // Permitir solo si el pago es igual o mayor al total
-    if (totalPagadoUSD < totalPagarUSD) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Pago insuficiente',
-        text: 'El monto pagado no cubre el total de la venta'
-      });
+
+    // --- 6) Restante ---
+    let restanteUSD = cleanCantidad(totalPagarUSD - totalPagadoUSD);
+    let restanteBS  = cleanCantidad(totalPagarBS - totalPagadoBS);
+
+    const restanteElement = $('#restante-pagar');
+    if (restanteUSD === 0 && restanteBS === 0) {
+      restanteElement.removeClass('restante-pendiente').addClass('pago-completado');
+      restanteElement.html(`<i class="bi bi-check-circle-fill"></i> Pago completado`);
+    } else if (restanteUSD < 0 || restanteBS < 0) {
+      restanteElement.removeClass('pago-completado').addClass('restante-pendiente');
+      restanteElement.text(
+        `Cambio a devolver: USD ${Math.abs(restanteUSD).toFixed(2)} (BS ${formatBsDisplay(Math.abs(restanteBS))})`
+      );
+    } else {
+      restanteElement.removeClass('pago-completado').addClass('restante-pendiente');
+      restanteElement.text(
+        `Restante por pagar: USD ${formatUsdDisplay(restanteUSD)} (BS ${formatBsDisplay(restanteBS)})`
+      );
+    }
+
+    if (restanteUSD > TOLERANCIA || restanteBS > TOLERANCIA) {
+      Swal.fire({ icon: 'error', title: 'Pago insuficiente', text: 'El monto pagado no cubre el total de la venta' });
       return;
     }
-    
-    // Generar lista detallada de productos para la confirmación
+
+    // --- 7) Confirmación ---
     const productosTexto = carrito.map(item => {
       const marca = item.marca ? ` (${item.marca})` : '';
+      const precioUnitario = Number(item.precio_unitario || 0); // 👈 evitar NaN
       let detalle = `• ${item.nombre}${marca}<br>&nbsp;&nbsp;${item.tipo_venta === 'mayor' ? 'Al Mayor' : 'Al Detal'} - ${item.cantidad}`;
-      
       if (item.tipo_venta === 'mayor') {
         detalle += ` × ${item.unidades_por_empaque} unidades = ${item.unidades} unidades`;
       }
-      
-      detalle += ` × ${item.moneda_precio === 'USD' ? 'USD' : 'BS'} ${item.precio_unitario.toFixed(2)} = BS ${item.subtotal_bs.toFixed(2)}`;
-      
+      detalle += ` × ${item.moneda_precio} ${precioUnitario.toFixed(2)} = USD ${formatUsdDisplay(item.subtotal_usd)} (BS ${formatBsDisplay(item.subtotal_bs)})`;
       return detalle;
     }).join('<br>');
-    
-    // Obtener métodos de pago como texto para mostrar
-    const metodosPagoTexto = metodosPagoActuales.map(pago => 
-      `• ${pago.tipo}: ${pago.moneda} ${pago.monto.toFixed(2)}`
-    ).join('<br>');
-    
-    // Mostrar confirmación con detalles
+
+    const metodosPagoTexto = pagosProcesados.map(p => {
+      const original = `${p.moneda_original} ${Number(p.monto_original).toFixed(2)}`;
+      return `• ${p.tipo}: ${original} → USD ${formatUsdDisplay(p.monto_usd)} / BS ${formatBsDisplay(p.monto_bs)}`;
+    }).join('<br>');
+
     const confirmacion = await Swal.fire({
       title: '¿Confirmar venta?',
       html: `
-        <div style="text-align: left; font-size: 0.95em;">
+        <div style="text-align:left; font-size:0.95em;">
           <p><strong>📅 Fecha:</strong> ${formatearFechaLocal(fechaVenta)}</p>
           <p><strong>🛒 Productos (${carrito.length} items):</strong></p>
-          <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px; background-color: #f8f9fa;">
+          <div style="max-height:200px; overflow-y:auto; border:1px solid #ddd; padding:10px; border-radius:5px; background:#f8f9fa;">
             ${productosTexto}
           </div>
-          <p style="margin-top: 15px;"><strong>💳 Métodos de pago:</strong></p>
-          <div style="border: 1px solid #ddd; padding: 10px; border-radius: 5px; background-color: #f8f9fa;">
+          <p style="margin-top:10px;"><strong>💳 Métodos de pago:</strong></p>
+          <div style="border:1px solid #ddd; padding:10px; border-radius:5px; background:#f8f9fa;">
             ${metodosPagoTexto}
           </div>
-          <div style="margin-top: 15px; padding: 10px; background-color: #e8f5e8; border-radius: 5px; border: 1px solid #c3e6c3;">
+          <div style="margin-top:15px; padding:10px; background:#e8f5e8; border-radius:5px; border:1px solid #c3e6c3;">
             <strong>💰 Total a pagar:</strong><br>
-            USD ${totalPagarUSD.toFixed(2)} (BS ${convertirUsdABs(totalPagarUSD).toFixed(2)})
+            USD ${formatUsdDisplay(totalPagarUSD)} (BS ${formatBsDisplay(totalPagarBS)})
           </div>
         </div>
       `,
@@ -1235,147 +1287,141 @@ function finalizarVenta() {
       cancelButtonText: 'Cancelar',
       confirmButtonColor: '#3105f1',
       cancelButtonColor: '#6c757d',
-      width: '600px'
+      width: '640px'
     });
-    
-    if (!confirmacion.isConfirmed) {
-      return;
-    }
-    
-    // Mostrar loading
+
+    if (!confirmacion.isConfirmed) return;
+
+    // --- 8) Guardar en BD ---
     $('#loadingOverlay').show();
-    
     try {
-      // Obtener la tasa de cambio actual
-      const tasaCambio = obtenerTasaCambio();
-      
-      // Crear el string tipo_pago con los métodos de pago únicos
-      const tiposPagoUnicos = [...new Set(metodosPagoActuales.map(pago => pago.tipo))];
-      const tipoPagoString = tiposPagoUnicos.join(', ');
-      
-      // 1. Crear la venta en la base de datos
-      const { data: venta, error: errorVenta } = await supabaseClient
+      const tiposPagoUnicos = [...new Set(metodosPagoActuales.map(p => p.tipo))];
+      const tipoPagoString  = tiposPagoUnicos.join(', ');
+
+      // Insertar venta
+      const { data: ventaInsertada, error: errorVenta } = await supabaseClient
         .from('ventas')
         .insert([{
           fecha: fechaVenta,
-          total: convertirUsdABs(totalPagarUSD),
-          tasa_cambio: tasaCambio,
+          tasa_cambio: tasa,
           total_usd: totalPagarUSD,
+          total: totalPagarBS,
           tipo_pago: tipoPagoString
         }])
-        .select();
-      
-      if (errorVenta) {
-        throw new Error('Error al crear venta: ' + errorVenta.message);
-      }
-      
-      const ventaId = venta[0].id;
-      console.log('Venta creada con ID:', ventaId);
-      
-      // 2. Agregar los productos de la venta
+        .select()
+        .single();
+
+      if (errorVenta) throw errorVenta;
+      const ventaId = ventaInsertada.id;
+
+      // Insertar detalles
+      const detalles = carrito.map(item => ({
+        venta_id: ventaId,
+        producto_id: item.producto_id,
+        tipo_venta: item.tipo_venta,
+        cantidad: item.unidades,
+        unidades: item.unidades,
+        precio_unitario: Number(item.precio_unitario || 0),
+        moneda_precio: item.moneda_precio,
+        subtotal_usd: item.subtotal_usd,
+        subtotal_bs: item.subtotal_bs
+      }));
+
+      const { error: errorDetalles } = await supabaseClient.from('detalles_venta').insert(detalles);
+      if (errorDetalles) throw errorDetalles;
+
+      // Actualizar stock
       for (const item of carrito) {
-        const { error: errorDetalle } = await supabaseClient
-          .from('detalles_venta')
-          .insert([{
-            venta_id: ventaId,
-            producto_id: item.producto_id,
-            tipo_venta: item.tipo_venta,
-            cantidad: item.unidades,
-            precio_unitario: item.precio_unitario
-          }]);
-        
-        if (errorDetalle) {
-          throw new Error('Error al agregar detalle de venta: ' + errorDetalle.message);
-        }
-        
-        // 3. Actualizar el stock del producto
         const producto = todosLosProductos.find(p => p.id === item.producto_id);
         if (producto) {
+          const nuevaCantidad = Number(producto.cantidad) - Number(item.unidades || 0);
           const { error: errorStock } = await supabaseClient
             .from('productos')
-            .update({ cantidad: producto.cantidad - item.unidades })
+            .update({ cantidad: nuevaCantidad })
             .eq('id', item.producto_id);
-          
-          if (errorStock) {
-            throw new Error('Error al actualizar stock: ' + errorStock.message);
-          }
+          if (errorStock) throw errorStock;
         }
       }
-      
-      // 4. Agregar los métodos de pago
-      for (const metodo of metodosPagoActuales) {
-        let montoUSD = 0;
-        let montoBS = 0;
-        
-        if (metodo.moneda === 'USD') {
-          montoUSD = metodo.monto;
-          montoBS = convertirUsdABs(metodo.monto);
-        } else {
-          montoBS = metodo.monto;
-          montoUSD = convertirBsAUsd(metodo.monto);
-        }
-        
-        const { error: errorPago } = await supabaseClient
-          .from('pagos_venta')
-          .insert([{
-            venta_id: ventaId,
-            metodo: metodo.tipo,
-            monto_bs: montoBS,
-            monto_usd: montoUSD
-          }]);
-        
-        if (errorPago) {
-          throw new Error('Error al registrar pago: ' + errorPago.message);
-        }
+
+      // Insertar pagos
+      for (const p of pagosProcesados) {
+        const { error: errorPago } = await supabaseClient.from('pagos_venta').insert([{
+          venta_id: ventaId,
+          metodo: p.tipo,
+          monto_bs: p.monto_bs,
+          monto_usd: p.monto_usd
+        }]);
+        if (errorPago) throw errorPago;
       }
-      
-      // Ocultar loading
+
       $('#loadingOverlay').hide();
-      
-      // Mostrar mensaje de éxito
+
       await Swal.fire({
         icon: 'success',
         title: 'Venta registrada',
         html: `
-          <div style="text-align: left;">
+          <div style="text-align:left;">
             <p>La venta se ha registrado correctamente</p>
             <p><strong>Fecha:</strong> ${formatearFechaLocal(fechaVenta)}</p>
-            <p><strong>Total:</strong> USD ${totalPagarUSD.toFixed(2)} (BS ${convertirUsdABs(totalPagarUSD).toFixed(2)})</p>
+            <p><strong>Total:</strong> USD ${formatUsdDisplay(totalPagarUSD)} (BS ${formatBsDisplay(totalPagarBS)})</p>
           </div>
         `,
         confirmButtonColor: '#3105f1'
       });
-      
-      // Limpiar carrito y formulario
-      carrito.length = 0; // Vaciar array sin reasignar
+
+      // Reset
+      carrito.length = 0;
       actualizarCarrito();
-      $('#metodos-pago').empty(); // Limpiar métodos de pago del DOM
+      $('#metodos-pago').empty();
       $('#form-finalizar-venta')[0].reset();
       $('#fecha').val(obtenerFechaActual());
-      $('#restante-pagar').text('Restante por pagar: USD 0.00 (BS 0.00)').removeClass('pago-completado').addClass('restante-pendiente');
-      
-      // Recargar productos para actualizar stock
+      $('#restante-pagar').text('Restante por pagar: USD 0.00 (BS 0)')
+        .removeClass('pago-completado').addClass('restante-pendiente');
       await cargarProductos();
-      
+
     } catch (error) {
-      // Ocultar loading
       $('#loadingOverlay').hide();
-      
       console.error('Error al finalizar venta:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al registrar la venta: ' + error.message
-      });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Error al registrar la venta: ' + (error.message || error) });
     }
   });
 }
+
+
+//fin de finalizar venta
+
+async function cargarUltimaTasaCambio() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('ventas')
+      .select('tasa_cambio')
+      .order('fecha', { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+
+    if (data && data.length > 0 && data[0].tasa_cambio) {
+      console.log('Última tasa encontrada:', data[0].tasa_cambio);
+      $('#tasa-cambio').val(data[0].tasa_cambio); // colocar tasa en el input
+    } else {
+      console.warn('No se encontraron ventas, usando valor por defecto.');
+      // Puedes dejar el input como está o setear un valor fijo
+      $('#tasa-cambio').val(140);  
+    }
+  } catch (err) {
+    console.error('Error al cargar la última tasa de cambio:', err.message);
+    // en caso de error, no se modifica el valor por defecto
+  }
+}
+
+
     // Inicializar la aplicación
     $(document).ready(function() {
       console.log('Inicializando aplicación...');
-      
+       cargarUltimaTasaCambio();
       // Establecer fecha actual
       $('#fecha').val(obtenerFechaActual());
+      
       
       // Cargar productos
       cargarProductos().then(() => {
