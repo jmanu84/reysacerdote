@@ -6,8 +6,9 @@
   <title>Dashboard de Ventas</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   <style>
-    
     :root {
       --verde-farmacia: #05642d;
       --fondo-oscuro: #1a1a1a;
@@ -367,6 +368,32 @@
       color: #28a745; /* Verde para bolívares */
     }
     
+    /* Botón de imprimir reporte */
+    .btn-imprimir {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-imprimir:hover {
+      background-color: #5a6268;
+    }
+
+    .btn-imprimir-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 15px;
+    }
+    
     /* Ajustes para pantallas pequeñas */
     @media (max-width: 768px) {
       .productos-grid {
@@ -413,6 +440,10 @@
       
       .summary-card {
         min-width: 100%;
+      }
+
+      .btn-imprimir-container {
+        justify-content: center;
       }
     }
     
@@ -522,6 +553,7 @@
           <div class="filtros-fechas" id="filtrosFechas" style="display: none;">
             <div class="filtros-rapidos-fechas">
               <button class="btn-filtro active" data-fecha-filtro="all">Todas las fechas</button>
+              <button class="btn-filtro" data-fecha-filtro="semana">Esta semana</button>
               <button class="btn-filtro" data-fecha-filtro="mes">Este mes</button>
             </div>
             
@@ -553,6 +585,13 @@
             <button class="btn-filtro" data-filter="Efectivo">Efectivo</button>
             <button class="btn-filtro" data-filter="Pago móvil">Pago Móvil</button>
             <button class="btn-filtro" data-filter="Dólares">Dólares</button>
+          </div>
+          
+          <!-- Botón para imprimir reporte -->
+          <div class="btn-imprimir-container">
+            <button class="btn-imprimir" id="btnImprimir">
+              <i class="fas fa-print"></i> Imprimir Reporte
+            </button>
           </div>
           
           <div class="search-box">
@@ -640,7 +679,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-   // Configuración de Supabase
+  // Configuración de Supabase
     const SUPABASE_URL = 'https://rirfvhvlmytnpqkcpxbx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpcmZ2aHZsbXl0bnBxa2NweGJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0ODE2NDUsImV4cCI6MjA3MjA1NzY0NX0.5JLGuOIWNvKIESJG26JLOgRVCu0jVoH0ELZjQ63gV48';
      
@@ -728,228 +767,322 @@
       });
     }
 
-async function cargarDatos() {
-  const loadingIndicator = document.getElementById('loadingIndicator');
-  const tableContainer   = document.getElementById('tableContainer');
-  const productosGrid    = document.getElementById('productosGrid');
-  const emptyMessage     = document.getElementById('emptyMessage');
-  const errorMessage     = document.getElementById('errorMessage');
-  const summaryCards     = document.getElementById('summaryCards');
-  const filtrosRapidos   = document.getElementById('filtrosRapidos');
-  const filtrosFechas    = document.getElementById('filtrosFechas');
-
-  try {
-    // Mostrar loading
-    loadingIndicator.style.display = 'block';
-    tableContainer.style.display   = 'none';
-    productosGrid.style.display    = 'none';
-    emptyMessage.style.display     = 'none';
-    errorMessage.style.display     = 'none';
-    summaryCards.style.display     = 'none';
-    filtrosRapidos.style.display   = 'none';
-    filtrosFechas.style.display    = 'none';
-
-    // Obtener datos en paralelo
-    const [productosResponse, ventasResponse, detallesResponse, pagosResponse] = await Promise.all([
-      supabaseClient.from('productos').select('id, nombre, marca, cantidad_por_empaque, precio_venta_1_usd'),
-      supabaseClient.from('ventas').select('*').order('fecha', { ascending: false }),
-      supabaseClient.from('detalles_venta').select('*'),
-      supabaseClient.from('pagos_venta').select('*')
-    ]);
-
-    if (productosResponse.error) throw productosResponse.error;
-    if (ventasResponse.error)   throw ventasResponse.error;
-    if (detallesResponse.error) throw detallesResponse.error;
-    if (pagosResponse.error)    throw pagosResponse.error;
-
-    // Crear mapa de productos
-    productosMap = {};
-    productosResponse.data.forEach(producto => {
-      productosMap[producto.id] = {
-        nombre: producto.nombre,
-        marca: producto.marca || 'Sin marca',
-        cantidad_por_empaque: producto.cantidad_por_empaque || 1,
-        precio_usd: producto.precio_venta_1_usd || 0
-      };
-    });
-
-    // Guardar datos globales
-    ventasCompletas = ventasResponse.data || [];
-    detallesVentas  = detallesResponse.data || [];
-    pagosVentas     = pagosResponse.data || [];
-
-    // Ordenar ventas (más recientes primero)
-    ventasCompletas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-    // --- Calcular estadísticas ---
-
-    // Totales desde DETALLES (fuente de verdad)
-    const montoTotalUsd = detallesVentas.reduce((acc, d) => acc + (d.subtotal_usd || 0), 0);
-    const montoTotalBs  = detallesVentas.reduce((acc, d) => acc + (d.subtotal_bs || 0), 0);
-
-    // Número de ventas distintas
-    const totalVentas = new Set(detallesVentas.map(d => d.venta_id)).size;
-
-    // Montos por tipo de pago (pagos_venta)
-    let ventasPuntoBs   = 0;
-    let ventasEfectivoBs= 0;
-    let ventasMovilBs   = 0;
-    let ventasDolaresUsd= 0;
-
-    pagosVentas.forEach(pago => {
-      switch (pago.metodo) {
-        case 'Punto de venta':
-          ventasPuntoBs += pago.monto_bs || 0;
-          break;
-        case 'Efectivo':
-          ventasEfectivoBs += pago.monto_bs || 0;
-          break;
-        case 'Pago móvil':
-          ventasMovilBs += pago.monto_bs || 0;
-          break;
-        case 'Dólares':
-          ventasDolaresUsd += pago.monto_usd || 0;
-          break;
+    // Función para filtrar ventas por fecha
+    function filtrarVentasPorFecha(ventas) {
+      const ahora = new Date();
+      
+      switch (filtroFechaTipo) {
+        case 'hoy':
+          const inicioHoy = inicioDelDia(ahora);
+          const finHoy = finDelDia(ahora);
+          return ventas.filter(venta => {
+            const fechaVenta = new Date(venta.fecha);
+            return fechaVenta >= inicioHoy && fechaVenta <= finHoy;
+          });
+          
+        case 'semana':
+          const inicioSemana = inicioDeSemana();
+          const finSemana = finDeSemana();
+          return ventas.filter(venta => {
+            const fechaVenta = new Date(venta.fecha);
+            return fechaVenta >= inicioSemana && fechaVenta <= finSemana;
+          });
+          
+        case 'mes':
+          const inicioMes = inicioDeMes();
+          const finMes = finDeMes();
+          return ventas.filter(venta => {
+            const fechaVenta = new Date(venta.fecha);
+            return fechaVenta >= inicioMes && fechaVenta <= finMes;
+          });
+          
+        case 'rango':
+          if (!fechaInicioRango || !fechaFinRango) return ventas;
+          
+          const inicioRango = inicioDelDia(new Date(fechaInicioRango));
+          const finRango = finDelDia(new Date(fechaFinRango));
+          
+          return ventas.filter(venta => {
+            const fechaVenta = new Date(venta.fecha);
+            return fechaVenta >= inicioRango && fechaVenta <= finRango;
+          });
+          
+        default: // 'all'
+          return ventas;
       }
-    });
-
-    // --- Actualizar tarjetas ---
-    const fmtUSD = x => `$ ${Number(x).toFixed(2)}`;
-    const fmtBS  = x => `Bs ${Number(x).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-    document.getElementById('totalVentas').textContent    = totalVentas;
-    document.getElementById('montoTotalUSD').textContent  = fmtUSD(montoTotalUsd);
-    document.getElementById('montoTotalBS').textContent   = fmtBS(montoTotalBs);
-    document.getElementById('ventasPunto').textContent    = fmtBS(ventasPuntoBs);
-    document.getElementById('ventasEfectivo').textContent = fmtBS(ventasEfectivoBs);
-    document.getElementById('ventasMovil').textContent    = fmtBS(ventasMovilBs);
-    document.getElementById('ventasDolares').textContent  = fmtUSD(ventasDolaresUsd);
-
-    summaryCards.style.display = 'flex';
-    filtrosRapidos.style.display = 'flex';
-    filtrosFechas.style.display  = 'flex';
-    loadingIndicator.style.display = 'none';
-
-    // Mostrar detalles si existen ventas
-    if (detallesVentas.length > 0) {
-      mostrarProductosAgrupados();
-      productosGrid.style.display = 'grid';
-      mostrarDetallesVentas();
-      tableContainer.style.display = 'block';
-    } else {
-      emptyMessage.style.display = 'block';
     }
 
-  } catch (error) {
-    console.error('Error al cargar datos:', error);
-    loadingIndicator.style.display = 'none';
-    errorMessage.style.display = 'block';
-  }
-}
-
-
-//aqui termina cargar datos
-
-function mostrarProductosAgrupados() {
-  const productosGrid = document.getElementById('productosGrid');
-  productosGrid.innerHTML = '';
-
-  // Crear array de detalles con información de venta asociada
-  const detallesConVenta = detallesVentas.map(detalle => {
-    const venta = ventasCompletas.find(v => v.id === detalle.venta_id);
-    return { ...detalle, venta };
-  });
-
-  // Filtrar según los filtros seleccionados
-  let detallesFiltrados = aplicarFiltros(detallesConVenta);
+    // Función para calcular estadísticas de ventas
+   // Función para calcular estadísticas de ventas - VERSIÓN CORREGIDA
+function calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados) {
+  // Calcular total de ventas
+  const totalVentas = new Set(detallesFiltrados.map(d => d.venta_id)).size;
   
-  // Aplicar filtro de búsqueda por texto
-  detallesFiltrados = filtrarPorTexto(detallesFiltrados);
+  // Calcular montos totales (USD y BS) desde los detalles
+  const montoTotalUsdDetalles = detallesFiltrados.reduce((acc, d) => acc + (d.subtotal_usd || 0), 0);
+  const montoTotalBsDetalles = detallesFiltrados.reduce((acc, d) => acc + (d.subtotal_bs || 0), 0);
+  
+  // Calcular montos por tipo de pago
+  let ventasPuntoBs = 0;
+  let ventasEfectivoBs = 0;
+  let ventasMovilBs = 0;
+  let ventasDolaresUsd = 0;
+  
+  // CORRECCIÓN: También sumar los pagos en dólares al monto total en USD
+  let montoTotalUsdPagos = 0;
 
-  // Agrupar por producto
-  const productosAgrupados = {};
-
-  detallesFiltrados.forEach(item => {
-    if (!productosAgrupados[item.producto_id]) {
-      productosAgrupados[item.producto_id] = {
-        nombre: productosMap[item.producto_id]?.nombre,
-        marca: productosMap[item.producto_id]?.marca || 'Sin marca',
-        id: item.producto_id,
-        unidades: 0,          // 🔹 ahora acumulamos unidades
-        subtotal_bs: 0,
-        subtotal_usd: 0
-      };
+  pagosFiltrados.forEach(pago => {
+    switch (pago.metodo) {
+      case 'Punto de venta':
+        ventasPuntoBs += pago.monto_bs || 0;
+        break;
+      case 'Efectivo':
+        ventasEfectivoBs += pago.monto_bs || 0;
+        break;
+      case 'Pago móvil':
+        ventasMovilBs += pago.monto_bs || 0;
+        break;
+      case 'Dólares':
+        ventasDolaresUsd += pago.monto_usd || 0;
+        // CORRECCIÓN: Sumar los pagos en dólares al total en USD
+        montoTotalUsdPagos += pago.monto_usd || 0;
+        break;
     }
-
-    productosAgrupados[item.producto_id].unidades += item.unidades || 0;
-    productosAgrupados[item.producto_id].subtotal_usd += item.subtotal_usd || 0;
-    productosAgrupados[item.producto_id].subtotal_bs  += item.subtotal_bs  || 0;
   });
-
-  // Convertir a array y ordenar por subtotal (mayor a menor)
-  const productosArray = Object.values(productosAgrupados);
-  productosArray.sort((a, b) => b.subtotal_bs - a.subtotal_bs);
-
-  // Crear tarjetas para cada producto
-  productosArray.forEach(producto => {
-    const card = document.createElement('div');
-    card.className = 'producto-card';
-
-    card.innerHTML = `
-      <h3 class="producto-nombre">${producto.nombre}</h3>
-      <table class="producto-tabla">
-        <tr>
-          <th>Marca</th>
-          <td>${producto.marca}</td>
-        </tr>
-        <tr>
-          <th>Unidades Vendidas</th>
-          <td>${producto.unidades}</td>
-        </tr>
-        <tr>
-          <th>Total USD</th>
-          <td class="moneda-usd">$ ${producto.subtotal_usd.toFixed(2)}</td>
-        </tr>
-        <tr>
-          <th>Total Bs</th>
-          <td class="moneda-bs">Bs ${producto.subtotal_bs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-        </tr>
-      </table>
-      <div class="producto-total">
-        <div class="total-label">Total Vendido</div>
-        <div class="total-value moneda-bs">Bs ${producto.subtotal_bs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-      </div>
-    `;
-
-    productosGrid.appendChild(card);
-  });
+  
+  // CORRECCIÓN: El monto total en USD debe incluir tanto los detalles como los pagos en dólares
+  const montoTotalUsd = montoTotalUsdDetalles + montoTotalUsdPagos;
+  
+  return {
+    totalVentas,
+    montoTotalUsd, // Ahora incluye correctamente los pagos en dólares
+    montoTotalBs: montoTotalBsDetalles,
+    ventasPuntoBs,
+    ventasEfectivoBs,
+    ventasMovilBs,
+    ventasDolaresUsd
+  };
 }
 
-    function mostrarDetallesVentas() {
+    // Función para actualizar las tarjetas de resumen
+    function actualizarResumenVentas(estadisticas) {
+      const fmtUSD = x => `$ ${Number(x).toFixed(2)}`;
+      const fmtBS = x => `Bs ${Number(x).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      document.getElementById('totalVentas').textContent = estadisticas.totalVentas;
+      document.getElementById('montoTotalUSD').textContent = fmtUSD(estadisticas.montoTotalUsd);
+      document.getElementById('montoTotalBS').textContent = fmtBS(estadisticas.montoTotalBs);
+      document.getElementById('ventasPunto').textContent = fmtBS(estadisticas.ventasPuntoBs);
+      document.getElementById('ventasEfectivo').textContent = fmtBS(estadisticas.ventasEfectivoBs);
+      document.getElementById('ventasMovil').textContent = fmtBS(estadisticas.ventasMovilBs);
+      document.getElementById('ventasDolares').textContent = fmtUSD(estadisticas.ventasDolaresUsd);
+    }
+
+    async function cargarDatos() {
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const tableContainer   = document.getElementById('tableContainer');
+      const productosGrid    = document.getElementById('productosGrid');
+      const emptyMessage     = document.getElementById('emptyMessage');
+      const errorMessage     = document.getElementById('errorMessage');
+      const summaryCards     = document.getElementById('summaryCards');
+      const filtrosRapidos   = document.getElementById('filtrosRapidos');
+      const filtrosFechas    = document.getElementById('filtrosFechas');
+
+      try {
+        // Mostrar loading
+        loadingIndicator.style.display = 'block';
+        tableContainer.style.display   = 'none';
+        productosGrid.style.display    = 'none';
+        emptyMessage.style.display     = 'none';
+        errorMessage.style.display     = 'none';
+        summaryCards.style.display     = 'none';
+        filtrosRapidos.style.display   = 'none';
+        filtrosFechas.style.display    = 'none';
+
+        // Obtener datos en paralelo
+        const [productosResponse, ventasResponse, detallesResponse, pagosResponse] = await Promise.all([
+          supabaseClient.from('productos').select('id, nombre, marca, cantidad_por_empaque, precio_venta_1_usd'),
+          supabaseClient.from('ventas').select('*').order('fecha', { ascending: false }),
+          supabaseClient.from('detalles_venta').select('*'),
+          supabaseClient.from('pagos_venta').select('*')
+        ]);
+
+        if (productosResponse.error) throw productosResponse.error;
+        if (ventasResponse.error)   throw ventasResponse.error;
+        if (detallesResponse.error) throw detallesResponse.error;
+        if (pagosResponse.error)    throw pagosResponse.error;
+
+        // Crear mapa de productos
+        productosMap = {};
+        productosResponse.data.forEach(producto => {
+          productosMap[producto.id] = {
+            nombre: producto.nombre,
+            marca: producto.marca || 'Sin marca',
+            cantidad_por_empaque: producto.cantidad_por_empaque || 1,
+            precio_usd: producto.precio_venta_1_usd || 0
+          };
+        });
+
+        // Guardar datos globales
+        ventasCompletas = ventasResponse.data || [];
+        detallesVentas  = detallesResponse.data || [];
+        pagosVentas     = pagosResponse.data || [];
+
+        // Ordenar ventas (más recientes primero)
+        ventasCompletas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        // Aplicar filtros iniciales
+        aplicarFiltrosYActualizarVistas();
+
+        summaryCards.style.display = 'flex';
+        filtrosRapidos.style.display = 'flex';
+        filtrosFechas.style.display  = 'flex';
+        loadingIndicator.style.display = 'none';
+
+      } catch (error) {
+        console.error('Error al cargar datos:', error);
+        loadingIndicator.style.display = 'none';
+        errorMessage.style.display = 'block';
+      }
+    }
+
+    // Función para aplicar filtros y actualizar vistas sin recargar datos
+    function aplicarFiltrosYActualizarVistas() {
+      // Filtrar ventas por fecha
+      const ventasFiltradas = filtrarVentasPorFecha(ventasCompletas);
+      
+      // Filtrar detalles y pagos según las ventas filtradas
+      const ventasFiltradasIds = ventasFiltradas.map(v => v.id);
+      const detallesFiltrados = detallesVentas.filter(d => ventasFiltradasIds.includes(d.venta_id));
+      const pagosFiltrados = pagosVentas.filter(p => ventasFiltradasIds.includes(p.venta_id));
+      
+      // Calcular estadísticas con los datos filtrados
+      const estadisticas = calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados);
+      
+      // Actualizar tarjetas de resumen
+      actualizarResumenVentas(estadisticas);
+
+      // Mostrar detalles si existen ventas
+      if (detallesVentas.length > 0) {
+        mostrarProductosAgrupados(detallesFiltrados);
+        document.getElementById('productosGrid').style.display = 'grid';
+        mostrarDetallesVentas(detallesFiltrados);
+        document.getElementById('tableContainer').style.display = 'block';
+        document.getElementById('emptyMessage').style.display = 'none';
+      } else {
+        document.getElementById('emptyMessage').style.display = 'block';
+        document.getElementById('productosGrid').style.display = 'none';
+        document.getElementById('tableContainer').style.display = 'none';
+      }
+    }
+
+    function mostrarProductosAgrupados(detallesFiltrados) {
+      const productosGrid = document.getElementById('productosGrid');
+      productosGrid.innerHTML = '';
+
+      // Crear array de detalles con información de venta asociada
+      const detallesConVenta = detallesFiltrados.map(detalle => {
+        const venta = ventasCompletas.find(v => v.id === detalle.venta_id);
+        return { ...detalle, venta };
+      });
+
+      // Filtrar según los filtros seleccionados
+      let detallesFiltradosConFiltros = aplicarFiltros(detallesConVenta);
+      
+      // Aplicar filtro de búsqueda por texto
+      detallesFiltradosConFiltros = filtrarPorTexto(detallesFiltradosConFiltros);
+
+      // Agrupar por producto
+      const productosAgrupados = {};
+
+      detallesFiltradosConFiltros.forEach(item => {
+        if (!productosAgrupados[item.producto_id]) {
+          productosAgrupados[item.producto_id] = {
+            nombre: productosMap[item.producto_id]?.nombre,
+            marca: productosMap[item.producto_id]?.marca || 'Sin marca',
+            id: item.producto_id,
+            unidades: 0,
+            subtotal_bs: 0,
+            subtotal_usd: 0
+          };
+        }
+
+        productosAgrupados[item.producto_id].unidades += item.unidades || 0;
+        productosAgrupados[item.producto_id].subtotal_usd += item.subtotal_usd || 0;
+        productosAgrupados[item.producto_id].subtotal_bs  += item.subtotal_bs  || 0;
+      });
+
+      // Convertir a array y ordenar por subtotal (mayor a menor)
+      const productosArray = Object.values(productosAgrupados);
+      productosArray.sort((a, b) => b.subtotal_bs - a.subtotal_bs);
+
+      // Crear tarjetas para cada producto
+      productosArray.forEach(producto => {
+        const card = document.createElement('div');
+        card.className = 'producto-card';
+
+        card.innerHTML = `
+          <h3 class="producto-nombre">${producto.nombre}</h3>
+          <table class="producto-tabla">
+            <tr>
+              <th>Marca</th>
+              <td>${producto.marca}</td>
+            </tr>
+            <tr>
+              <th>Unidades Vendidas</th>
+              <td>${producto.unidades}</td>
+            </tr>
+            <tr>
+              <th>Total USD</th>
+              <td class="moneda-usd">$ ${producto.subtotal_usd.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <th>Total Bs</th>
+              <td class="moneda-bs">Bs ${producto.subtotal_bs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            </tr>
+          </table>
+          <div class="producto-total">
+            <div class="total-label">Total Vendido</div>
+            <div class="total-value moneda-bs">Bs ${producto.subtotal_bs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+          </div>
+        `;
+
+        productosGrid.appendChild(card);
+      });
+    }
+
+    function mostrarDetallesVentas(detallesFiltrados) {
       const tablaVentas = document.getElementById('tablaVentas');
       tablaVentas.innerHTML = '';
       
       // Crear array de detalles con información de venta asociada
-      const detallesConVenta = detallesVentas.map(detalle => {
+      const detallesConVenta = detallesFiltrados.map(detalle => {
         const venta = ventasCompletas.find(v => v.id === detalle.venta_id);
         return { ...detalle, venta };
       });
       
       // Filtrar según los filtros seleccionados
-      let detallesFiltrados = aplicarFiltros(detallesConVenta);
+      let detallesFiltradosConFiltros = aplicarFiltros(detallesConVenta);
       
       // Aplicar filtro de búsqueda por texto
-      detallesFiltrados = filtrarPorTexto(detallesFiltrados);
+      detallesFiltradosConFiltros = filtrarPorTexto(detallesFiltradosConFiltros);
       
       // Ordenar por fecha (más recientes primero)
-      detallesFiltrados.sort((a, b) => new Date(b.venta.fecha) - new Date(a.venta.fecha));
+      detallesFiltradosConFiltros.sort((a, b) => new Date(b.venta.fecha) - new Date(a.venta.fecha));
       
       // Mostrar en la tabla
-      detallesFiltrados.forEach(item => {
+      detallesFiltradosConFiltros.forEach(item => {
         const productoInfo = productosMap[item.producto_id];
         if (!productoInfo) return;
         
         const fila = document.createElement('tr');
+        
+        // Determinar la moneda para mostrar el subtotal
+        const esDolares = item.venta.tipo_pago === 'Dólares';
+        const monedaClass = esDolares ? 'moneda-usd' : 'moneda-bs';
+        const subtotalFormateado = esDolares ? 
+          `$ ${item.subtotal_usd.toFixed(2)}` : 
+          `Bs ${item.subtotal_bs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         
         fila.innerHTML = `
           <td>${formatearFecha(item.venta.fecha)}</td>
@@ -958,7 +1091,7 @@ function mostrarProductosAgrupados() {
           <td>${item.venta.tipo_pago}</td>
           <td>${item.unidades}</td>
           <td class="moneda-usd">$ ${(item.subtotal_usd / item.unidades).toFixed(2)}</td>
-          <td class="moneda-bs">Bs ${item.subtotal_bs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+          <td class="${monedaClass}">${subtotalFormateado}</td>
           <td>
             <button class="btn-eliminar" data-venta-id="${item.venta_id}">
               <i class="fas fa-trash-alt"></i>
@@ -979,59 +1112,12 @@ function mostrarProductosAgrupados() {
     }
     
     function aplicarFiltros(detalles) {
-      // Primero aplicar filtro de fecha
-      let filtrados = filtrarPorFecha(detalles);
-      
-      // Luego aplicar filtro de tipo de pago
+      // Aplicar filtro de tipo de pago
       if (filtroActual !== 'all') {
-        filtrados = filtrados.filter(item => item.venta.tipo_pago === filtroActual);
+        return detalles.filter(item => item.venta.tipo_pago === filtroActual);
       }
       
-      return filtrados;
-    }
-    
-    function filtrarPorFecha(detalles) {
-      const ahora = new Date();
-      
-      switch (filtroFechaTipo) {
-        case 'hoy':
-          const inicioHoy = inicioDelDia(ahora);
-          const finHoy = finDelDia(ahora);
-          return detalles.filter(item => {
-            const fechaVenta = new Date(item.venta.fecha);
-            return fechaVenta >= inicioHoy && fechaVenta <= finHoy;
-          });
-          
-        case 'semana':
-          const inicioSemana = inicioDeSemana();
-          const finSemana = finDeSemana();
-          return detalles.filter(item => {
-            const fechaVenta = new Date(item.venta.fecha);
-            return fechaVenta >= inicioSemana && fechaVenta <= finSemana;
-          });
-          
-        case 'mes':
-          const inicioMes = inicioDeMes();
-          const finMes = finDeMes();
-          return detalles.filter(item => {
-            const fechaVenta = new Date(item.venta.fecha);
-            return fechaVenta >= inicioMes && fechaVenta <= finMes;
-          });
-          
-        case 'rango':
-          if (!fechaInicioRango || !fechaFinRango) return detalles;
-          
-          const inicioRango = inicioDelDia(new Date(fechaInicioRango));
-          const finRango = finDelDia(new Date(fechaFinRango));
-          
-          return detalles.filter(item => {
-            const fechaVenta = new Date(item.venta.fecha);
-            return fechaVenta >= inicioRango && fechaVenta <= finRango;
-          });
-          
-        default: // 'all'
-          return detalles;
-      }
+      return detalles;
     }
     
     function mostrarModalConfirmacion(ventaId) {
@@ -1080,6 +1166,108 @@ function mostrarProductosAgrupados() {
         alert('Error al eliminar la venta. Por favor, inténtalo de nuevo.');
       }
     }
+
+    // Función para generar el reporte en PDF
+    function generarReportePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      // Obtener ventas filtradas por fecha
+      const ventasFiltradas = filtrarVentasPorFecha(ventasCompletas);
+      
+      // Filtrar detalles y pagos según las ventas filtradas
+      const ventasFiltradasIds = ventasFiltradas.map(v => v.id);
+      const detallesFiltrados = detallesVentas.filter(d => ventasFiltradasIds.includes(d.venta_id));
+      const pagosFiltrados = pagosVentas.filter(p => ventasFiltradasIds.includes(p.venta_id));
+      
+      // Calcular estadísticas con los datos filtrados
+      const estadisticas = calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados);
+      
+      // Título del reporte
+      doc.setFontSize(18);
+      doc.text('Reporte de Ventas - Rey Sacerdote', 105, 15, { align: 'center' });
+      
+      // Información del rango de fechas
+      doc.setFontSize(12);
+      let textoFecha = 'Todas las fechas';
+      
+      if (filtroFechaTipo === 'hoy') {
+        textoFecha = 'Hoy';
+      } else if (filtroFechaTipo === 'semana') {
+        textoFecha = 'Esta semana';
+      } else if (filtroFechaTipo === 'mes') {
+        textoFecha = 'Este mes';
+      } else if (fechaInicioRango && fechaFinRango) {
+        textoFecha = `Desde ${formatearFecha(fechaInicioRango)} hasta ${formatearFecha(fechaFinRango)}`;
+      }
+      
+      doc.text(`Fecha: ${textoFecha}`, 105, 25, { align: 'center' });
+      
+      // Resumen de ventas
+      doc.setFontSize(14);
+      doc.text('Resumen de Ventas', 14, 40);
+      
+      doc.setFontSize(12);
+      doc.text(`Total de ventas: ${estadisticas.totalVentas}`, 14, 50);
+      doc.text(`Monto total (USD): $ ${estadisticas.montoTotalUsd.toFixed(2)}`, 14, 60);
+      doc.text(`Monto total (BS): Bs ${estadisticas.montoTotalBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 14, 70);
+      
+      // Detalles de ventas por tipo de pago
+      doc.text('Ventas por tipo de pago:', 14, 85);
+      doc.text(`Punto de Venta: Bs ${estadisticas.ventasPuntoBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 20, 95);
+      doc.text(`Efectivo: Bs ${estadisticas.ventasEfectivoBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 20, 105);
+      doc.text(`Pago Móvil: Bs ${estadisticas.ventasMovilBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 20, 115);
+      doc.text(`Dólares: $ ${estadisticas.ventasDolaresUsd.toFixed(2)}`, 20, 125);
+      
+      // Tabla de ventas detalladas
+      doc.setFontSize(14);
+      doc.text('Detalles de Ventas', 14, 140);
+      
+      // Preparar datos para la tabla
+      const detallesConInfo = detallesFiltrados.map(detalle => {
+        const venta = ventasCompletas.find(v => v.id === detalle.venta_id);
+        const productoInfo = productosMap[detalle.producto_id];
+        
+        // Determinar la moneda para mostrar el subtotal
+        const esDolares = venta.tipo_pago === 'Dólares';
+        const subtotalFormateado = esDolares ? 
+          `$ ${detalle.subtotal_usd.toFixed(2)}` : 
+          `Bs ${detalle.subtotal_bs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        
+        return {
+          fecha: venta.fecha,
+          producto: productoInfo?.nombre || 'Producto no encontrado',
+          marca: productoInfo?.marca || 'Sin marca',
+          tipoPago: venta.tipo_pago,
+          cantidad: detalle.unidades,
+          precioUnitario: (detalle.subtotal_usd / detalle.unidades).toFixed(2),
+          subtotal: subtotalFormateado
+        };
+      });
+      
+      // Generar tabla
+      doc.autoTable({
+        startY: 145,
+        head: [['Fecha', 'Producto', 'Marca', 'Tipo Pago', 'Cantidad', 'Precio Unit.', 'Subtotal']],
+        body: detallesConInfo.map(item => [
+          formatearFecha(item.fecha),
+          item.producto,
+          item.marca,
+          item.tipoPago,
+          item.cantidad,
+          `$ ${item.precioUnitario}`,
+          item.subtotal
+        ]),
+        theme: 'grid',
+        headStyles: {
+          fillColor: [30, 136, 229]
+        }
+      });
+      
+      // Guardar el PDF
+      const fechaReporte = new Date().toISOString().slice(0, 10);
+      doc.save(`reporte_ventas_${fechaReporte}.pdf`);
+    }
     
     // Event listeners
     document.addEventListener('DOMContentLoaded', () => {
@@ -1096,9 +1284,8 @@ function mostrarProductosAgrupados() {
           // Actualizar filtro
           filtroActual = btn.getAttribute('data-filter');
           
-          // Actualizar vistas
-          mostrarProductosAgrupados();
-          mostrarDetallesVentas();
+          // Aplicar filtros y actualizar vistas sin recargar datos
+          aplicarFiltrosYActualizarVistas();
         });
       });
       
@@ -1120,9 +1307,8 @@ function mostrarProductosAgrupados() {
           fechaInicioRango = null;
           fechaFinRango = null;
           
-          // Actualizar vistas
-          mostrarProductosAgrupados();
-          mostrarDetallesVentas();
+          // Aplicar filtros y actualizar vistas sin recargar datos
+          aplicarFiltrosYActualizarVistas();
         });
       });
       
@@ -1143,9 +1329,8 @@ function mostrarProductosAgrupados() {
         // Actualizar estado activo
         document.querySelectorAll('[data-fecha-filtro]').forEach(b => b.classList.remove('active'));
         
-        // Actualizar vistas
-        mostrarProductosAgrupados();
-        mostrarDetallesVentas();
+        // Aplicar filtros y actualizar vistas sin recargar datos
+        aplicarFiltrosYActualizarVistas();
       });
       
       document.getElementById('aplicarRangoMobile').addEventListener('click', () => {
@@ -1164,9 +1349,8 @@ function mostrarProductosAgrupados() {
         // Actualizar estado activo
         document.querySelectorAll('[data-fecha-filtro]').forEach(b => b.classList.remove('active'));
         
-        // Actualizar vistas
-        mostrarProductosAgrupados();
-        mostrarDetallesVentas();
+        // Aplicar filtros y actualizar vistas sin recargar datos
+        aplicarFiltrosYActualizarVistas();
       });
       
       // Event listener para confirmar eliminación
@@ -1175,18 +1359,24 @@ function mostrarProductosAgrupados() {
       // Event listener para el buscador
       document.getElementById('buscadorVentas').addEventListener('input', (e) => {
         textoBusqueda = e.target.value;
-        mostrarProductosAgrupados();
-        mostrarDetallesVentas();
+        
+        // Aplicar filtros y actualizar vistas sin recargar datos
+        aplicarFiltrosYActualizarVistas();
       });
       
       // Event listener para cambio de pestaña
       document.getElementById('detalles-tab').addEventListener('click', () => {
-        mostrarDetallesVentas();
+        // Aplicar filtros y actualizar vistas sin recargar datos
+        aplicarFiltrosYActualizarVistas();
       });
       
       document.getElementById('productos-tab').addEventListener('click', () => {
-        mostrarProductosAgrupados();
+        // Aplicar filtros y actualizar vistas sin recargar datos
+        aplicarFiltrosYActualizarVistas();
       });
+      
+      // Event listener para el botón de imprimir
+      document.getElementById('btnImprimir').addEventListener('click', generarReportePDF);
     });
   </script>
 </body>
