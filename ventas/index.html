@@ -15,6 +15,7 @@
       --texto-blanco: #ffffff;
       --azul-ventas: #1e88e5;
       --rojo-eliminar: #dc3545;
+      --naranja-biopago: #28a745; /* Color naranja para Biopago */
     }
     
     body {
@@ -367,6 +368,10 @@
     .moneda-bs {
       color: #28a745; /* Verde para bolívares */
     }
+
+    .moneda-biopago {
+      color: var(--naranja-biopago); /* Naranja para Biopago */
+    }
     
     /* Botón de imprimir reporte */
     .btn-imprimir {
@@ -547,12 +552,24 @@
                 <div class="summary-value moneda-usd" id="ventasDolares">$ 0.00</div>
               </div>
             </div>
+
+            <!-- Nueva tarjeta para Biopago -->
+            <div class="summary-card">
+              <div class="summary-icon">
+                <i class="fas fa-credit-card"></i>
+              </div>
+              <div class="summary-content">
+                <div class="summary-title">Biopago</div>
+                <div class="summary-value moneda-biopago" id="ventasBiopago">Bs 0.00</div>
+              </div>
+            </div>
           </div>
 
           <!-- Filtros de fechas -->
           <div class="filtros-fechas" id="filtrosFechas" style="display: none;">
             <div class="filtros-rapidos-fechas">
               <button class="btn-filtro active" data-fecha-filtro="all">Todas las fechas</button>
+              <button class="btn-filtro" data-fecha-filtro="hoy">Hoy</button>
               <button class="btn-filtro" data-fecha-filtro="semana">Esta semana</button>
               <button class="btn-filtro" data-fecha-filtro="mes">Este mes</button>
             </div>
@@ -585,6 +602,8 @@
             <button class="btn-filtro" data-filter="Efectivo">Efectivo</button>
             <button class="btn-filtro" data-filter="Pago móvil">Pago Móvil</button>
             <button class="btn-filtro" data-filter="Dólares">Dólares</button>
+            <!-- Nuevo filtro para Biopago -->
+            <button class="btn-filtro" data-filter="Biopago">Biopago</button>
           </div>
           
           <!-- Botón para imprimir reporte -->
@@ -812,57 +831,61 @@
       }
     }
 
-    // Función para calcular estadísticas de ventas
-   // Función para calcular estadísticas de ventas - VERSIÓN CORREGIDA
-function calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados) {
-  // Calcular total de ventas
-  const totalVentas = new Set(detallesFiltrados.map(d => d.venta_id)).size;
-  
-  // Calcular montos totales (USD y BS) desde los detalles
-  const montoTotalUsdDetalles = detallesFiltrados.reduce((acc, d) => acc + (d.subtotal_usd || 0), 0);
-  const montoTotalBsDetalles = detallesFiltrados.reduce((acc, d) => acc + (d.subtotal_bs || 0), 0);
-  
-  // Calcular montos por tipo de pago
-  let ventasPuntoBs = 0;
-  let ventasEfectivoBs = 0;
-  let ventasMovilBs = 0;
-  let ventasDolaresUsd = 0;
-  
-  // CORRECCIÓN: También sumar los pagos en dólares al monto total en USD
-  let montoTotalUsdPagos = 0;
+    // Función para calcular estadísticas de ventas - VERSIÓN CORREGIDA
+    function calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados) {
+      // Calcular total de ventas
+      const totalVentas = new Set(detallesFiltrados.map(d => d.venta_id)).size;
+      
+      // Calcular montos totales (USD y BS) desde los detalles
+      const montoTotalUsdDetalles = detallesFiltrados.reduce((acc, d) => acc + (d.subtotal_usd || 0), 0);
+      const montoTotalBsDetalles = detallesFiltrados.reduce((acc, d) => acc + (d.subtotal_bs || 0), 0);
+      
+      // Calcular montos por tipo de pago
+      let ventasPuntoBs = 0;
+      let ventasEfectivoBs = 0;
+      let ventasMovilBs = 0;
+      let ventasDolaresUsd = 0;
+      let ventasBiopagoBs = 0; // Nuevo: Monto para Biopago
+      
+      // CORRECCIÓN: También sumar los pagos en dólares al monto total en USD
+      let montoTotalUsdPagos = 0;
 
-  pagosFiltrados.forEach(pago => {
-    switch (pago.metodo) {
-      case 'Punto de venta':
-        ventasPuntoBs += pago.monto_bs || 0;
-        break;
-      case 'Efectivo':
-        ventasEfectivoBs += pago.monto_bs || 0;
-        break;
-      case 'Pago móvil':
-        ventasMovilBs += pago.monto_bs || 0;
-        break;
-      case 'Dólares':
-        ventasDolaresUsd += pago.monto_usd || 0;
-        // CORRECCIÓN: Sumar los pagos en dólares al total en USD
-        montoTotalUsdPagos += pago.monto_usd || 0;
-        break;
+      pagosFiltrados.forEach(pago => {
+        switch (pago.metodo) {
+          case 'Punto de venta':
+            ventasPuntoBs += pago.monto_bs || 0;
+            break;
+          case 'Efectivo':
+            ventasEfectivoBs += pago.monto_bs || 0;
+            break;
+          case 'Pago móvil':
+            ventasMovilBs += pago.monto_bs || 0;
+            break;
+          case 'Dólares':
+            ventasDolaresUsd += pago.monto_usd || 0;
+            // CORRECCIÓN: Sumar los pagos en dólares al total en USD
+            montoTotalUsdPagos += pago.monto_usd || 0;
+            break;
+          case 'Biopago': // Nuevo caso para Biopago
+            ventasBiopagoBs += pago.monto_bs || 0;
+            break;
+        }
+      });
+      
+      // CORRECCIÓN: El monto total en USD debe incluir tanto los detalles como los pagos en dólares
+      const montoTotalUsd = montoTotalUsdDetalles + montoTotalUsdPagos;
+      
+      return {
+        totalVentas,
+        montoTotalUsd, // Ahora incluye correctamente los pagos en dólares
+        montoTotalBs: montoTotalBsDetalles,
+        ventasPuntoBs,
+        ventasEfectivoBs,
+        ventasMovilBs,
+        ventasDolaresUsd,
+        ventasBiopagoBs // Nuevo: Incluir Biopago en las estadísticas
+      };
     }
-  });
-  
-  // CORRECCIÓN: El monto total en USD debe incluir tanto los detalles como los pagos en dólares
-  const montoTotalUsd = montoTotalUsdDetalles + montoTotalUsdPagos;
-  
-  return {
-    totalVentas,
-    montoTotalUsd, // Ahora incluye correctamente los pagos en dólares
-    montoTotalBs: montoTotalBsDetalles,
-    ventasPuntoBs,
-    ventasEfectivoBs,
-    ventasMovilBs,
-    ventasDolaresUsd
-  };
-}
 
     // Función para actualizar las tarjetas de resumen
     function actualizarResumenVentas(estadisticas) {
@@ -876,6 +899,8 @@ function calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados) {
       document.getElementById('ventasEfectivo').textContent = fmtBS(estadisticas.ventasEfectivoBs);
       document.getElementById('ventasMovil').textContent = fmtBS(estadisticas.ventasMovilBs);
       document.getElementById('ventasDolares').textContent = fmtUSD(estadisticas.ventasDolaresUsd);
+      // Nuevo: Actualizar tarjeta de Biopago
+      document.getElementById('ventasBiopago').textContent = fmtBS(estadisticas.ventasBiopagoBs || 0);
     }
 
     async function cargarDatos() {
@@ -1012,7 +1037,7 @@ function calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados) {
         productosAgrupados[item.producto_id].subtotal_bs  += item.subtotal_bs  || 0;
       });
 
-      // Convertir a array y ordenar por subtotal (mayor a menor)
+      // Convertir to array y ordenar por subtotal (mayor a menor)
       const productosArray = Object.values(productosAgrupados);
       productosArray.sort((a, b) => b.subtotal_bs - a.subtotal_bs);
 
@@ -1079,7 +1104,8 @@ function calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados) {
         
         // Determinar la moneda para mostrar el subtotal
         const esDolares = item.venta.tipo_pago === 'Dólares';
-        const monedaClass = esDolares ? 'moneda-usd' : 'moneda-bs';
+        const esBiopago = item.venta.tipo_pago === 'Biopago'; // Nuevo: Verificar si es Biopago
+        const monedaClass = esDolares ? 'moneda-usd' : (esBiopago ? 'moneda-biopago' : 'moneda-bs');
         const subtotalFormateado = esDolares ? 
           `$ ${item.subtotal_usd.toFixed(2)}` : 
           `Bs ${item.subtotal_bs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -1218,10 +1244,12 @@ function calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados) {
       doc.text(`Efectivo: Bs ${estadisticas.ventasEfectivoBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 20, 105);
       doc.text(`Pago Móvil: Bs ${estadisticas.ventasMovilBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 20, 115);
       doc.text(`Dólares: $ ${estadisticas.ventasDolaresUsd.toFixed(2)}`, 20, 125);
+      // Nuevo: Añadir Biopago al reporte PDF
+      doc.text(`Biopago: Bs ${(estadisticas.ventasBiopagoBs || 0).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 20, 135);
       
       // Tabla de ventas detalladas
       doc.setFontSize(14);
-      doc.text('Detalles de Ventas', 14, 140);
+      doc.text('Detalles de Ventas', 14, 150);
       
       // Preparar datos para la tabla
       const detallesConInfo = detallesFiltrados.map(detalle => {
@@ -1247,7 +1275,7 @@ function calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados) {
       
       // Generar tabla
       doc.autoTable({
-        startY: 145,
+        startY: 155,
         head: [['Fecha', 'Producto', 'Marca', 'Tipo Pago', 'Cantidad', 'Precio Unit.', 'Subtotal']],
         body: detallesConInfo.map(item => [
           formatearFecha(item.fecha),
