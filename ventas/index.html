@@ -18,6 +18,7 @@
       --rojo-eliminar: #dc3545;
       --naranja-biopago: #ff9800;
     }
+    
     body { background-color: #000; color: var(--texto-blanco); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     .container-mobile { max-width: 100%; padding: 15px; }
     .btn-submit { background-color: #05642d; color: #fff; padding: 10px 30px; border: none; transition: all 0.3s ease; }
@@ -86,6 +87,8 @@
     .info-paginacion { font-size: 0.9rem; color: #aaa; }
     @media (max-width: 768px) { .productos-grid { grid-template-columns: 1fr; } .filtros-fechas { flex-direction: column; } .filtros-rapidos-fechas { flex-wrap: wrap; justify-content: center; } .rango-fechas { flex-direction: column; align-items: stretch; } .rango-fechas-horizontal { display: none; } .rango-fechas-vertical { display: flex; flex-direction: column; gap: 10px; } .table-ventas th, .table-ventas td { padding: 8px 5px; font-size: 0.9rem; } .table-ventas th { font-size: 0.95rem; } .summary-card { min-width: 100%; } .btn-imprimir-container { justify-content: center; } .paginacion { flex-wrap: wrap; } }
     @media (min-width: 769px) { .rango-fechas-vertical { display: none; } .rango-fechas-horizontal { display: flex; align-items: center; gap: 10px; } }
+
+    
   </style>
 </head>
 <body>
@@ -95,6 +98,13 @@
         <img alt="Logo" src="logo.png" class="img-fluid" height="150px" width="350px">
       </div>
     </div>
+    <div class="row">
+    <div class="col-12 text-center">
+        <h3 style="background-color: #dc3545; color: white; padding: 15px; margin: 20px 0; border-radius: 5px; font-weight: bold;">
+            EL SISTEMA SERÁ DESACTIVADO - FAVOR PONERSE AL DÍA CON EL PAGO
+        </h3>
+    </div>
+</div>
     
     <div class="card-ventas">
       <h2 class="title-ventas">REPORTE DE VENTAS</h2>
@@ -198,7 +208,7 @@
           </div>
           
           <div class="btn-imprimir-container">
-            <button class="btn-imprimir" id="btnImprimir">
+            <button class="btn-imprimir" id="btnImprimir" disabled>
               <i class="fas fa-print"></i> Imprimir Reporte
             </button>
           </div>

@@ -1419,6 +1419,25 @@ async function cargarUltimaTasaCambio() {
     // Inicializar la aplicación
     $(document).ready(function() {
       console.log('Inicializando aplicación...');
+       // Mostrar ventana emergente de aviso de pago
+       Swal.fire({
+        title: 'AVISO IMPORTANTE',
+        html: `
+          <div style="text-align: center; font-size: 1.1em;">
+            <p><strong>Estimado Usuario:</strong></p>
+            <p>Aún no se ha realizado el pago por la implementación del sistema.</p>
+            <p><strong>Favor ponerse al día.</strong></p>
+            <p style="color: #dc3545; font-weight: bold;">El sistema será desactivado.</p>
+          </div>
+        `,
+        icon: 'warning',
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#dc3545',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showCloseButton: false,
+        width: '500px'
+      });
        cargarUltimaTasaCambio();
       // Establecer fecha actual
       $('#fecha').val(obtenerFechaActual());
