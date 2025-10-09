@@ -1420,28 +1420,28 @@ async function cargarUltimaTasaCambio() {
     $(document).ready(function() {
       console.log('Inicializando aplicación...');
        // Mostrar ventana emergente de aviso de pago
-       Swal.fire({
-        title: 'AVISO IMPORTANTE',
-        html: `
-          <div style="text-align: center; font-size: 1.1em;">
-            <p><strong>Estimado Usuario:</strong></p>
-            <p>Aún no se ha realizado el pago por la implementación del sistema.</p>
-            <p><strong>Favor ponerse al día.</strong></p>
-            <p style="color: #dc3545; font-weight: bold;">El sistema esta desactivado.</p>
-          </div>
-        `,
-        icon: 'warning',
-        showConfirmButton: false,
-        showCancelButton: false,
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        allowEnterKey: false,
-        backdrop: true,
-        width: '500px',
-        didOpen: () => {
-        document.body.style.overflow = 'hidden';
-      }
-      });
+       //Swal.fire({
+       // title: 'AVISO IMPORTANTE',
+       // html: `
+       //   <div style="text-align: center; font-size: 1.1em;">
+       //     <p><strong>Estimado Usuario:</strong></p>
+       //     <p>Aún no se ha realizado el pago por la implementación del sistema.</p>
+       //     <p><strong>Favor ponerse al día.</strong></p>
+       //     <p style="color: #dc3545; font-weight: bold;">El sistema esta desactivado.</p>
+       //   </div>
+       // `,
+       // icon: 'warning',
+       // showConfirmButton: false,
+       // showCancelButton: false,
+       // allowOutsideClick: false,
+       // allowEscapeKey: false,
+       // allowEnterKey: false,
+       // backdrop: true,
+       // width: '500px',
+       // didOpen: () => {
+       // document.body.style.overflow = 'hidden';
+      //}
+      //});
        cargarUltimaTasaCambio();
       // Establecer fecha actual
       $('#fecha').val(obtenerFechaActual());
