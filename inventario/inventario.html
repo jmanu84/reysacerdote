@@ -254,6 +254,15 @@
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+
+    .is-invalid {
+      border-color: #dc3545 !important;
+      box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    
+    .form-text-danger {
+      color: #dc3545 !important;
+    }
   </style>
 </head>
 <body>
@@ -289,6 +298,7 @@
               <th>Variante</th>
               <th>Presentación</th>
               <th>Cant. Ingresada</th>
+              <th>N° de Factura</th>
               <th>Precio Venta</th>
               <th>Opciones</th>
             </tr>
@@ -375,6 +385,13 @@
               <input type="number" class="form-control" id="edit-unit-count" min="0" required>
             </div>
 
+            <!-- Número de Factura -->
+            <div class="mb-3">
+              <label for="edit-invoice-number" class="form-label">Número de Factura</label>
+              <input type="text" class="form-control" id="edit-invoice-number" placeholder="Ej: F12345-ABC" required>
+              <div id="edit-invoice-feedback" class="form-text" style="display:none;"></div>
+            </div>
+
             <!-- Tasa de cambio Bs a USD -->
             <div class="mb-3">
               <label for="edit-tasa-cambio" class="form-label">Tasa de Cambio (BS a USD)</label>
@@ -397,38 +414,47 @@
               <div class="col-md-6 mb-3">
                 <div class="price-card">
                   <div class="price-header">
-                    <span class="price-title">Precio de venta 1 (USD)</span>
+                    <span class="price-title">Precio de venta 1 (USD - Físico)</span>
                   </div>
                   <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-1" placeholder="0.00" required data-bs-target="edit-sale-price-1-bs">
                   <div class="usd-conversion">
-                    <small>Bs: <span id="edit-sale-price-1-bs">0.00</span></small>
+                    <small>BS: <span id="edit-sale-price-1-bs">0.00</span></small>
                   </div>
                 </div>
                 <div class="price-card">
                   <div class="price-header">
-                    <span class="price-title">Precio de venta 2 (Bs)</span>
+                    <span class="price-title">Precio de venta 2 (USD - BCV)</span>
                   </div>
-                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-2" placeholder="0.00" data-usd-target="edit-sale-price-2-usd">
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-2" placeholder="0.00" required data-bs-target="edit-sale-price-2-bs">
                   <div class="usd-conversion">
-                    <small>USD: <span id="edit-sale-price-2-usd">0.00</span></small>
+                    <small>BS: <span id="edit-sale-price-2-bs">0.00</span></small>
                   </div>
                 </div>
                 <div class="price-card">
                   <div class="price-header">
-                    <span class="price-title">Precio de venta 3 (Bs)</span>
+                    <span class="price-title">Precio de venta 3 (Bs - Efectivo)</span>
                   </div>
-                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-3" placeholder="0.00" data-usd-target="edit-sale-price-3-usd">
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-3" placeholder="0.00" readonly data-usd-target="edit-sale-price-3-usd">
                   <div class="usd-conversion">
                     <small>USD: <span id="edit-sale-price-3-usd">0.00</span></small>
                   </div>
                 </div>
                 <div class="price-card">
                   <div class="price-header">
-                    <span class="price-title">Precio de venta 4 (Bs)</span>
+                    <span class="price-title">Precio de venta 4 (Bs - Punto)</span>
                   </div>
-                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-4" placeholder="0.00" data-usd-target="edit-sale-price-4-usd">
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-4" placeholder="0.00" readonly data-usd-target="edit-sale-price-4-usd">
                   <div class="usd-conversion">
                     <small>USD: <span id="edit-sale-price-4-usd">0.00</span></small>
+                  </div>
+                </div>
+                <div class="price-card">
+                  <div class="price-header">
+                    <span class="price-title">Precio de venta 5 (Bs - Unidad)</span>
+                  </div>
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-5" placeholder="0.00" readonly data-usd-target="edit-sale-price-5-usd">
+                  <div class="usd-conversion">
+                    <small>USD: <span id="edit-sale-price-5-usd">0.00</span></small>
                   </div>
                 </div>
               </div>
@@ -497,16 +523,19 @@
           empaque_mayor: "Caja",
           cantidad_por_empaque: 50,
           cantidad: 25,
+          numero_factura: "F12345-ABC",
           precio_compra: 70.00,
           precio_venta_1: 140.00,
           precio_venta_2: 168.00,
           precio_venta_3: 196.00,
           precio_venta_4: 224.00,
+          precio_venta_5: 240.00,
           precio_compra_usd: 0.50,
           precio_venta_1_usd: 1.00,
           precio_venta_2_usd: 1.20,
           precio_venta_3_usd: 1.40,
           precio_venta_4_usd: 1.60,
+          precio_venta_5_usd: 1.71,
           tasa_cambio: 140,
           fecha_ingreso: "2025-01-15"
         },
@@ -519,16 +548,19 @@
           empaque_mayor: "Paca",
           cantidad_por_empaque: 12,
           cantidad: 8,
+          numero_factura: "F67890-XYZ",
           precio_compra: 490.00,
           precio_venta_1: 838.60,
           precio_venta_2: 910.00,
           precio_venta_3: 980.00,
-          precio_venta_4: null,
+          precio_venta_4: 1130.00,
+          precio_venta_5: 94.17,
           precio_compra_usd: 3.50,
           precio_venta_1_usd: 5.99,
           precio_venta_2_usd: 6.50,
           precio_venta_3_usd: 7.00,
-          precio_venta_4_usd: null,
+          precio_venta_4_usd: 8.07,
+          precio_venta_5_usd: 0.67,
           tasa_cambio: 140,
           fecha_ingreso: "2025-01-10"
         }
@@ -637,6 +669,7 @@
           <td>${producto.variante || 'N/A'}</td>
           <td>${producto.presentacion_unitaria || 'N/A'}</td>
           <td ${stockClass}>${producto.cantidad || 0}</td>
+          <td>${producto.numero_factura || 'N/A'}</td>
           <td>Bs ${parseFloat(producto.precio_venta_1 || 0).toFixed(2)}</td>
           <td>
             <button type="button" class="btn btn-warning btn-sm btn-editar" data-id="${producto.id}" title="Editar">
@@ -708,30 +741,38 @@
     // ==================== FUNCIÓN PARA ACTUALIZAR PRECIOS ====================
     function actualizarPrecios() {
       const tasaCambio = parseFloat(document.getElementById('edit-tasa-cambio').value) || 1;
-      const priceInputs = document.querySelectorAll('#modalEditarProducto .price-input');
-      
-      priceInputs.forEach(input => {
-        const inputValue = parseFloat(input.value) || 0;
-        
-        // USD → BS (para precio compra y venta 1)
-        const bsTargetId = input.getAttribute('data-bs-target');
-        if (bsTargetId) {
-          const bsValue = inputValue * tasaCambio;
-          const bsElement = document.getElementById(bsTargetId);
-          if (bsElement) {
-            bsElement.textContent = bsValue.toFixed(2);
-          }
-        }
-        
-        // BS → USD (para ventas 2, 3, 4)
-        const usdTargetId = input.getAttribute('data-usd-target');
-        if (usdTargetId) {
-          const usdValue = inputValue / tasaCambio;
-          const usdElement = document.getElementById(usdTargetId);
-          if (usdElement) {
-            usdElement.textContent = usdValue.toFixed(2);
-          }
-        }
+      const purchaseUsd = parseFloat(document.getElementById('edit-purchase-price').value) || 0;
+      const sale1Usd = parseFloat(document.getElementById('edit-sale-price-1').value) || 0;
+      const sale2Usd = parseFloat(document.getElementById('edit-sale-price-2').value) || 0; // BCV USD
+      const packageQty = parseFloat(document.getElementById('edit-package-quantity').value) || 1;
+
+      // Mostrar equivalencias USD->Bs para compra, venta1, venta2
+      const mapBsTargets = [
+        { value: purchaseUsd, target: 'edit-purchase-price-bs' },
+        { value: sale1Usd, target: 'edit-sale-price-1-bs' },
+        { value: sale2Usd, target: 'edit-sale-price-2-bs' }
+      ];
+      mapBsTargets.forEach(({ value, target }) => {
+        const el = document.getElementById(target);
+        if (el) el.textContent = (value * tasaCambio).toFixed(2);
+      });
+
+      // Calcular precios 3, 4, 5 en Bs
+      const sale3Bs = sale2Usd * tasaCambio; // Efectivo
+      const sale4Bs = sale3Bs + 150; // Punto
+      const sale5Bs = packageQty > 0 ? (sale4Bs / packageQty) : 0; // Unidad
+
+      // Escribir en inputs y mostrar equivalencias en USD
+      const writeAndShow = [
+        { inputId: 'edit-sale-price-3', value: sale3Bs, usdTarget: 'edit-sale-price-3-usd' },
+        { inputId: 'edit-sale-price-4', value: sale4Bs, usdTarget: 'edit-sale-price-4-usd' },
+        { inputId: 'edit-sale-price-5', value: sale5Bs, usdTarget: 'edit-sale-price-5-usd' }
+      ];
+      writeAndShow.forEach(({ inputId, value, usdTarget }) => {
+        const input = document.getElementById(inputId);
+        if (input) input.value = value ? value.toFixed(2) : '';
+        const usdEl = document.getElementById(usdTarget);
+        if (usdEl) usdEl.textContent = tasaCambio ? (value / tasaCambio).toFixed(2) : '0.00';
       });
     }
 
@@ -776,14 +817,16 @@
         
         document.getElementById("edit-package-quantity").value = producto.cantidad_por_empaque || '';
         document.getElementById("edit-unit-count").value = producto.cantidad || 0;
+        document.getElementById("edit-invoice-number").value = producto.numero_factura || '';
         document.getElementById("edit-tasa-cambio").value = producto.tasa_cambio || 140;
         
-        // Precios (cargar en USD para compra y venta 1)
+        // Precios (cargar en USD para compra y venta 1 y 2)
         document.getElementById("edit-purchase-price").value = producto.precio_compra_usd || 0;
         document.getElementById("edit-sale-price-1").value = producto.precio_venta_1_usd || 0;
-        document.getElementById("edit-sale-price-2").value = producto.precio_venta_2 || '';
+        document.getElementById("edit-sale-price-2").value = producto.precio_venta_2_usd || '';
         document.getElementById("edit-sale-price-3").value = producto.precio_venta_3 || '';
         document.getElementById("edit-sale-price-4").value = producto.precio_venta_4 || '';
+        document.getElementById("edit-sale-price-5").value = producto.precio_venta_5 || '';
         
         document.getElementById("edit-entry-date").value = producto.fecha_ingreso || new Date().toISOString().split('T')[0];
         
@@ -824,7 +867,8 @@
       const tasaCambio = parseFloat(document.getElementById('edit-tasa-cambio').value) || 1;
       const purchasePriceUSD = precioCompra;
       
-      if (precioVenta2 > 0 && (precioVenta2 / tasaCambio) <= purchasePriceUSD) {
+      // venta 2 está en USD ahora
+      if (precioVenta2 > 0 && precioVenta2 <= purchasePriceUSD) {
         Swal.fire({
           icon: 'error',
           title: 'Error en precios',
@@ -883,20 +927,22 @@
       const empaqueMayor = document.getElementById("edit-packaging").value;
       const cantidadPorEmpaque = parseInt(document.getElementById("edit-package-quantity").value);
       const cantidad = parseInt(document.getElementById("edit-unit-count").value);
+      const numeroFactura = document.getElementById("edit-invoice-number").value.trim();
       const tasaCambio = parseFloat(document.getElementById("edit-tasa-cambio").value);
       
-      // Precios (compra y venta 1 en USD, otros en Bs)
+      // Precios (compra y venta 1 y 2 en USD, otros en Bs)
       const precioCompraUSD = parseFloat(document.getElementById("edit-purchase-price").value);
       const precioVenta1USD = parseFloat(document.getElementById("edit-sale-price-1").value);
-      const precioVenta2 = document.getElementById("edit-sale-price-2").value ? parseFloat(document.getElementById("edit-sale-price-2").value) : null;
+      const precioVenta2USD = parseFloat(document.getElementById("edit-sale-price-2").value) || 0;
       const precioVenta3 = document.getElementById("edit-sale-price-3").value ? parseFloat(document.getElementById("edit-sale-price-3").value) : null;
       const precioVenta4 = document.getElementById("edit-sale-price-4").value ? parseFloat(document.getElementById("edit-sale-price-4").value) : null;
+      const precioVenta5 = document.getElementById("edit-sale-price-5").value ? parseFloat(document.getElementById("edit-sale-price-5").value) : null;
       
       const fechaIngreso = document.getElementById("edit-entry-date").value;
 
       // Validar campos requeridos
       if (!nombre || !marca || !variante || !presentacionUnitaria || !empaqueMayor || 
-          isNaN(cantidadPorEmpaque) || isNaN(cantidad) || isNaN(tasaCambio) || 
+          isNaN(cantidadPorEmpaque) || isNaN(cantidad) || !numeroFactura || isNaN(tasaCambio) || 
           isNaN(precioCompraUSD) || isNaN(precioVenta1USD) || !fechaIngreso) {
         Swal.fire({
           title: 'Error',
@@ -906,7 +952,7 @@
         return;
       }
 
-      // Preparar datos para actualizar (convertir USD a Bs para compra y venta 1)
+      // Preparar datos para actualizar (convertir USD a Bs para compra, venta 1 y venta 2)
       const dataActualizada = {
         nombre: nombre,
         marca: marca,
@@ -915,19 +961,22 @@
         empaque_mayor: empaqueMayor,
         cantidad_por_empaque: cantidadPorEmpaque,
         cantidad: cantidad,
+        numero_factura: numeroFactura,
         tasa_cambio: tasaCambio,
         // Precios en Bs (convertidos desde USD)
         precio_compra: precioCompraUSD * tasaCambio,
         precio_venta_1: precioVenta1USD * tasaCambio,
-        precio_venta_2: precioVenta2,
+        precio_venta_2: precioVenta2USD * tasaCambio,
         precio_venta_3: precioVenta3,
         precio_venta_4: precioVenta4,
-        // Precios en USD (originales para compra y venta 1)
+        precio_venta_5: precioVenta5,
+        // Precios en USD (originales para compra, venta 1 y venta 2)
         precio_compra_usd: precioCompraUSD,
         precio_venta_1_usd: precioVenta1USD,
-        precio_venta_2_usd: precioVenta2 ? precioVenta2 / tasaCambio : null,
+        precio_venta_2_usd: precioVenta2USD,
         precio_venta_3_usd: precioVenta3 ? precioVenta3 / tasaCambio : null,
         precio_venta_4_usd: precioVenta4 ? precioVenta4 / tasaCambio : null,
+        precio_venta_5_usd: precioVenta5 ? precioVenta5 / tasaCambio : null,
         fecha_ingreso: fechaIngreso
       };
 
@@ -1078,7 +1127,8 @@
           (producto.nombre && producto.nombre.toLowerCase().includes(textoBusqueda)) ||
           (producto.marca && producto.marca.toLowerCase().includes(textoBusqueda)) ||
           (producto.variante && producto.variante.toLowerCase().includes(textoBusqueda)) ||
-          (producto.presentacion_unitaria && producto.presentacion_unitaria.toLowerCase().includes(textoBusqueda))
+          (producto.presentacion_unitaria && producto.presentacion_unitaria.toLowerCase().includes(textoBusqueda)) ||
+          (producto.numero_factura && producto.numero_factura.toLowerCase().includes(textoBusqueda))
         );
       });
       
@@ -1112,6 +1162,14 @@
       priceInputs.forEach(input => {
         input.addEventListener('input', actualizarPrecios);
       });
+      
+      // Configurar eventos para actualizar precios cuando cambia la cantidad por empaque
+      document.getElementById('edit-package-quantity').addEventListener('input', actualizarPrecios);
+      
+      // Validaciones de precio
+      document.getElementById("edit-purchase-price").addEventListener("change", validarPreciosEdicion);
+      document.getElementById("edit-sale-price-1").addEventListener("change", validarPreciosEdicion);
+      document.getElementById("edit-sale-price-2").addEventListener("change", validarPreciosEdicion);
       
       console.log('✅ Aplicación inicializada correctamente');
     });

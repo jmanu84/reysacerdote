@@ -348,6 +348,18 @@
           </div>
         </div>
         
+        <!-- Inputs de precios USD editables -->
+        <div class="row g-2 mt-2" id="container-precios-usd" style="display: none;">
+          <div class="col-md-6">
+            <label class="form-label">Dólar Físico (USD)</label>
+            <input type="number" step="0.01" class="form-control" id="dolar-fisico" placeholder="0.00">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Dólar BCV (USD)</label>
+            <input type="number" step="0.01" class="form-control" id="dolar-bcv" placeholder="0.00">
+          </div>
+        </div>
+        
         <!-- Información adicional para venta al mayor -->
         <div class="row g-2 mt-2" id="info-mayor" style="display: none;">
           <div class="col-md-4">
@@ -614,6 +626,13 @@
           if (productoSeleccionado) {
             console.log('Producto encontrado:', productoSeleccionado);
             
+            // Cargar valores de precios desde la base de datos
+            $('#dolar-fisico').val(productoSeleccionado.precio_venta_1_usd || 0);
+            $('#dolar-bcv').val(productoSeleccionado.precio_venta_2_usd || 0);
+            
+            // Mostrar contenedor de precios USD
+            $('#container-precios-usd').show();
+            
             // Habilitar tipo de venta
             $('#tipo-venta').prop('disabled', false);
             
@@ -636,100 +655,108 @@
       });
     }
 
+    // Calcular y actualizar los 4 precios basados en los inputs USD
+    function calcularPreciosDesdeUSD() {
+      if (!productoSeleccionado) return null;
+      
+      const dolarFisico = parseFloat($('#dolar-fisico').val()) || 0;
+      const dolarBCV = parseFloat($('#dolar-bcv').val()) || 0;
+      const tasaCambio = obtenerTasaCambio();
+      
+      if (dolarFisico === 0 && dolarBCV === 0) return null;
+      
+      // Calcular precios base en Bs
+      const precio1BS = dolarFisico * tasaCambio; // Dólar Físico en Bs
+      const precio2BS = dolarBCV * tasaCambio; // Dólar BCV en Bs
+      const precio3BS = precio2BS; // Efectivo Bs (igual al BCV)
+      const precio4BS = precio3BS + 150; // Punto Bs (+ 150)
+      
+      return {
+        dolarFisico: dolarFisico,
+        dolarBCV: dolarBCV,
+        precio1BS: precio1BS,
+        precio2BS: precio2BS,
+        precio3BS: precio3BS,
+        precio4BS: precio4BS
+      };
+    }
+    
     // Llenar selector de precios según el tipo de venta
     function llenarSelectorPrecios(tipoVenta) {
       if (!productoSeleccionado) return;
       
       $('#precio-selector').empty().append('<option value="">Seleccione precio</option>');
       
+      const preciosCalculados = calcularPreciosDesdeUSD();
       const cantidadPorEmpaque = productoSeleccionado.cantidad_por_empaque || 1;
+      
+      if (!preciosCalculados) {
+        console.log('No hay precios calculados disponibles');
+        $('#precio-selector').prop('disabled', true);
+        return;
+      }
       
       if (tipoVenta === 'detal') {
         // Para venta al detal, todos los precios se dividen entre cantidad_por_empaque
-        // Precio 1: USD (precio_venta_1_usd / cantidad_por_empaque)
-        if (productoSeleccionado.precio_venta_1_usd && productoSeleccionado.precio_venta_1_usd > 0) {
-          const precioDetalUSD = redondearADosDecimales(productoSeleccionado.precio_venta_1_usd / cantidadPorEmpaque);
-          $('#precio-selector').append(new Option(
-            `Precio 1: USD ${precioDetalUSD.toFixed(2)}`,
-            JSON.stringify({precio: precioDetalUSD, moneda: 'USD'}),
-            false,
-            false
-          ));
-        }
+        const precio1Detal = redondearADosDecimales(preciosCalculados.dolarFisico / cantidadPorEmpaque);
+        const precio2Detal = redondearADosDecimales(preciosCalculados.precio2BS / cantidadPorEmpaque);
+        const precio3Detal = redondearADosDecimales(preciosCalculados.precio3BS / cantidadPorEmpaque);
+        const precio4Detal = redondearADosDecimales(preciosCalculados.precio4BS / cantidadPorEmpaque);
         
-        // Precio 2: BS (precio_venta_2 / cantidad_por_empaque)
-        if (productoSeleccionado.precio_venta_2 && productoSeleccionado.precio_venta_2 > 0) {
-          const precioDetalBS2 = redondearADosDecimales(productoSeleccionado.precio_venta_2 / cantidadPorEmpaque);
-          $('#precio-selector').append(new Option(
-            `Precio 2: BS ${precioDetalBS2.toFixed(2)}`,
-            JSON.stringify({precio: precioDetalBS2, moneda: 'BS'}),
-            false,
-            false
-          ));
-        }
+        // Precio 1: Dólar Físico (USD)
+        $('#precio-selector').append(new Option(
+          `Dólar Físico: USD ${precio1Detal.toFixed(2)}`,
+          JSON.stringify({precio: precio1Detal, moneda: 'USD'}),
+          false,
+          false
+        ));
         
-        // Precio 3: BS (precio_venta_3 / cantidad_por_empaque)
-        if (productoSeleccionado.precio_venta_3 && productoSeleccionado.precio_venta_3 > 0) {
-          const precioDetalBS3 = redondearADosDecimales(productoSeleccionado.precio_venta_3 / cantidadPorEmpaque);
-          $('#precio-selector').append(new Option(
-            `Precio 3: BS ${precioDetalBS3.toFixed(2)}`,
-            JSON.stringify({precio: precioDetalBS3, moneda: 'BS'}),
-            false,
-            false
-          ));
-        }
+        // Precio 2: Dólar BCV (USD convertido a BS)
+        $('#precio-selector').append(new Option(
+          `Dólar BCV: BS ${precio2Detal.toFixed(2)}`,
+          JSON.stringify({precio: precio2Detal, moneda: 'BS'}),
+          false,
+          false
+        ));
         
-        // Precio 4: BS (precio_venta_4 / cantidad_por_empaque)
-        if (productoSeleccionado.precio_venta_4 && productoSeleccionado.precio_venta_4 > 0) {
-          const precioDetalBS4 = redondearADosDecimales(productoSeleccionado.precio_venta_4 / cantidadPorEmpaque);
-          $('#precio-selector').append(new Option(
-            `Precio 4: BS ${precioDetalBS4.toFixed(2)}`,
-            JSON.stringify({precio: precioDetalBS4, moneda: 'BS'}),
-            false,
-            false
-          ));
-        }
+        // Precio 3: Efectivo Bs
+       
+        
+        // Precio 4: Punto Bs
+        $('#precio-selector').append(new Option(
+          `Punto Bs: BS ${precio4Detal.toFixed(2)}`,
+          JSON.stringify({precio: precio4Detal, moneda: 'BS'}),
+          false,
+          false
+        ));
       } else if (tipoVenta === 'mayor') {
         // Para venta al mayor, se muestran los precios directamente sin dividir
-        // Precio 1: USD (precio_venta_1_usd)
-        if (productoSeleccionado.precio_venta_1_usd && productoSeleccionado.precio_venta_1_usd > 0) {
-          $('#precio-selector').append(new Option(
-            `Precio 1: USD ${productoSeleccionado.precio_venta_1_usd.toFixed(2)}`,
-            JSON.stringify({precio: productoSeleccionado.precio_venta_1_usd, moneda: 'USD'}),
-            false,
-            false
-          ));
-        }
+        // Precio 1: Dólar Físico (USD)
+        $('#precio-selector').append(new Option(
+          `Dólar Físico: USD ${preciosCalculados.dolarFisico.toFixed(2)}`,
+          JSON.stringify({precio: preciosCalculados.dolarFisico, moneda: 'USD'}),
+          false,
+          false
+        ));
         
-        // Precio 2: BS (precio_venta_2)
-        if (productoSeleccionado.precio_venta_2 && productoSeleccionado.precio_venta_2 > 0) {
-          $('#precio-selector').append(new Option(
-            `Precio 2: BS ${productoSeleccionado.precio_venta_2.toFixed(2)}`,
-            JSON.stringify({precio: productoSeleccionado.precio_venta_2, moneda: 'BS'}),
-            false,
-            false
-          ));
-        }
+        // Precio 2: Dólar BCV (USD convertido a BS)
+        $('#precio-selector').append(new Option(
+          `Dólar BCV: BS ${preciosCalculados.precio2BS.toFixed(2)}`,
+          JSON.stringify({precio: preciosCalculados.precio2BS, moneda: 'BS'}),
+          false,
+          false
+        ));
         
-        // Precio 3: BS (precio_venta_3)
-        if (productoSeleccionado.precio_venta_3 && productoSeleccionado.precio_venta_3 > 0) {
-          $('#precio-selector').append(new Option(
-            `Precio 3: BS ${productoSeleccionado.precio_venta_3.toFixed(2)}`,
-            JSON.stringify({precio: productoSeleccionado.precio_venta_3, moneda: 'BS'}),
-            false,
-            false
-          ));
-        }
+        // Precio 3: Efectivo Bs
+       
         
-        // Precio 4: BS (precio_venta_4)
-        if (productoSeleccionado.precio_venta_4 && productoSeleccionado.precio_venta_4 > 0) {
-          $('#precio-selector').append(new Option(
-            `Precio 4: BS ${productoSeleccionado.precio_venta_4.toFixed(2)}`,
-            JSON.stringify({precio: productoSeleccionado.precio_venta_4, moneda: 'BS'}),
-            false,
-            false
-          ));
-        }
+        // Precio 4: Punto Bs
+        $('#precio-selector').append(new Option(
+          `Punto Bs: BS ${preciosCalculados.precio4BS.toFixed(2)}`,
+          JSON.stringify({precio: preciosCalculados.precio4BS, moneda: 'BS'}),
+          false,
+          false
+        ));
       }
       
       // Habilitar selector de precios
@@ -855,6 +882,9 @@
 
     // Limpiar campos dependientes
     function limpiarCamposDependientes() {
+      $('#container-precios-usd').hide();
+      $('#dolar-fisico').val('');
+      $('#dolar-bcv').val('');
       $('#tipo-venta').val('').prop('disabled', true);
       $('#precio-selector').empty().append('<option value="">Seleccione precio</option>').prop('disabled', true);
       $('#unidad').val('');
@@ -867,6 +897,21 @@
     function manejarCambioCantidad() {
       $('#cantidad').on('input', function() {
         actualizarCalculosVenta();
+      });
+    }
+    
+    // Manejar cambios en los inputs de precios USD
+    function manejarCambioPreciosUSD() {
+      $('#dolar-fisico, #dolar-bcv, #tasa-cambio').on('input', function() {
+        const tipoVenta = $('#tipo-venta').val();
+        if (tipoVenta) {
+          llenarSelectorPrecios(tipoVenta);
+          // Si ya había un precio seleccionado, mantenerlo si existe en el nuevo selector
+          const precioAnterior = $('#precio-selector').data('precio-anterior');
+          if (precioAnterior) {
+            $('#precio-selector').val(precioAnterior);
+          }
+        }
       });
     }
 
@@ -1299,11 +1344,25 @@ function finalizarVenta() {
       const tiposPagoUnicos = [...new Set(metodosPagoActuales.map(p => p.tipo))];
       const tipoPagoString  = tiposPagoUnicos.join(', ');
 
+      // Obtener el siguiente número de venta
+      const { data: ultimaVenta, error: errorUltimaVenta } = await supabaseClient
+        .from('ventas')
+        .select('numero_venta')
+        .order('numero_venta', { ascending: false })
+        .limit(1)
+        .single();
+      
+      let siguienteNumero = 100; // Número inicial
+      if (!errorUltimaVenta && ultimaVenta && ultimaVenta.numero_venta) {
+        siguienteNumero = ultimaVenta.numero_venta + 1;
+      }
+
       // Insertar venta
       const { data: ventaInsertada, error: errorVenta } = await supabaseClient
         .from('ventas')
         .insert([{
           fecha: fechaVenta,
+          numero_venta: siguienteNumero,
           tasa_cambio: tasa,
           total_usd: totalPagarUSD,
           total: totalPagarBS,
@@ -1314,6 +1373,7 @@ function finalizarVenta() {
 
       if (errorVenta) throw errorVenta;
       const ventaId = ventaInsertada.id;
+      const numeroVentaGuardado = ventaInsertada.numero_venta || siguienteNumero;
 
       // Insertar detalles
       const detalles = carrito.map(item => ({
@@ -1357,18 +1417,28 @@ function finalizarVenta() {
 
       $('#loadingOverlay').hide();
 
-      await Swal.fire({
+      const { value: imprimirTicket } = await Swal.fire({
         icon: 'success',
         title: 'Venta registrada',
         html: `
           <div style="text-align:left;">
             <p>La venta se ha registrado correctamente</p>
+            <p><strong>N° Venta:</strong> ${numeroVentaGuardado}</p>
             <p><strong>Fecha:</strong> ${formatearFechaLocal(fechaVenta)}</p>
             <p><strong>Total:</strong> USD ${formatUsdDisplay(totalPagarUSD)} (BS ${formatBsDisplay(totalPagarBS)})</p>
           </div>
         `,
-        confirmButtonColor: '#3105f1'
+        confirmButtonColor: '#3105f1',
+        showDenyButton: true,
+        denyButtonText: 'Imprimir Ticket',
+        denyButtonColor: '#3105f1',
+        confirmButtonText: 'Aceptar'
       });
+      
+      // Si el usuario quiere imprimir el ticket
+      if (imprimirTicket === false) {
+        imprimirTicketVenta(numeroVentaGuardado, fechaVenta, carrito, totalPagarUSD, totalPagarBS, pagosProcesados);
+      }
 
       // Reset
       carrito.length = 0;
@@ -1390,6 +1460,179 @@ function finalizarVenta() {
 
 
 //fin de finalizar venta
+
+// Función para imprimir el ticket de venta
+function imprimirTicketVenta(numeroVenta, fecha, carrito, totalUSD, totalBS, pagosProcesados) {
+  // Crear ventana de impresión
+  const ventanaImpresion = window.open('', '_blank', 'width=400,height=600');
+  
+  let htmlTicket = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Ticket de Venta #${numeroVenta}</title>
+      <style>
+        @page {
+          size: 80mm 200mm;
+          margin: 5mm;
+        }
+        body {
+          font-family: 'Courier New', monospace;
+          font-size: 12px;
+          line-height: 1.4;
+          margin: 0;
+          padding: 10px;
+        }
+        .header {
+          text-align: center;
+          border-bottom: 2px dashed #000;
+          padding-bottom: 10px;
+          margin-bottom: 15px;
+        }
+        .header h1 {
+          margin: 0;
+          font-size: 18px;
+        }
+        .info-venta {
+          margin-bottom: 15px;
+        }
+        .info-venta p {
+          margin: 5px 0;
+        }
+        .productos {
+          border-top: 1px dashed #000;
+          border-bottom: 1px dashed #000;
+          padding: 10px 0;
+          margin: 15px 0;
+        }
+        .producto {
+          margin-bottom: 8px;
+          padding-bottom: 8px;
+          border-bottom: 1px dotted #ccc;
+        }
+        .producto:last-child {
+          border-bottom: none;
+        }
+        .producto-titulo {
+          font-weight: bold;
+          margin-bottom: 3px;
+        }
+        .producto-detalle {
+          font-size: 11px;
+          color: #555;
+        }
+        .total {
+          text-align: right;
+          font-weight: bold;
+          font-size: 14px;
+          margin-top: 15px;
+          padding-top: 10px;
+          border-top: 2px solid #000;
+        }
+        .pagos {
+          margin-top: 15px;
+          padding-top: 10px;
+          border-top: 1px dashed #000;
+        }
+        .pago {
+          display: flex;
+          justify-content: space-between;
+          margin: 5px 0;
+          font-size: 11px;
+        }
+        .footer {
+          text-align: center;
+          margin-top: 20px;
+          padding-top: 10px;
+          border-top: 2px dashed #000;
+          font-size: 10px;
+        }
+        @media print {
+          body {
+            padding: 5px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>TICKET DE VENTA</h1>
+        <p><strong>#${numeroVenta}</strong></p>
+      </div>
+      
+      <div class="info-venta">
+        <p><strong>Fecha:</strong> ${formatearFechaLocal(fecha)}</p>
+        <p><strong>Tasa de Cambio:</strong> ${obtenerTasaCambio().toFixed(2)} BS/USD</p>
+      </div>
+      
+      <div class="productos">
+        <h3 style="text-align: center; margin-top: 0;">PRODUCTOS</h3>
+  `;
+  
+  // Agregar productos
+  carrito.forEach(item => {
+    const tipoVenta = item.tipo_venta === 'mayor' ? 'Al Mayor' : 'Al Detal';
+    const unidadesInfo = item.tipo_venta === 'mayor' 
+      ? `${item.cantidad} ${item.empaque_mayor} × ${item.unidades_por_empaque} = ${item.unidades} uds`
+      : `${item.cantidad} unidades`;
+    
+    htmlTicket += `
+      <div class="producto">
+        <div class="producto-titulo">${item.nombre}</div>
+        <div class="producto-detalle">
+          ${item.marca || 'Sin marca'}<br>
+          ${tipoVenta} - ${unidadesInfo}<br>
+          $${item.precio_unitario_usd.toFixed(2)} × ${item.cantidad} = $${item.subtotal_usd.toFixed(2)} (BS ${item.subtotal_bs.toFixed(2)})
+        </div>
+      </div>
+    `;
+  });
+  
+  htmlTicket += `
+      </div>
+      
+      <div class="total">
+        <p>TOTAL: $${totalUSD.toFixed(2)}</p>
+        <p>BS. ${totalBS.toFixed(2)}</p>
+      </div>
+      
+      <div class="pagos">
+        <h3 style="text-align: center; margin: 10px 0 10px 0;">FORMA DE PAGO</h3>
+  `;
+  
+  // Agregar pagos
+  pagosProcesados.forEach(pago => {
+    const montoOriginal = `${pago.moneda_original} ${Number(pago.monto_original).toFixed(2)}`;
+    htmlTicket += `
+      <div class="pago">
+        <span>${pago.tipo}:</span>
+        <span>${montoOriginal}</span>
+      </div>
+    `;
+  });
+  
+  htmlTicket += `
+      </div>
+      
+      <div class="footer">
+        <p>¡Gracias por su compra!</p>
+        <p>Venta #${numeroVenta}</p>
+      </div>
+    </body>
+    </html>
+  `;
+  
+  ventanaImpresion.document.write(htmlTicket);
+  ventanaImpresion.document.close();
+  
+  // Esperar a que se cargue y luego imprimir
+  ventanaImpresion.onload = function() {
+    setTimeout(() => {
+      ventanaImpresion.print();
+    }, 250);
+  };
+}
 
 async function cargarUltimaTasaCambio() {
   try {
@@ -1454,6 +1697,7 @@ async function cargarUltimaTasaCambio() {
         manejarTipoVenta();
         manejarSeleccionPrecio();
         manejarCambioCantidad();
+        manejarCambioPreciosUSD();
         agregarAlCarrito();
         agregarMetodoPago();
         finalizarVenta();
