@@ -113,7 +113,7 @@
           <button class="nav-link" id="detalles-tab" data-bs-toggle="tab" data-bs-target="#detalles" type="button" role="tab" aria-controls="detalles" aria-selected="false">Detalles de Ventas</button>
         </li>
         <li class="nav-item" role="presentation">
-          <button class="nav-link" id="reporte-tab" data-bs-toggle="tab" data-bs-target="#reporte" type="button" role="tab" aria-controls="reporte" aria-selected="false">Reporte</button>
+          <button class="nav-link" id="reporte-tab" data-bs-toggle="tab" data-bs-target="#reporte" type="button" role="tab" aria-controls="reporte" aria-selected="false">Reporte Producto</button>
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" id="buscar-tab" data-bs-toggle="tab" data-bs-target="#buscar" type="button" role="tab" aria-controls="buscar" aria-selected="false">Buscar Venta</button>
@@ -262,6 +262,28 @@
         </div>
         
         <div class="tab-pane fade" id="reporte" role="tabpanel" aria-labelledby="reporte-tab">
+          <div class="btn-imprimir-container">
+            <button class="btn-imprimir" id="btnImprimirReporte" disabled>
+              <i class="fas fa-print"></i> Imprimir Reporte
+            </button>
+          </div>
+          <div class="table-responsive" id="reporteTableContainer" style="display: none;">
+            <table class="table-ventas" id="tablaReporteProductos">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Marca</th>
+                  <th>Stock</th>
+                  <th>Unidades Vendidas</th>
+                  <th>Total USD</th>
+                  <th>Total BS</th>
+                  <th>Equivalente BS (USD)</th>
+                  <th>Total Vendido (BS)</th>
+                </tr>
+              </thead>
+              <tbody id="reporteTableBody"></tbody>
+            </table>
+          </div>
           <div id="reporteContainer" style="display: none;"></div>
         </div>
 
@@ -790,10 +812,14 @@
     });
   }
 
-  // MOSTRAR REPORTE (agrupado por día y método)
+  // MOSTRAR REPORTE PRODUCTO (tabla con productos totalizados)
   function mostrarVistaReporte(detallesFiltrados, pagosFiltrados, ventasFiltradas) {
     const cont = document.getElementById('reporteContainer');
-    if (!cont) return;
+    const tableCont = document.getElementById('reporteTableContainer');
+    const tableBody = document.getElementById('reporteTableBody');
+    const btnImprimir = document.getElementById('btnImprimirReporte');
+    
+    if (!cont || !tableCont || !tableBody) return;
 
     // Estadísticas generales
     const stats = calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados, ventasFiltradas);
@@ -804,77 +830,77 @@
     document.getElementById('filtrosRapidos').style.display = 'flex';
     document.getElementById('loadingIndicator').style.display = 'none';
 
-    // Agrupar por día
-    const porDia = {};
-    ventasFiltradas.forEach(v => {
-      const f = normalizarFecha(v.fecha || v.created_at || v.createdAt);
-      if (!f) return;
-      if (!porDia[f]) porDia[f] = { ventas: [], pagos: [] };
-      porDia[f].ventas.push(v);
-    });
-    pagosFiltrados.forEach(p => {
-      const v = ventasMap[p.venta_id];
-      if (!v) return;
-      const f = normalizarFecha(v.fecha || v.created_at || v.createdAt);
-      if (!f) return;
-      if (!porDia[f]) porDia[f] = { ventas: [], pagos: [] };
-      porDia[f].pagos.push(p);
+    // Agrupar productos (similar a mostrarVistaProductos)
+    const productosAgrupados = {};
+    detallesFiltrados.forEach(detalle => {
+      const productoId = detalle.producto_id;
+      const productoInfo = productosMap[productoId];
+      const venta = ventasMap[detalle.venta_id];
+      if (!productoInfo) return;
+
+      if (!productosAgrupados[productoId]) {
+        productosAgrupados[productoId] = {
+          producto_id: productoId,
+          nombre: productoInfo.nombre,
+          marca: productoInfo.marca || 'Sin marca',
+          detalles: [],
+          totalUnidades: 0,
+          totalUsd: 0,
+          totalBs: 0,
+          totalBsEquivalenteDesdeUsd: 0
+        };
+      }
+
+      const esDolares = esVentaEnDolares(detalle.venta_id);
+      productosAgrupados[productoId].detalles.push(detalle);
+      productosAgrupados[productoId].totalUnidades += Number(detalle.cantidad || 0);
+
+      if (esDolares) {
+        productosAgrupados[productoId].totalUsd += Number(detalle.subtotal_usd || 0);
+        const tasa = Number((venta && venta.tasa_cambio) || 0);
+        if (tasa && detalle.subtotal_usd) {
+          productosAgrupados[productoId].totalBsEquivalenteDesdeUsd += Number(detalle.subtotal_usd) * tasa;
+        }
+      } else {
+        productosAgrupados[productoId].totalBs += Number(detalle.subtotal_bs || 0);
+      }
     });
 
-    // Construir HTML de reporte
-    const diasOrdenados = Object.keys(porDia).sort();
-    if (diasOrdenados.length === 0) {
+    const productosArray = Object.values(productosAgrupados).sort((a,b) => a.nombre.localeCompare(b.nombre));
+
+    // Construir tabla
+    tableBody.innerHTML = '';
+    cont.style.display = 'none';
+
+    if (productosArray.length === 0) {
+      tableCont.style.display = 'none';
       cont.style.display = 'block';
       cont.innerHTML = '<div class="text-center" style="padding:20px;">No hay datos para el período seleccionado.</div>';
+      if (btnImprimir) btnImprimir.disabled = true;
       return;
     }
 
-    const bloques = diasOrdenados.map(dia => {
-      const pagosDia = porDia[dia].pagos;
-      let punto = 0, efectivo = 0, movil = 0, dolares = 0, biopago = 0;
-      pagosDia.forEach(p => {
-        switch (p.metodo) {
-          case 'Punto de venta': punto += Number(p.monto_bs || 0); break;
-          case 'Efectivo': efectivo += Number(p.monto_bs || 0); break;
-          case 'Pago móvil': movil += Number(p.monto_bs || 0); break;
-          case 'Dólares': dolares += Number(p.monto_usd || 0); break;
-          case 'Biopago': biopago += Number(p.monto_bs || 0); break;
-          default: break;
-        }
-      });
-      const totalBs = punto + efectivo + movil + biopago;
-      const totalUsd = dolares;
-      return `
-        <div class="producto-card" style="margin-bottom:10px;">
-          <h3 class="producto-nombre">${formatearFechaTexto(dia)}</h3>
-          <div class="producto-info">
-            <div class="producto-info-row"><span class="producto-info-label">Punto de venta</span><span class="producto-info-value moneda-bs">${formatearMoneda(punto,'BS')}</span></div>
-            <div class="producto-info-row"><span class="producto-info-label">Efectivo</span><span class="producto-info-value moneda-bs">${formatearMoneda(efectivo,'BS')}</span></div>
-            <div class="producto-info-row"><span class="producto-info-label">Pago móvil</span><span class="producto-info-value moneda-bs">${formatearMoneda(movil,'BS')}</span></div>
-            <div class="producto-info-row"><span class="producto-info-label">Dólares</span><span class="producto-info-value moneda-usd">${formatearMoneda(totalUsd,'USD')}</span></div>
-            <div class="producto-info-row"><span class="producto-info-label">Biopago</span><span class="producto-info-value moneda-bs">${formatearMoneda(biopago,'BS')}</span></div>
-          </div>
-          <div class="producto-total">
-            <div class="total-label">Totales del día</div>
-            <div class="total-value moneda-bs">${formatearMoneda(totalBs,'BS')}</div>
-            ${totalUsd > 0 ? `<div class="total-label">Equivalente USD</div><div class="total-value moneda-usd">${formatearMoneda(totalUsd,'USD')}</div>` : ''}
-          </div>
-        </div>
-      `;
-    }).join('');
+    tableCont.style.display = 'block';
+    if (btnImprimir) btnImprimir.disabled = false;
 
-    cont.innerHTML = `
-      <div class="producto-card">
-        <h3 class="producto-nombre">Período: ${obtenerTextoRangoFechas()}</h3>
-        <div class="producto-info">
-          <div class="producto-info-row"><span class="producto-info-label">Total Ventas</span><span class="producto-info-value">${stats.totalVentas}</span></div>
-          <div class="producto-info-row"><span class="producto-info-label">Monto Total USD</span><span class="producto-info-value moneda-usd">${formatearMoneda(stats.montoTotalUsd,'USD')}</span></div>
-          <div class="producto-info-row"><span class="producto-info-label">Monto Total BS</span><span class="producto-info-value moneda-bs">${formatearMoneda(stats.montoTotalBs,'BS')}</span></div>
-        </div>
-      </div>
-      <div style="margin-top:15px;">${bloques}</div>
-    `;
-    cont.style.display = 'block';
+    productosArray.forEach(producto => {
+      const totalBsVendido = Number(producto.totalBs || 0) + Number(producto.totalBsEquivalenteDesdeUsd || 0);
+      const productoInfo = productosMap[producto.producto_id];
+      const stock = productoInfo && Number.isFinite(Number(productoInfo.cantidad)) ? Number(productoInfo.cantidad) : null;
+      
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${producto.nombre}</td>
+        <td>${producto.marca}</td>
+        <td>${stock !== null ? stock.toLocaleString() : '-'}</td>
+        <td>${producto.totalUnidades.toLocaleString()}</td>
+        <td class="moneda-usd">${producto.totalUsd > 0 ? formatearMoneda(producto.totalUsd, 'USD') : '-'}</td>
+        <td class="moneda-bs">${producto.totalBs > 0 ? formatearMoneda(producto.totalBs, 'BS') : '-'}</td>
+        <td class="moneda-bs">${producto.totalBsEquivalenteDesdeUsd > 0 ? formatearMoneda(producto.totalBsEquivalenteDesdeUsd, 'BS') : '-'}</td>
+        <td class="moneda-bs">${formatearMoneda(totalBsVendido, 'BS')}</td>
+      `;
+      tableBody.appendChild(fila);
+    });
   }
 
   // BUSCAR VENTA POR numero_venta
@@ -1185,6 +1211,122 @@
     doc.save(`reporte_ventas_${new Date().toISOString().split('T')[0]}.pdf`);
   }
 
+  // IMPRESIÓN REPORTE PRODUCTOS / PDF (solo productos totalizados)
+  function imprimirReporteProductos() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape' });
+    doc.setFontSize(20);
+    doc.text('REPORTE DE PRODUCTOS VENDIDOS', 105, 15, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 105, 22, { align: 'center' });
+    const textoRangoFechas = obtenerTextoRangoFechas();
+    doc.text(`Período: ${textoRangoFechas}`, 105, 29, { align: 'center' });
+
+    const ventasFiltradas = filtrarVentasPorFecha(ventasCompletas);
+
+    const detallesFiltradosPorFecha = detallesVentas.map(detalle => {
+      const venta = ventasMap[detalle.venta_id];
+      return venta ? { ...detalle, fecha: venta.fecha } : null;
+    }).filter(Boolean);
+
+    let detallesFiltrados = detallesFiltradosPorFecha;
+    if (filtroActual !== 'all') {
+      detallesFiltrados = detallesFiltradosPorFecha.filter(detalle => {
+        const tipoPago = obtenerTipoPago(detalle.venta_id, detalle.tipo_pago);
+        return tipoPago === filtroActual;
+      });
+    }
+    detallesFiltrados = filtrarPorTexto(detallesFiltrados);
+
+    // Agrupar productos (igual que en mostrarVistaReporte)
+    const productosAgrupados = {};
+    detallesFiltrados.forEach(detalle => {
+      const productoId = detalle.producto_id;
+      const productoInfo = productosMap[productoId];
+      const venta = ventasMap[detalle.venta_id];
+      if (!productoInfo) return;
+
+      if (!productosAgrupados[productoId]) {
+        productosAgrupados[productoId] = {
+          producto_id: productoId,
+          nombre: productoInfo.nombre,
+          marca: productoInfo.marca || 'Sin marca',
+          totalUnidades: 0,
+          totalUsd: 0,
+          totalBs: 0,
+          totalBsEquivalenteDesdeUsd: 0
+        };
+      }
+
+      const esDolares = esVentaEnDolares(detalle.venta_id);
+      productosAgrupados[productoId].totalUnidades += Number(detalle.cantidad || 0);
+
+      if (esDolares) {
+        productosAgrupados[productoId].totalUsd += Number(detalle.subtotal_usd || 0);
+        const tasa = Number((venta && venta.tasa_cambio) || 0);
+        if (tasa && detalle.subtotal_usd) {
+          productosAgrupados[productoId].totalBsEquivalenteDesdeUsd += Number(detalle.subtotal_usd) * tasa;
+        }
+      } else {
+        productosAgrupados[productoId].totalBs += Number(detalle.subtotal_bs || 0);
+      }
+    });
+
+    const productosArray = Object.values(productosAgrupados).sort((a,b) => a.nombre.localeCompare(b.nombre));
+
+    if (productosArray.length > 0) {
+      const tableColumn = ["Producto", "Marca", "Stock", "Unidades", "Total USD", "Total BS", "Equiv. BS (USD)", "Total Vendido BS"];
+      const tableRows = [];
+      
+      productosArray.forEach(producto => {
+        const totalBsVendido = Number(producto.totalBs || 0) + Number(producto.totalBsEquivalenteDesdeUsd || 0);
+        const nombreTruncado = producto.nombre.length > 25 ? producto.nombre.substring(0, 22) + '...' : producto.nombre;
+        const marcaTruncada = producto.marca.length > 15 ? producto.marca.substring(0, 12) + '...' : producto.marca;
+        const productoInfo = productosMap[producto.producto_id];
+        const stock = productoInfo && Number.isFinite(Number(productoInfo.cantidad))
+          ? Number(productoInfo.cantidad).toLocaleString() : '-';
+        
+        tableRows.push([
+          nombreTruncado,
+          marcaTruncada,
+          stock,
+          producto.totalUnidades.toLocaleString(),
+          producto.totalUsd > 0 ? formatearMoneda(producto.totalUsd, 'USD') : '-',
+          producto.totalBs > 0 ? formatearMoneda(producto.totalBs, 'BS') : '-',
+          producto.totalBsEquivalenteDesdeUsd > 0 ? formatearMoneda(producto.totalBsEquivalenteDesdeUsd, 'BS') : '-',
+          formatearMoneda(totalBsVendido, 'BS')
+        ]);
+      });
+
+      doc.setFontSize(12);
+      doc.text('PRODUCTOS VENDIDOS', 20, 45);
+      
+      doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 55,
+        theme: 'grid',
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [30,136,229] },
+        columnStyles: { 
+          0: { cellWidth: 55 },
+          1: { cellWidth: 35 },
+          2: { cellWidth: 20 },
+          3: { cellWidth: 24 },
+          4: { cellWidth: 26 },
+          5: { cellWidth: 28 },
+          6: { cellWidth: 32 },
+          7: { cellWidth: 32 }
+        }
+      });
+    } else {
+      doc.setFontSize(12);
+      doc.text('No hay productos para el período seleccionado.', 20, 45);
+    }
+
+    doc.save(`reporte_productos_${new Date().toISOString().split('T')[0]}.pdf`);
+  }
+
   // INIT DOM
   document.addEventListener('DOMContentLoaded', function() {
     cargarYMostrarDatos();
@@ -1268,6 +1410,12 @@
 
     // imprimir
     document.getElementById('btnImprimir').addEventListener('click', imprimirReporte);
+    
+    // imprimir reporte productos
+    const btnImprimirReporte = document.getElementById('btnImprimirReporte');
+    if (btnImprimirReporte) {
+      btnImprimirReporte.addEventListener('click', imprimirReporteProductos);
+    }
 
     // eliminar confirm
     document.getElementById('confirmarEliminarBtn').addEventListener('click', eliminarVenta);
