@@ -1344,36 +1344,33 @@ function finalizarVenta() {
       const tiposPagoUnicos = [...new Set(metodosPagoActuales.map(p => p.tipo))];
       const tipoPagoString  = tiposPagoUnicos.join(', ');
 
-      // Obtener el siguiente número de venta
-      const { data: ultimaVenta, error: errorUltimaVenta } = await supabaseClient
-        .from('ventas')
-        .select('numero_venta')
-        .order('numero_venta', { ascending: false })
-        .limit(1)
-        .single();
-      
-      let siguienteNumero = 100; // Número inicial
-      if (!errorUltimaVenta && ultimaVenta && ultimaVenta.numero_venta) {
-        siguienteNumero = ultimaVenta.numero_venta + 1;
-      }
-
       // Insertar venta
       const { data: ventaInsertada, error: errorVenta } = await supabaseClient
         .from('ventas')
         .insert([{
           fecha: fechaVenta,
-          numero_venta: siguienteNumero,
           tasa_cambio: tasa,
           total_usd: totalPagarUSD,
           total: totalPagarBS,
           tipo_pago: tipoPagoString
         }])
-        .select()
+        .select('id, numero_venta, fecha, tasa_cambio, total_usd, total, tipo_pago')
         .single();
 
       if (errorVenta) throw errorVenta;
       const ventaId = ventaInsertada.id;
-      const numeroVentaGuardado = ventaInsertada.numero_venta || siguienteNumero;
+      let numeroVentaGuardado = ventaInsertada.numero_venta;
+      // Fallback: si por alguna razón el default aún no aparece, consultar por id
+      if (numeroVentaGuardado === null || numeroVentaGuardado === undefined) {
+        const { data: ventaRefrescada, error: errRefresco } = await supabaseClient
+          .from('ventas')
+          .select('numero_venta')
+          .eq('id', ventaId)
+          .single();
+        if (!errRefresco && ventaRefrescada) {
+          numeroVentaGuardado = ventaRefrescada.numero_venta;
+        }
+      }
 
       // Insertar detalles
       const detalles = carrito.map(item => ({
