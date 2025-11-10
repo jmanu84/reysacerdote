@@ -271,14 +271,15 @@
             <table class="table-ventas" id="tablaReporteProductos">
               <thead>
                 <tr>
+                  <th>Fecha</th>
                   <th>Producto</th>
-                  <th>Marca</th>
+                  <th>Inventario Inicial</th>
+                  <th>Recibo</th>
                   <th>Stock</th>
-                  <th>Unidades Vendidas</th>
-                  <th>Total USD</th>
-                  <th>Total BS</th>
-                  <th>Equivalente BS (USD)</th>
-                  <th>Total Vendido (BS)</th>
+                  <th>Precio</th>
+                  <th>Cant. Vendidas</th>
+                  <th>Total Ventas</th>
+                  <th>Inventario Final</th>
                 </tr>
               </thead>
               <tbody id="reporteTableBody"></tbody>
@@ -847,7 +848,9 @@
           totalUnidades: 0,
           totalUsd: 0,
           totalBs: 0,
-          totalBsEquivalenteDesdeUsd: 0
+          totalBsEquivalenteDesdeUsd: 0,
+          ultimaFechaVenta: null,
+          cantidadesPorMetodo: {} // { 'Punto de venta': unidades, 'Efectivo': unidades, 'Dólares': unidades, ... }
         };
       }
 
@@ -863,6 +866,30 @@
         }
       } else {
         productosAgrupados[productoId].totalBs += Number(detalle.subtotal_bs || 0);
+      }
+
+      // Fecha última venta por producto
+      const fechaVenta = venta ? venta.fecha : detalle.fecha;
+      if (fechaVenta) {
+        const fNorm = normalizarFecha(fechaVenta);
+        if (!productosAgrupados[productoId].ultimaFechaVenta || fNorm > productosAgrupados[productoId].ultimaFechaVenta) {
+          productosAgrupados[productoId].ultimaFechaVenta = fNorm;
+        }
+      }
+
+      // Cantidades por método de pago (contar unidades para luego multiplicar por el precio del método)
+      let metodo = obtenerTipoPago(detalle.venta_id, detalle.tipo_pago);
+      // Fallback si no hay método: inferir por moneda del detalle
+      if (!metodo || metodo === 'N/A') {
+        if (detalle.moneda_precio === 'USD') metodo = 'Dólares';
+        else metodo = 'Efectivo';
+      }
+      if (metodo) {
+        if (!productosAgrupados[productoId].cantidadesPorMetodo[metodo]) {
+          productosAgrupados[productoId].cantidadesPorMetodo[metodo] = 0;
+        }
+        const unidades = Number(detalle.cantidad || 0);
+        productosAgrupados[productoId].cantidadesPorMetodo[metodo] += unidades;
       }
     });
 
@@ -886,18 +913,59 @@
     productosArray.forEach(producto => {
       const totalBsVendido = Number(producto.totalBs || 0) + Number(producto.totalBsEquivalenteDesdeUsd || 0);
       const productoInfo = productosMap[producto.producto_id];
-      const stock = productoInfo && Number.isFinite(Number(productoInfo.cantidad)) ? Number(productoInfo.cantidad) : null;
-      
+      const stockActual = productoInfo && Number.isFinite(Number(productoInfo.cantidad)) ? Number(productoInfo.cantidad) : null;
+      // Inventarios según indicación del usuario:
+      // Inventario Inicial = stock actual
+      const inventarioInicial = stockActual !== null ? stockActual : null;
+      // Inventario Final = stock actual - cantidad vendida del período
+      const inventarioFinal = stockActual !== null ? (stockActual - Number(producto.totalUnidades || 0)) : null;
+      // Recibo (último ingreso): fecha_ingreso + cantidad_ingresada si existen, si no vacío
+      const reciboStr = (productoInfo && productoInfo.fecha_ingreso && productoInfo.cantidad_ingresada)
+        ? `${formatearFecha(productoInfo.fecha_ingreso)} / ${Number(productoInfo.cantidad_ingresada).toLocaleString()}`
+        : '';
+      // Precio: USD, BCV (USD), Efectivo (Bs), Punto (Bs = Efectivo + 150) replicando lógica de ingresarVenta.html
+      const precioUsd = productoInfo && Number.isFinite(Number(productoInfo.precio_venta_1_usd)) ? Number(productoInfo.precio_venta_1_usd) : 0; // Dólar Físico (USD)
+      const precioBcvUsd = productoInfo && Number.isFinite(Number(productoInfo.precio_venta_2_usd)) ? Number(productoInfo.precio_venta_2_usd) : 0; // Dólar BCV (USD)
+      const tasaProducto = productoInfo && Number.isFinite(Number(productoInfo.tasa_cambio)) ? Number(productoInfo.tasa_cambio) : 0;
+      const efectivoBs = (precioBcvUsd && tasaProducto) ? (precioBcvUsd * tasaProducto) : 0; // Efectivo Bs = BCV(USD) * tasa
+      const puntoBs = efectivoBs ? (efectivoBs + 150) : 0; // Punto Bs = Efectivo + 150
+      const precioTexto = `
+        USD: ${formatearMoneda(precioUsd,'USD')}<br>
+        BCV (USD): ${formatearMoneda(precioBcvUsd,'USD')}<br>
+        Efectivo: ${formatearMoneda(efectivoBs,'BS')}<br>
+        Punto: ${formatearMoneda(puntoBs,'BS')}
+      `;
+      // Total ventas por método = (unidades por método) × (precio por método) sin conversión
+      const cantMet = producto.cantidadesPorMetodo || {};
+      const totalesMetodoTexto = Object.keys(cantMet).map(m => {
+        const unidades = Number(cantMet[m] || 0);
+        let moneda = 'BS';
+        let monto = 0;
+        if (m === 'Dólares') {
+          moneda = 'USD';
+          monto = unidades * precioUsd;
+        } else if (m === 'Punto de venta') {
+          monto = unidades * puntoBs;
+        } else {
+          // Efectivo, Pago móvil, Transferencia, Biopago -> usar Efectivo Bs
+          monto = unidades * efectivoBs;
+        }
+        const txt = moneda === 'USD' ? formatearMoneda(monto, 'USD') : formatearMoneda(monto, 'BS');
+        return `${m}: ${txt}`;
+      }).join('<br>');
+      const fechaUltima = producto.ultimaFechaVenta ? formatearFecha(producto.ultimaFechaVenta) : '-';
+
       const fila = document.createElement('tr');
       fila.innerHTML = `
+        <td>${fechaUltima}</td>
         <td>${producto.nombre}</td>
-        <td>${producto.marca}</td>
-        <td>${stock !== null ? stock.toLocaleString() : '-'}</td>
+        <td>${inventarioInicial !== null ? inventarioInicial.toLocaleString() : '-'}</td>
+        <td>${reciboStr || '-'}</td>
+        <td>${stockActual !== null ? stockActual.toLocaleString() : '-'}</td>
+        <td>${precioTexto}</td>
         <td>${producto.totalUnidades.toLocaleString()}</td>
-        <td class="moneda-usd">${producto.totalUsd > 0 ? formatearMoneda(producto.totalUsd, 'USD') : '-'}</td>
-        <td class="moneda-bs">${producto.totalBs > 0 ? formatearMoneda(producto.totalBs, 'BS') : '-'}</td>
-        <td class="moneda-bs">${producto.totalBsEquivalenteDesdeUsd > 0 ? formatearMoneda(producto.totalBsEquivalenteDesdeUsd, 'BS') : '-'}</td>
-        <td class="moneda-bs">${formatearMoneda(totalBsVendido, 'BS')}</td>
+        <td>${totalesMetodoTexto || '-'}</td>
+        <td>${inventarioFinal !== null ? inventarioFinal.toLocaleString() : '-'}</td>
       `;
       tableBody.appendChild(fila);
     });
@@ -1214,9 +1282,9 @@
   // IMPRESIÓN REPORTE PRODUCTOS / PDF (solo productos totalizados)
   function imprimirReporteProductos() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'landscape' });
+    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
     doc.setFontSize(20);
-    doc.text('REPORTE DE PRODUCTOS VENDIDOS', 105, 15, { align: 'center' });
+    doc.text('REPORTE DE VENTAS - REY SACERDOTE', 105, 15, { align: 'center' });
     doc.setFontSize(10);
     doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 105, 22, { align: 'center' });
     const textoRangoFechas = obtenerTextoRangoFechas();
@@ -1251,6 +1319,7 @@
           producto_id: productoId,
           nombre: productoInfo.nombre,
           marca: productoInfo.marca || 'Sin marca',
+          detalles: [],
           totalUnidades: 0,
           totalUsd: 0,
           totalBs: 0,
@@ -1259,6 +1328,8 @@
       }
 
       const esDolares = esVentaEnDolares(detalle.venta_id);
+      // Guardar detalle para cálculos posteriores (total por método)
+      productosAgrupados[productoId].detalles.push(detalle);
       productosAgrupados[productoId].totalUnidades += Number(detalle.cantidad || 0);
 
       if (esDolares) {
@@ -1275,48 +1346,109 @@
     const productosArray = Object.values(productosAgrupados).sort((a,b) => a.nombre.localeCompare(b.nombre));
 
     if (productosArray.length > 0) {
-      const tableColumn = ["Producto", "Marca", "Stock", "Unidades", "Total USD", "Total BS", "Equiv. BS (USD)", "Total Vendido BS"];
+      const tableColumn = ["Fecha", "Producto", "Inv. Inicial", "Recibo", "Stock", "Precio", "Cant. Vendidas", "Total Ventas", "Inv. Final"];
       const tableRows = [];
       
       productosArray.forEach(producto => {
-        const totalBsVendido = Number(producto.totalBs || 0) + Number(producto.totalBsEquivalenteDesdeUsd || 0);
-        const nombreTruncado = producto.nombre.length > 25 ? producto.nombre.substring(0, 22) + '...' : producto.nombre;
-        const marcaTruncada = producto.marca.length > 15 ? producto.marca.substring(0, 12) + '...' : producto.marca;
         const productoInfo = productosMap[producto.producto_id];
-        const stock = productoInfo && Number.isFinite(Number(productoInfo.cantidad))
-          ? Number(productoInfo.cantidad).toLocaleString() : '-';
+        const stockActual = productoInfo && Number.isFinite(Number(productoInfo.cantidad)) ? Number(productoInfo.cantidad) : null;
+        const inventarioInicial = stockActual !== null ? stockActual : null;
+        const inventarioFinal = stockActual !== null ? (stockActual - Number(producto.totalUnidades || 0)) : null;
+        const reciboStr = (productoInfo && productoInfo.fecha_ingreso && productoInfo.cantidad_ingresada)
+          ? `${formatearFecha(productoInfo.fecha_ingreso)} / ${Number(productoInfo.cantidad_ingresada).toLocaleString()}`
+          : '-';
+        const precioUsd = productoInfo && Number.isFinite(Number(productoInfo.precio_venta_1_usd)) ? Number(productoInfo.precio_venta_1_usd) : 0; // Dólar Físico (USD)
+        const precioBcvUsd = productoInfo && Number.isFinite(Number(productoInfo.precio_venta_2_usd)) ? Number(productoInfo.precio_venta_2_usd) : 0; // Dólar BCV (USD)
+        const tasaProducto = productoInfo && Number.isFinite(Number(productoInfo.tasa_cambio)) ? Number(productoInfo.tasa_cambio) : 0;
+        const efectivoBs = (precioBcvUsd && tasaProducto) ? (precioBcvUsd * tasaProducto) : 0; // Efectivo Bs = BCV(USD) * tasa
+        const puntoBs = efectivoBs ? (efectivoBs + 150) : 0; // Punto Bs = Efectivo + 150
+        const precioTextoPlano = `USD: ${Number(precioUsd||0).toFixed(2)} | BCV(USD): ${Number(precioBcvUsd||0).toFixed(2)} | Efec: ${Number(efectivoBs||0).toFixed(2)} | Punto: ${Number(puntoBs||0).toFixed(2)}`;
+        
+        // Total ventas por método = (unidades por método) × (precio por método)
+        const cantidadesPorMetodo = {};
+        (producto.detalles || []).forEach(det => {
+          let metodo = obtenerTipoPago(det.venta_id, det.tipo_pago);
+          if (!metodo || metodo === 'N/A') metodo = (det.moneda_precio === 'USD') ? 'Dólares' : 'Efectivo';
+          if (!metodo) return;
+          if (!cantidadesPorMetodo[metodo]) cantidadesPorMetodo[metodo] = 0;
+          cantidadesPorMetodo[metodo] += Number(det.cantidad || 0);
+        });
+        const totalVentasPlano = Object.keys(cantidadesPorMetodo).map(m => {
+          const unidades = Number(cantidadesPorMetodo[m] || 0);
+          let moneda = 'BS';
+          let monto = 0;
+          if (m === 'Dólares') {
+            moneda = 'USD';
+            monto = unidades * precioUsd;
+          } else if (m === 'Punto de venta') {
+            monto = unidades * puntoBs;
+          } else {
+            // Efectivo, Pago móvil, Transferencia, Biopago -> Efectivo Bs
+            monto = unidades * efectivoBs;
+          }
+          // Etiquetas cortas
+          const etiqueta = (m === 'Punto de venta') ? 'Punto'
+                         : (m === 'Pago móvil') ? 'Móvil'
+                         : (m === 'Transferencia') ? 'Transf'
+                         : (m === 'Dólares') ? 'USD'
+                         : (m === 'Biopago') ? 'Biopago'
+                         : (m === 'Efectivo') ? 'Efectivo' : m;
+          const pref = moneda === 'USD' ? '$' : 'Bs';
+          const val = moneda === 'USD'
+            ? Number(monto||0).toFixed(2)
+            : Number(monto||0).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
+          return `${etiqueta}: ${pref} ${val}`;
+        }).join('\\n');
+
+        // Fecha para mostrar: última venta; si no hay, usar fecha_ingreso del producto
+        let ultima = null;
+        (producto.detalles || []).forEach(det => {
+          const v = ventasMap[det.venta_id];
+          const f = v ? v.fecha : det.fecha;
+          if (!f) return;
+          const n = normalizarFecha(f);
+          if (!ultima || (n && n > ultima)) ultima = n;
+        });
+        let fechaUltima = ultima ? formatearFecha(ultima) : '-';
+        if (fechaUltima === '-' && productoInfo && productoInfo.fecha_ingreso) {
+          fechaUltima = formatearFecha(productoInfo.fecha_ingreso);
+        }
+
+        const nombreTruncado = producto.nombre.length > 40 ? producto.nombre.substring(0, 37) + '...' : producto.nombre;
         
         tableRows.push([
+          fechaUltima,
           nombreTruncado,
-          marcaTruncada,
-          stock,
-          producto.totalUnidades.toLocaleString(),
-          producto.totalUsd > 0 ? formatearMoneda(producto.totalUsd, 'USD') : '-',
-          producto.totalBs > 0 ? formatearMoneda(producto.totalBs, 'BS') : '-',
-          producto.totalBsEquivalenteDesdeUsd > 0 ? formatearMoneda(producto.totalBsEquivalenteDesdeUsd, 'BS') : '-',
-          formatearMoneda(totalBsVendido, 'BS')
+          inventarioInicial !== null ? inventarioInicial.toLocaleString() : '-',
+          reciboStr,
+          stockActual !== null ? stockActual.toLocaleString() : '-',
+          precioTextoPlano,
+          Number(producto.totalUnidades || 0).toLocaleString(),
+          totalVentasPlano || '-',
+          inventarioFinal !== null ? inventarioFinal.toLocaleString() : '-'
         ]);
       });
 
       doc.setFontSize(12);
-      doc.text('PRODUCTOS VENDIDOS', 20, 45);
+      doc.text('PRODUCTOS - RESUMEN', 20, 45);
       
       doc.autoTable({
         head: [tableColumn],
         body: tableRows,
         startY: 55,
         theme: 'grid',
-        styles: { fontSize: 8 },
+        styles: { fontSize: 6, overflow: 'linebreak', cellWidth: 'wrap' },
         headStyles: { fillColor: [30,136,229] },
         columnStyles: { 
-          0: { cellWidth: 55 },
-          1: { cellWidth: 35 },
-          2: { cellWidth: 20 },
-          3: { cellWidth: 24 },
-          4: { cellWidth: 26 },
-          5: { cellWidth: 28 },
-          6: { cellWidth: 32 },
-          7: { cellWidth: 32 }
+          0: { cellWidth: 22 },  // Fecha
+          1: { cellWidth: 50 },  // Producto
+          2: { cellWidth: 20 },  // Inv. Inicial
+          3: { cellWidth: 18 },  // Recibo
+          4: { cellWidth: 20 },  // Stock
+          5: { cellWidth: 52 },  // Precio
+          6: { cellWidth: 26 },  // Cant. Vendidas
+          7: { cellWidth: 48 },  // Total Ventas
+          8: { cellWidth: 22 }   // Inv. Final
         }
       });
     } else {
