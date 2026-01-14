@@ -1,88 +1,108 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Menú Principal - Inventario</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #000000;
-      color: #ffffff;
-      min-height: 100vh;
-    }
-    
-    .logo-container {
-      margin-top: 50px;
-      margin-bottom: 30px;
-    }
-    
-    .menu-container {
-      background-color: #1a1a1a;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(255,255,255,0.1);
-      padding: 40px 30px;
-      margin-bottom: 50px;
-    }
+    <meta charset="UTF-8">
+    <title>Servicio Suspendido</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #ffffff;
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
 
-    .menu-title {
-      text-align: center;
-      margin-bottom: 30px;
-      font-size: 2rem;
-    }
+        .container {
+            max-width: 520px;
+            text-align: center;
+            padding: 42px 32px;
+            border: 1px solid #222;
+            border-radius: 8px;
+            background-color: #0b0b0b;
+        }
 
-    .menu-btn {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      background-color: #3105f1;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 1.1rem;
-      transition: all 0.3s ease;
-      text-align: center;
-      display: block;
-      text-decoration: none;
-    }
+        .logo {
+            margin-bottom: 28px;
+        }
 
-    /* Clase para estado desactivado */
-  .menu-btn.disabled {
-    background-color: #cccccc; /* Gris */
-    color: #666666;
-    cursor: not-allowed;
-    pointer-events: none; /* Desactiva clics */
-  }
+        .logo img {
+            max-width: 160px;
+        }
 
-    .menu-btn:hover {
-      background-color: #041fbd;
-      transform: translateY(-2px);
-    }
-  </style>
+        h1 {
+            font-size: 24px;
+            margin-bottom: 18px;
+            font-weight: normal;
+            color: #c0392b; /* rojo sobrio */
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #cccccc;
+            margin-bottom: 18px;
+        }
+
+        .debt {
+            margin: 24px 0;
+            padding: 18px;
+            background-color: #111;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        .debt strong {
+            color: #ffffff;
+        }
+
+        .amount {
+            font-size: 19px;
+            margin-top: 12px;
+            color: #ffffff;
+        }
+
+        .footer {
+            margin-top: 28px;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Logo -->
-    <div class="row">
-      <div class="col-12 text-center logo-container">
-        <img alt="Logo" src="logo.png" class="img-fluid" height="150px" width="350px">
-      </div>
+
+<div class="container">
+    <div class="logo">
+        <img src="logo.png" alt="Logo del sistema">
     </div>
 
-    <!-- Menú Principal -->
-    <div class="row justify-content-center">
-      <div class="col-12 col-md-8 col-lg-6">
-        <div class="menu-container">
-          <h1 class="menu-title">INVENTARIO</h1>
-          
-          <a href="menuProductos.html" class="menu-btn">1. Gestión de Productos</a>
-          <a href="ingresarVenta.html" class="menu-btn">2. Registrar Venta</a>
-          <a href="../ventas/index.html" class="menu-btn">3. Reporte de Ventas</a>
+    <h1>Servicio suspendido temporalmente</h1>
+
+    <p>
+        El acceso al sistema ha sido suspendido por pagos pendientes.
+    </p>
+
+    <div class="debt">
+        <p><strong>Meses pendientes:</strong></p>
+        <p>Noviembre – Diciembre – Enero</p>
+        <div class="amount">
+            Total adeudado: <strong>USD 60</strong>
         </div>
-      </div>
     </div>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <p>
+        El servicio será reactivado una vez regularizado el pago correspondiente.
+    </p>
+
+    <div class="footer">
+        © Sistema de Gestión · Soporte Técnico
+    </div>
+</div>
+
 </body>
 </html>
+
