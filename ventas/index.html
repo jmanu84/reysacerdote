@@ -1,108 +1,1596 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Servicio Suspendido</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #000;
-            color: #ffffff;
-            font-family: Arial, Helvetica, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reporte de Ventas - Corregido</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    /* ========= ESTILOS (mantuve todos los tuyos) ========= */
+    :root {
+      --verde-farmacia: #05642d;
+      --fondo-oscuro: #1a1a1a;
+      --texto-blanco: #ffffff;
+      --azul-ventas: #1e88e5;
+      --rojo-eliminar: #dc3545;
+      --naranja-biopago: #ff9800;
+    }
+    
+    body { background-color: #000; color: var(--texto-blanco); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .container-mobile { max-width: 100%; padding: 15px; }
+    .btn-submit { background-color: #05642d; color: #fff; padding: 10px 30px; border: none; transition: all 0.3s ease; }
+    .btn-submit:hover { background-color: #cccccc; color: #000000; transform: translateY(-2px); }
+    .logo-container { text-align: center; margin: 15px 0 25px; }
+    .card-ventas { background-color: var(--fondo-oscuro); border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    .title-ventas { text-align: center; margin-bottom: 20px; color: var(--texto-blanco); font-size: 1.5rem; }
+    .search-box { margin-bottom: 15px; }
+    .search-input { width: 100%; padding: 10px 15px; background-color: #2a2a2a; border: 1px solid var(--verde-farmacia); border-radius: 5px; color: var(--texto-blanco); }
+    .table-ventas { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .table-ventas th { background-color: var(--azul-ventas); color: white; padding: 12px 8px; text-align: left; }
+    .table-ventas td { padding: 10px 8px; border-bottom: 1px solid #333; }
+    .table-ventas tr:nth-child(even) { background-color: #2a2a2a; }
+    .table-ventas tr:hover { background-color: #333; }
+    .btn-volver { display: block; width: 100%; background-color: #333; color: white; text-align: center; padding: 10px; border-radius: 5px; margin-top: 20px; text-decoration: none; }
+    .btn-volver:hover { background-color: #444; color: white; }
+    .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .summary-cards { display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .summary-card { background-color: var(--fondo-oscuro); border-radius: 10px; padding: 15px; flex: 1; min-width: 200px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); display: flex; align-items: center; }
+    .summary-icon { font-size: 2rem; margin-right: 15px; color: var(--azul-ventas); }
+    .summary-content { flex: 1; }
+    .summary-title { font-size: 0.9rem; color: #aaa; margin-bottom: 5px; }
+    .summary-value { font-size: 1.3rem; font-weight: bold; }
+    .summary-subvalue { font-size: 0.9rem; color: #aaa; }
+    .filtros-rapidos { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+    .filtros-fechas { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; align-items: center; }
+    .filtros-rapidos-fechas { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-filtro { background-color: #333; color: white; border: none; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; }
+    .btn-filtro:hover { background-color: #444; }
+    .btn-filtro.active { background-color: var(--azul-ventas); font-weight: bold; }
+    .rango-fechas { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .fecha-input { background-color: #2a2a2a; border: 1px solid var(--verde-farmacia); border-radius: 5px; color: var(--texto-blanco); padding: 5px 10px; }
+    .fecha-label { font-size: 0.9rem; color: #aaa; }
+    .btn-eliminar { background-color: var(--rojo-eliminar); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+    .btn-eliminar:hover { background-color: #c82333; }
+    .modal-venta { color: var(--texto-blanco); }
+    .modal-content { background-color: var(--fondo-oscuro); }
+    .modal-header { border-bottom: 1px solid #333; }
+    .modal-footer { border-top: 1px solid #333; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .nav-tabs { border-bottom: 1px solid #444; margin-bottom: 20px; }
+    .nav-tabs .nav-link { color: #aaa; border: none; border-bottom: 3px solid transparent; }
+    .nav-tabs .nav-link.active { color: var(--azul-ventas); background-color: transparent; border-bottom: 3px solid var(--azul-ventas); }
+    .nav-tabs .nav-link:hover { color: white; border-color: #eee; }
+    .productos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-top: 20px; }
+    .producto-card { background-color: #2a2a2a; border-radius: 10px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: transform 0.2s ease; }
+    .producto-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+    .producto-nombre { font-size: 1.1rem; font-weight: bold; margin: 0 0 15px 0; text-align: center; border-bottom: 1px solid #444; padding-bottom: 10px; }
+    .producto-info { margin-bottom: 15px; }
+    .producto-info-row { display: flex; justify-content: space-between; margin-bottom: 5px; padding: 0 10px; }
+    .producto-info-label { color: #aaa; font-size: 0.9rem; }
+    .producto-info-value { font-weight: bold; }
+    .producto-total { text-align: center; padding-top: 10px; border-top: 1px solid #444; margin-top: 15px; }
+    .total-label { font-size: 0.9rem; color: #aaa; margin-bottom: 5px; }
+    .total-value { font-size: 1.2rem; font-weight: bold; }
+    .moneda-usd { color: #17a2b8; }
+    .moneda-bs { color: #28a745; }
+    .moneda-biopago { color: var(--naranja-biopago); }
+    .btn-imprimir { background-color: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; margin-bottom: 15px; display: flex; align-items: center; gap: 5px; }
+    .btn-imprimir:hover { background-color: #5a6268; }
+    .btn-imprimir-container { display: flex; justify-content: flex-end; margin-bottom: 15px; }
+    .paginacion { display: flex; justify-content: center; align-items: center; margin-top: 20px; gap: 10px; }
+    .btn-paginacion { background-color: #333; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    .btn-paginacion:hover:not(:disabled) { background-color: #444; }
+    .btn-paginacion:disabled { background-color: #555; cursor: not-allowed; }
+    .info-paginacion { font-size: 0.9rem; color: #aaa; }
+    @media (max-width: 768px) { .productos-grid { grid-template-columns: 1fr; } .filtros-fechas { flex-direction: column; } .filtros-rapidos-fechas { flex-wrap: wrap; justify-content: center; } .rango-fechas { flex-direction: column; align-items: stretch; } .rango-fechas-horizontal { display: none; } .rango-fechas-vertical { display: flex; flex-direction: column; gap: 10px; } .table-ventas th, .table-ventas td { padding: 8px 5px; font-size: 0.9rem; } .table-ventas th { font-size: 0.95rem; } .summary-card { min-width: 100%; } .btn-imprimir-container { justify-content: center; } .paginacion { flex-wrap: wrap; } }
+    @media (min-width: 769px) { .rango-fechas-vertical { display: none; } .rango-fechas-horizontal { display: flex; align-items: center; gap: 10px; } }
 
-        .container {
-            max-width: 520px;
-            text-align: center;
-            padding: 42px 32px;
-            border: 1px solid #222;
-            border-radius: 8px;
-            background-color: #0b0b0b;
-        }
-
-        .logo {
-            margin-bottom: 28px;
-        }
-
-        .logo img {
-            max-width: 160px;
-        }
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 18px;
-            font-weight: normal;
-            color: #c0392b; /* rojo sobrio */
-        }
-
-        p {
-            font-size: 16px;
-            line-height: 1.7;
-            color: #cccccc;
-            margin-bottom: 18px;
-        }
-
-        .debt {
-            margin: 24px 0;
-            padding: 18px;
-            background-color: #111;
-            border-radius: 6px;
-            font-size: 15px;
-        }
-
-        .debt strong {
-            color: #ffffff;
-        }
-
-        .amount {
-            font-size: 19px;
-            margin-top: 12px;
-            color: #ffffff;
-        }
-
-        .footer {
-            margin-top: 28px;
-            font-size: 12px;
-            color: #777;
-        }
-    </style>
+    
+  </style>
 </head>
 <body>
-
-<div class="container">
-    <div class="logo">
-        <img src="logo.png" alt="Logo del sistema">
+  <div class="container-mobile">
+    <div class="row">
+      <div class="col-12 text-center logo-container">
+        <img alt="Logo" src="logo.png" class="img-fluid" height="150px" width="350px">
+      </div>
     </div>
-
-    <h1>Servicio suspendido temporalmente</h1>
-
-    <p>
-        El acceso al sistema ha sido suspendido por pagos pendientes.
-    </p>
-
-    <div class="debt">
-        <p><strong>Meses pendientes:</strong></p>
-        <p>Noviembre – Diciembre – Enero</p>
-        <div class="amount">
-            Total adeudado: <strong>USD 60</strong>
-        </div>
-    </div>
-
-    <p>
-        El servicio será reactivado una vez regularizado el pago correspondiente.
-    </p>
-
-    <div class="footer">
-        © Sistema de Gestión · Soporte Técnico
-    </div>
+    <div class="row">
+    
 </div>
+    
+    <div class="card-ventas">
+      <h2 class="title-ventas">REPORTE DE VENTAS</h2>
+      
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="productos-tab" data-bs-toggle="tab" data-bs-target="#productos" type="button" role="tab" aria-controls="productos" aria-selected="true">Ventas por Producto</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="detalles-tab" data-bs-toggle="tab" data-bs-target="#detalles" type="button" role="tab" aria-controls="detalles" aria-selected="false">Detalles de Ventas</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="reporte-tab" data-bs-toggle="tab" data-bs-target="#reporte" type="button" role="tab" aria-controls="reporte" aria-selected="false">Reporte Producto</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="buscar-tab" data-bs-toggle="tab" data-bs-target="#buscar" type="button" role="tab" aria-controls="buscar" aria-selected="false">Buscar Venta</button>
+        </li>
+      </ul>
+      
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="productos" role="tabpanel" aria-labelledby="productos-tab">
+          <div class="summary-cards" id="summaryCards" style="display: none;">
+            <div class="summary-card">
+              <div class="summary-icon"><i class="fas fa-shopping-cart"></i></div>
+              <div class="summary-content">
+                <div class="summary-title">Total Ventas</div>
+                <div class="summary-value" id="totalVentas">0</div>
+              </div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-icon"><i class="fas fa-money-bill-wave"></i></div>
+              <div class="summary-content">
+                <div class="summary-title">Monto Total</div>
+                <div class="summary-value moneda-usd" id="montoTotalUSD">$ 0.00</div>
+                <div class="summary-subvalue moneda-bs" id="montoTotalBS">Bs 0.00</div>
+              </div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-icon"><i class="fas fa-store"></i></div>
+              <div class="summary-content">
+                <div class="summary-title">Punto de Venta</div>
+                <div class="summary-value moneda-bs" id="ventasPunto">Bs 0.00</div>
+              </div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-icon"><i class="fas fa-money-bill"></i></div>
+              <div class="summary-content">
+                <div class="summary-title">Efectivo</div>
+                <div class="summary-value moneda-bs" id="ventasEfectivo">Bs 0.00</div>
+              </div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-icon"><i class="fas fa-mobile-alt"></i></div>
+              <div class="summary-content">
+                <div class="summary-title">Pago Móvil</div>
+                <div class="summary-value moneda-bs" id="ventasMovil">Bs 0.00</div>
+              </div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-icon"><i class="fas fa-dollar-sign"></i></div>
+              <div class="summary-content">
+                <div class="summary-title">Dólares</div>
+                <div class="summary-value moneda-usd" id="ventasDolares">$ 0.00</div>
+              </div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-icon"><i class="fas fa-credit-card"></i></div>
+              <div class="summary-content">
+                <div class="summary-title">Biopago</div>
+                <div class="summary-value moneda-biopago" id="ventasBiopago">Bs 0.00</div>
+              </div>
+            </div>
+          </div>
 
+          <div class="filtros-fechas" id="filtrosFechas" style="display: none;">
+            <div class="filtros-rapidos-fechas">
+              <button class="btn-filtro active" data-fecha-filtro="all">Todas las fechas</button>
+              <button class="btn-filtro" data-fecha-filtro="hoy">Hoy</button>
+              <button class="btn-filtro" data-fecha-filtro="semana">Esta semana</button>
+              <button class="btn-filtro" data-fecha-filtro="mes">Este mes</button>
+            </div>
+            <div class="rango-fechas">
+              <div class="rango-fechas-horizontal">
+                <span class="fecha-label">Rango personalizado:</span>
+                <input type="date" class="fecha-input" id="fechaInicio">
+                <span class="fecha-label">a</span>
+                <input type="date" class="fecha-input" id="fechaFin">
+                <button class="btn-filtro" id="aplicarRango">Aplicar</button>
+              </div>
+              <div class="rango-fechas-vertical">
+                <span class="fecha-label">Rango personalizado:</span>
+                <input type="date" class="fecha-input mb-2" id="fechaInicioMobile" placeholder="Fecha inicio">
+                <span class="fecha-label">a</span>
+                <input type="date" class="fecha-input mb-2" id="fechaFinMobile" placeholder="Fecha fin">
+                <button class="btn-filtro" id="aplicarRangoMobile">Aplicar</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="filtros-rapidos" id="filtrosRapidos" style="display: none;">
+            <button class="btn-filtro active" data-filter="all">Todas</button>
+            <button class="btn-filtro" data-filter="Punto de venta">Punto de Venta</button>
+            <button class="btn-filtro" data-filter="Efectivo">Efectivo</button>
+            <button class="btn-filtro" data-filter="Pago móvil">Pago Móvil</button>
+            <button class="btn-filtro" data-filter="Dólares">Dólares</button>
+            <button class="btn-filtro" data-filter="Biopago">Biopago</button>
+          </div>
+          
+          <div class="btn-imprimir-container">
+            <button class="btn-imprimir" id="btnImprimir" disabled>
+              <i class="fas fa-print"></i> Imprimir Reporte
+            </button>
+          </div>
+          
+          <div class="search-box">
+            <input type="text" class="search-input" placeholder="Buscar por producto o marca..." id="buscadorVentas">
+          </div>
+          
+          <div id="loadingIndicator" class="text-center" style="padding: 20px;">
+            <svg style="animation: spin 1s linear infinite; display: inline-block; width: 24px; height: 24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p>Cargando ventas...</p>
+          </div>
+          
+          <div class="productos-grid" id="productosGrid" style="display: none;"></div>
+          
+          <div class="paginacion" id="paginacionProductos" style="display: none;">
+            <button class="btn-paginacion" id="anteriorProductos" disabled>Anterior</button>
+            <span class="info-paginacion" id="infoPaginacionProductos">Página 1 de 1</span>
+            <button class="btn-paginacion" id="siguienteProductos" disabled>Siguiente</button>
+          </div>
+        </div>
+        
+        <div class="tab-pane fade" id="detalles" role="tabpanel" aria-labelledby="detalles-tab">
+          <div class="table-responsive" id="tableContainer" style="display: none;">
+            <table class="table-ventas">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Producto</th>
+                  <th>Marca</th>
+                  <th>Tipo Pago</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unitario</th>
+                  <th>Subtotal</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaVentas"></tbody>
+            </table>
+          </div>
+          <div class="paginacion" id="paginacionDetalles" style="display: none;">
+            <button class="btn-paginacion" id="anteriorDetalles" disabled>Anterior</button>
+            <span class="info-paginacion" id="infoPaginacionDetalles">Página 1 de 1</span>
+            <button class="btn-paginacion" id="siguienteDetalles" disabled>Siguiente</button>
+          </div>
+        </div>
+        
+        <div class="tab-pane fade" id="reporte" role="tabpanel" aria-labelledby="reporte-tab">
+          <div class="btn-imprimir-container">
+            <button class="btn-imprimir" id="btnImprimirReporte" disabled>
+              <i class="fas fa-print"></i> Imprimir Reporte
+            </button>
+          </div>
+          <div class="table-responsive" id="reporteTableContainer" style="display: none;">
+            <table class="table-ventas" id="tablaReporteProductos">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Producto</th>
+                  <th>Inventario Inicial</th>
+                  <th>Recibo</th>
+                  <th>Stock</th>
+                  <th>Precio</th>
+                  <th>Cant. Vendidas</th>
+                  <th>Total Ventas</th>
+                  <th>Inventario Final</th>
+                </tr>
+              </thead>
+              <tbody id="reporteTableBody"></tbody>
+            </table>
+          </div>
+          <div id="reporteContainer" style="display: none;"></div>
+        </div>
+
+        <div class="tab-pane fade" id="buscar" role="tabpanel" aria-labelledby="buscar-tab">
+          <div class="search-box">
+            <input type="text" class="search-input" placeholder="Ingrese número de venta..." id="buscadorNumeroVenta">
+          </div>
+          <div id="resultadoBusqueda" class="productos-grid" style="display: none;"></div>
+          <div id="mensajeBusqueda" class="text-center" style="display: none; padding: 20px;"></div>
+        </div>
+      </div>
+      
+      <div id="emptyMessage" class="text-center" style="display: none; padding: 40px;">
+        <p>No hay ventas registradas.</p>
+      </div>
+      
+      <div id="errorMessage" class="text-center" style="display: none; padding: 40px; color: #ff6b6b;">
+        <p>Error al cargar ventas. Por favor, recarga la página.</p>
+      </div>
+      <br>
+      <div class="text-center">
+         <a class="btn btn-submit btn-lg" href="../inventario/index.html">Volver al Menú</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="confirmarEliminarModal" tabindex="-1" aria-labelledby="confirmarEliminarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content modal-venta">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmarEliminarModalLabel">Confirmar Eliminación</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas eliminar esta venta? Esta acción no se puede deshacer.</p>
+          <p><strong>Nota:</strong> Se eliminarán todos los detalles asociados a esta venta.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmarEliminarBtn">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+  // CONFIG
+  const SUPABASE_URL = 'https://rirfvhvlmytnpqkcpxbx.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpcmZ2aHZsbXl0bnBxa2NweGJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0ODE2NDUsImV4cCI6MjA3MjA1NzY0NX0.5JLGuOIWNvKIESJG26JLOgRVCu0jVoH0ELZjQ63gV48';
+
+  const { createClient } = supabase;
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // GLOBALS
+  let ventasCompletas = [];
+  let detallesVentas = [];
+  let pagosVentas = [];
+  let productosMap = {};
+  let ventasMap = {};
+  let filtroActual = 'all';
+  let filtroFechaTipo = 'all';
+  let fechaInicioRango = null;
+  let fechaFinRango = null;
+  let ventaAEliminar = null;
+  let textoBusqueda = '';
+  let paginaActualProductos = 1;
+  let paginaActualDetalles = 1;
+  const registrosPorPagina = 20;
+
+  // --- UTIL: parseFecha robusta (maneja YYYY-MM-DD sin timezone y strings ISO) ---
+  function parseFechaSeguro(fechaStr) {
+    if (!fechaStr) return null;
+    try {
+      // Si ya es Date
+      if (fechaStr instanceof Date) return fechaStr;
+      // Si viene como 'YYYY-MM-DD' (fecha sin hora) -> crear Date local
+      if (/^\d{4}-\d{2}-\d{2}$/.test(fechaStr)) {
+        const [y, m, d] = fechaStr.split('-').map(Number);
+        return new Date(y, m - 1, d, 0, 0, 0, 0);
+      }
+      // Si viene con hora o ISO -> intentar new Date
+      const dt = new Date(fechaStr);
+      if (!isNaN(dt.getTime())) return dt;
+      // fallback: parse separados
+      const parts = fechaStr.split(/[- :T]/).map(Number);
+      if (parts.length >= 3) {
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+      return null;
+    } catch (e) {
+      console.warn('parseFechaSeguro error', fechaStr, e);
+      return null;
+    }
+  }
+
+  // Formateo
+  function formatearFecha(fechaStr) {
+    const fecha = parseFechaSeguro(fechaStr);
+    if (!fecha) return 'N/A';
+    const dia = fecha.getDate().toString().padStart(2, '0');
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+    const año = fecha.getFullYear();
+    return `${dia}/${mes}/${año}`;
+  }
+  function formatearFechaTexto(fechaStr) {
+    const fecha = parseFechaSeguro(fechaStr);
+    if (!fecha) return 'N/A';
+    return fecha.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  // Normaliza fecha a YYYY-MM-DD (evita problemas de zona horaria)
+  function normalizarFecha(fecha) {
+    if (!fecha) return null;
+    // Helper: formatea fecha local a YYYY-MM-DD sin convertir a UTC
+    const aYMDLocal = (d) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
+
+    if (fecha instanceof Date) return aYMDLocal(fecha);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return fecha;
+    const d = parseFechaSeguro(fecha);
+    if (d && !isNaN(d)) return aYMDLocal(d);
+    return null;
+  }
+
+  // Inicio/fin utilitarios en local time
+  function inicioDelDia(fecha = new Date()) {
+    const inicio = new Date(fecha);
+    inicio.setHours(0,0,0,0);
+    return inicio;
+  }
+  function finDelDia(fecha = new Date()) {
+    const fin = new Date(fecha);
+    fin.setHours(23,59,59,999);
+    return fin;
+  }
+  function inicioDeSemana() {
+    const hoy = new Date();
+    const dia = hoy.getDay();
+    const diff = hoy.getDate() - dia + (dia === 0 ? -6 : 1);
+    return inicioDelDia(new Date(hoy.setDate(diff)));
+  }
+  function finDeSemana() {
+    const inicio = inicioDeSemana();
+    const fin = new Date(inicio);
+    fin.setDate(inicio.getDate() + 6);
+    return finDelDia(fin);
+  }
+  function inicioDeMes() {
+    const hoy = new Date();
+    return inicioDelDia(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
+  }
+  function finDeMes() {
+    const hoy = new Date();
+    return finDelDia(new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0));
+  }
+  function obtenerTextoRangoFechas() {
+    switch (filtroFechaTipo) {
+      case 'hoy': return `Hoy (${formatearFechaTexto(new Date())})`;
+      case 'semana': return `Esta semana (${formatearFechaTexto(inicioDeSemana())} - ${formatearFechaTexto(finDeSemana())})`;
+      case 'mes': return `Este mes (${formatearFechaTexto(inicioDeMes())} - ${formatearFechaTexto(finDeMes())})`;
+      case 'rango': return fechaInicioRango && fechaFinRango ? `Rango personalizado (${formatearFechaTexto(fechaInicioRango)} - ${formatearFechaTexto(fechaFinRango)})` : 'Rango personalizado';
+      default: return 'Todas las fechas';
+    }
+  }
+
+  // Devuelve el rango de fechas actual como YYYY-MM-DD para consultar en DB
+  function obtenerRangoFechasFiltro() {
+    if (filtroFechaTipo === 'all') return { inicio: null, fin: null };
+    if (filtroFechaTipo === 'hoy') {
+      const d = normalizarFecha(new Date());
+      return { inicio: d, fin: d };
+    }
+    if (filtroFechaTipo === 'semana') {
+      return {
+        inicio: normalizarFecha(inicioDeSemana()),
+        fin: normalizarFecha(finDeSemana())
+      };
+    }
+    if (filtroFechaTipo === 'mes') {
+      return {
+        inicio: normalizarFecha(inicioDeMes()),
+        fin: normalizarFecha(finDeMes())
+      };
+    }
+    if (filtroFechaTipo === 'rango' && fechaInicioRango && fechaFinRango) {
+      return { inicio: fechaInicioRango, fin: fechaFinRango };
+    }
+    return { inicio: null, fin: null };
+  }
+
+  // Formateo de moneda
+  function formatearMoneda(valor, moneda) {
+    if (valor === null || valor === undefined || isNaN(Number(valor))) {
+      return `${moneda === 'USD' ? '$' : 'Bs'} 0.00`;
+    }
+    if (moneda === 'USD') {
+      return `$ ${Number(valor).toFixed(2)}`;
+    }
+    return `Bs ${Number(valor).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  // Obtiene tipo pago buscándolo en pagosVentas o en detalle.tipo_pago
+  function obtenerTipoPago(ventaId, detalleTipoPago) {
+    const pagos = pagosVentas.filter(p => p.venta_id === ventaId);
+    if (pagos.length) {
+      const p = pagos.find(x => x.metodo) || pagos[0];
+      return p.metodo || detalleTipoPago || 'N/A';
+    }
+    return detalleTipoPago || 'N/A';
+  }
+
+  // Determina si venta fue pagada en dólares (si existe un pago con metodo 'Dólares')
+  function esVentaEnDolares(ventaId) {
+    const pagos = pagosVentas.filter(p => p.venta_id === ventaId);
+    return pagos.some(p => p && p.metodo === 'Dólares');
+  }
+
+  // --- FILTRADOS ---
+  function filtrarVentasPorFecha(ventas) {
+    // Normaliza y compara solamente la parte YYYY-MM-DD para evitar problemas de zona horaria.
+    if (!ventas || ventas.length === 0) return [];
+    if (filtroFechaTipo === 'all') return ventas;
+    const hoy = new Date();
+    let inicio = null, fin = null;
+    switch (filtroFechaTipo) {
+      case 'hoy':
+        inicio = fin = normalizarFecha(hoy);
+        break;
+      case 'semana':
+        inicio = normalizarFecha(inicioDeSemana());
+        fin = normalizarFecha(finDeSemana());
+        break;
+      case 'mes':
+        inicio = normalizarFecha(inicioDeMes());
+        fin = normalizarFecha(finDeMes());
+        break;
+      case 'rango':
+        if (fechaInicioRango && fechaFinRango) {
+          inicio = fechaInicioRango;
+          fin = fechaFinRango;
+        } else {
+          return ventas;
+        }
+        break;
+      default:
+        return ventas;
+    }
+    return ventas.filter(v => {
+      const f = normalizarFecha(v.fecha || v.created_at || v.createdAt);
+      if (!f) return false;
+      return (!inicio || f >= inicio) && (!fin || f <= fin);
+    });
+  }
+
+  function filtrarPorTexto(detalles) {
+    if (!textoBusqueda || textoBusqueda.trim() === '') return detalles;
+    const texto = textoBusqueda.toLowerCase().trim();
+    return detalles.filter(d => {
+      const p = productosMap[d.producto_id];
+      if (!p) return false;
+      const nombre = (p.nombre || '').toString().toLowerCase();
+      const marca = (p.marca || '').toString().toLowerCase();
+      return nombre.includes(texto) || marca.includes(texto);
+    });
+  }
+
+  // Obtiene precio unitario usando múltiples campos
+  function obtenerPrecioUnitario(detalle, tipoPago, venta) {
+    const esDolares = tipoPago === 'Dólares';
+    if (esDolares) {
+      if (detalle.precio_unitario_usd && Number(detalle.precio_unitario_usd) > 0) return Number(detalle.precio_unitario_usd);
+      if (detalle.precio_usd && Number(detalle.precio_usd) > 0) return Number(detalle.precio_usd);
+      if (detalle.precio_unitario && Number(detalle.precio_unitario) > 0) return Number(detalle.precio_unitario);
+      if (detalle.subtotal_usd && detalle.cantidad) return Number(detalle.subtotal_usd) / Number(detalle.cantidad);
+    } else {
+      if (detalle.precio_unitario_bs && Number(detalle.precio_unitario_bs) > 0) return Number(detalle.precio_unitario_bs);
+      if (detalle.precio_bs && Number(detalle.precio_bs) > 0) return Number(detalle.precio_bs);
+      if (detalle.precio_unitario && Number(detalle.precio_unitario) > 0) return Number(detalle.precio_unitario);
+      if (detalle.subtotal_bs && detalle.cantidad) return Number(detalle.subtotal_bs) / Number(detalle.cantidad);
+    }
+    if (detalle.subtotal_usd && detalle.cantidad && venta && venta.tasa_cambio) {
+      return Number(detalle.subtotal_usd) / Number(detalle.cantidad);
+    }
+    return 0;
+  }
+
+  // CALCULAR ESTADISTICAS (usa ventasFiltradas para contar total de ventas)
+  function calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados, ventasFiltradas) {
+    const totalVentas = Array.isArray(ventasFiltradas) ? ventasFiltradas.length : 0;
+
+    // Totales por método tomados exclusivamente de la tabla de pagos
+    let ventasPuntoBs = 0;
+    let ventasEfectivoBs = 0;
+    let ventasMovilBs = 0;
+    let ventasDolaresUsd = 0;
+    let ventasBiopagoBs = 0;
+
+    pagosFiltrados.forEach(pago => {
+      if (!pago || !pago.metodo) return;
+      switch (pago.metodo) {
+        case 'Punto de venta':
+          ventasPuntoBs += Number(pago.monto_bs || 0);
+          break;
+        case 'Efectivo':
+          ventasEfectivoBs += Number(pago.monto_bs || 0);
+          break;
+        case 'Pago móvil':
+          ventasMovilBs += Number(pago.monto_bs || 0);
+          break;
+        case 'Dólares':
+          ventasDolaresUsd += Number(pago.monto_usd || 0);
+          break;
+        case 'Biopago':
+          ventasBiopagoBs += Number(pago.monto_bs || 0);
+          break;
+        default:
+          break;
+      }
+    });
+
+    // Monto total por moneda (siempre mostrar ambos)
+    const montoTotalUsd = ventasDolaresUsd;
+    const montoTotalBs = ventasPuntoBs + ventasEfectivoBs + ventasMovilBs + ventasBiopagoBs;
+
+    return {
+      totalVentas,
+      montoTotalUsd,
+      montoTotalBs,
+      ventasPuntoBs,
+      ventasEfectivoBs,
+      ventasMovilBs,
+      ventasDolaresUsd,
+      ventasBiopagoBs
+    };
+  }
+
+  // ACTUALIZAR RESUMEN UI
+  function actualizarResumenVentas(estadisticas) {
+    document.getElementById('totalVentas').textContent = estadisticas.totalVentas;
+    document.getElementById('montoTotalUSD').textContent = formatearMoneda(estadisticas.montoTotalUsd, 'USD');
+    document.getElementById('montoTotalBS').textContent = formatearMoneda(estadisticas.montoTotalBs, 'BS');
+    document.getElementById('ventasPunto').textContent = formatearMoneda(estadisticas.ventasPuntoBs, 'BS');
+    document.getElementById('ventasEfectivo').textContent = formatearMoneda(estadisticas.ventasEfectivoBs, 'BS');
+    document.getElementById('ventasMovil').textContent = formatearMoneda(estadisticas.ventasMovilBs, 'BS');
+    document.getElementById('ventasDolares').textContent = formatearMoneda(estadisticas.ventasDolaresUsd, 'USD');
+    document.getElementById('ventasBiopago').textContent = formatearMoneda(estadisticas.ventasBiopagoBs, 'BS');
+  }
+
+  // MOSTRAR VISTA PRODUCTOS (ahora recibe ventasFiltradas)
+  function mostrarVistaProductos(detallesFiltrados, pagosFiltrados, ventasFiltradas) {
+    const productosAgrupados = {};
+    detallesFiltrados.forEach(detalle => {
+      const productoId = detalle.producto_id;
+      const productoInfo = productosMap[productoId];
+      const venta = ventasMap[detalle.venta_id];
+      if (!productoInfo) return;
+
+      if (!productosAgrupados[productoId]) {
+        productosAgrupados[productoId] = {
+          nombre: productoInfo.nombre,
+          marca: productoInfo.marca || 'Sin marca',
+          detalles: [],
+          totalUnidades: 0,
+          totalUsd: 0,
+          totalBs: 0,
+          totalBsEquivalenteDesdeUsd: 0
+        };
+      }
+
+      const esDolares = esVentaEnDolares(detalle.venta_id);
+      productosAgrupados[productoId].detalles.push(detalle);
+      productosAgrupados[productoId].totalUnidades += Number(detalle.cantidad || 0);
+
+      if (esDolares) {
+        productosAgrupados[productoId].totalUsd += Number(detalle.subtotal_usd || 0);
+        const tasa = Number((venta && venta.tasa_cambio) || 0);
+        if (tasa && detalle.subtotal_usd) {
+          productosAgrupados[productoId].totalBsEquivalenteDesdeUsd += Number(detalle.subtotal_usd) * tasa;
+        }
+      } else {
+        productosAgrupados[productoId].totalBs += Number(detalle.subtotal_bs || 0);
+      }
+    });
+
+    const productosArray = Object.values(productosAgrupados).sort((a,b) => a.nombre.localeCompare(b.nombre));
+
+    // Estadísticas (usando ventasFiltradas)
+    const estadisticas = calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados, ventasFiltradas);
+    actualizarResumenVentas(estadisticas);
+
+    document.getElementById('summaryCards').style.display = 'flex';
+    document.getElementById('filtrosFechas').style.display = 'flex';
+    document.getElementById('filtrosRapidos').style.display = 'flex';
+    document.getElementById('loadingIndicator').style.display = 'none';
+
+    // Paginación
+    const totalPaginas = Math.max(1, Math.ceil(productosArray.length / registrosPorPagina));
+    const inicio = (paginaActualProductos - 1) * registrosPorPagina;
+    const fin = inicio + registrosPorPagina;
+    const productosPagina = productosArray.slice(inicio, fin);
+
+    document.getElementById('anteriorProductos').disabled = paginaActualProductos <= 1;
+    document.getElementById('siguienteProductos').disabled = paginaActualProductos >= totalPaginas;
+    document.getElementById('infoPaginacionProductos').textContent = `Página ${paginaActualProductos} de ${totalPaginas}`;
+    document.getElementById('paginacionProductos').style.display = productosArray.length > registrosPorPagina ? 'flex' : 'none';
+
+    const productosGrid = document.getElementById('productosGrid');
+    productosGrid.innerHTML = '';
+
+    if (productosPagina.length === 0) {
+      document.getElementById('emptyMessage').style.display = 'block';
+      productosGrid.style.display = 'none';
+      return;
+    }
+
+    document.getElementById('emptyMessage').style.display = 'none';
+    productosGrid.style.display = 'grid';
+
+    productosPagina.forEach(producto => {
+      const productoCard = document.createElement('div');
+      productoCard.className = 'producto-card';
+
+      const totalBsVendido = Number(producto.totalBs || 0) + Number(producto.totalBsEquivalenteDesdeUsd || 0);
+
+      productoCard.innerHTML = `
+        <h3 class="producto-nombre">${producto.nombre}</h3>
+        <div class="producto-info">
+          <div class="producto-info-row"><span class="producto-info-label">Marca</span><span class="producto-info-value">${producto.marca}</span></div>
+          <div class="producto-info-row"><span class="producto-info-label">Unidades Vendidas</span><span class="producto-info-value">${producto.totalUnidades.toLocaleString()}</span></div>
+          ${producto.totalUsd > 0 ? `<div class="producto-info-row"><span class="producto-info-label">Total USD</span><span class="producto-info-value moneda-usd">${formatearMoneda(producto.totalUsd,'USD')}</span></div>` : ''}
+          ${producto.totalBs > 0 ? `<div class="producto-info-row"><span class="producto-info-label">Total Bs</span><span class="producto-info-value moneda-bs">${formatearMoneda(producto.totalBs,'BS')}</span></div>` : ''}
+          ${producto.totalBsEquivalenteDesdeUsd > 0 ? `<div class="producto-info-row"><span class="producto-info-label">Equivalente Bs (desde USD)</span><span class="producto-info-value moneda-bs">${formatearMoneda(producto.totalBsEquivalenteDesdeUsd,'BS')}</span></div>` : ''}
+        </div>
+        <div class="producto-total">
+          <div class="total-label">Total Vendido</div>
+          <div class="total-value moneda-bs">${formatearMoneda(totalBsVendido,'BS')}</div>
+        </div>
+      `;
+
+      productosGrid.appendChild(productoCard);
+    });
+  }
+
+  // MOSTRAR DETALLES (ahora recibe ventasFiltradas)
+  function mostrarVistaDetalles(detallesFiltrados, ventasFiltradas) {
+    const pagosFiltrados = pagosVentas.filter(p => ventasFiltradas.some(v => v.id === p.venta_id));
+    const estadisticas = calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados, ventasFiltradas);
+    actualizarResumenVentas(estadisticas);
+
+    document.getElementById('summaryCards').style.display = 'flex';
+    document.getElementById('filtrosFechas').style.display = 'flex';
+    document.getElementById('filtrosRapidos').style.display = 'flex';
+    document.getElementById('loadingIndicator').style.display = 'none';
+
+    const totalPaginas = Math.max(1, Math.ceil(detallesFiltrados.length / registrosPorPagina));
+    const inicio = (paginaActualDetalles - 1) * registrosPorPagina;
+    const fin = inicio + registrosPorPagina;
+    const detallesPagina = detallesFiltrados.slice(inicio, fin);
+
+    document.getElementById('anteriorDetalles').disabled = paginaActualDetalles <= 1;
+    document.getElementById('siguienteDetalles').disabled = paginaActualDetalles >= totalPaginas;
+    document.getElementById('infoPaginacionDetalles').textContent = `Página ${paginaActualDetalles} de ${totalPaginas}`;
+    document.getElementById('paginacionDetalles').style.display = detallesFiltrados.length > registrosPorPagina ? 'flex' : 'none';
+
+    const tablaVentas = document.getElementById('tablaVentas');
+    tablaVentas.innerHTML = '';
+
+    if (detallesPagina.length === 0) {
+      document.getElementById('emptyMessage').style.display = 'block';
+      document.getElementById('tableContainer').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('emptyMessage').style.display = 'none';
+    document.getElementById('tableContainer').style.display = 'block';
+
+    detallesPagina.forEach(detalle => {
+      const productoInfo = productosMap[detalle.producto_id];
+      if (!productoInfo) return;
+      const venta = ventasMap[detalle.venta_id];
+      const tipoPago = obtenerTipoPago(detalle.venta_id, detalle.tipo_pago);
+      const esDolares = tipoPago === 'Dólares';
+
+      const precioUnitario = obtenerPrecioUnitario(detalle, tipoPago, venta);
+      let subtotal = 0;
+      let claseMoneda = 'moneda-bs';
+      let simboloMoneda = 'Bs';
+      if (esDolares) {
+        subtotal = Number(detalle.subtotal_usd || 0);
+        claseMoneda = 'moneda-usd';
+        simboloMoneda = '$';
+      } else {
+        subtotal = Number(detalle.subtotal_bs || 0);
+      }
+
+      const precioFormateado = `${simboloMoneda} ${Number(precioUnitario || 0).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      const subtotalFormateado = `${simboloMoneda} ${Number(subtotal || 0).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${formatearFecha(detalle.fecha)}</td>
+        <td>${productoInfo.nombre}</td>
+        <td>${productoInfo.marca || 'N/A'}</td>
+        <td>${tipoPago}</td>
+        <td>${detalle.cantidad || 0}</td>
+        <td class="${claseMoneda}">${precioFormateado}</td>
+        <td class="${claseMoneda}">${subtotalFormateado}</td>
+        <td><button class="btn-eliminar" data-venta-id="${detalle.venta_id}"><i class="fas fa-trash"></i> Eliminar</button></td>
+      `;
+      tablaVentas.appendChild(fila);
+    });
+
+    document.querySelectorAll('.btn-eliminar').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const ventaId = this.getAttribute('data-venta-id');
+        confirmarEliminarVenta(ventaId);
+      });
+    });
+  }
+
+  // MOSTRAR REPORTE PRODUCTO (tabla con productos totalizados)
+  function mostrarVistaReporte(detallesFiltrados, pagosFiltrados, ventasFiltradas) {
+    const cont = document.getElementById('reporteContainer');
+    const tableCont = document.getElementById('reporteTableContainer');
+    const tableBody = document.getElementById('reporteTableBody');
+    const btnImprimir = document.getElementById('btnImprimirReporte');
+    
+    if (!cont || !tableCont || !tableBody) return;
+
+    // Estadísticas generales
+    const stats = calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados, ventasFiltradas);
+    actualizarResumenVentas(stats);
+
+    document.getElementById('summaryCards').style.display = 'flex';
+    document.getElementById('filtrosFechas').style.display = 'flex';
+    document.getElementById('filtrosRapidos').style.display = 'flex';
+    document.getElementById('loadingIndicator').style.display = 'none';
+
+    // Agrupar productos (similar a mostrarVistaProductos)
+    const productosAgrupados = {};
+    detallesFiltrados.forEach(detalle => {
+      const productoId = detalle.producto_id;
+      const productoInfo = productosMap[productoId];
+      const venta = ventasMap[detalle.venta_id];
+      if (!productoInfo) return;
+
+      if (!productosAgrupados[productoId]) {
+        productosAgrupados[productoId] = {
+          producto_id: productoId,
+          nombre: productoInfo.nombre,
+          marca: productoInfo.marca || 'Sin marca',
+          detalles: [],
+          totalUnidades: 0,
+          totalUsd: 0,
+          totalBs: 0,
+          totalBsEquivalenteDesdeUsd: 0,
+          ultimaFechaVenta: null,
+          cantidadesPorMetodo: {} // { 'Punto de venta': unidades, 'Efectivo': unidades, 'Dólares': unidades, ... }
+        };
+      }
+
+      const esDolares = esVentaEnDolares(detalle.venta_id);
+      productosAgrupados[productoId].detalles.push(detalle);
+      productosAgrupados[productoId].totalUnidades += Number(detalle.cantidad || 0);
+
+      if (esDolares) {
+        productosAgrupados[productoId].totalUsd += Number(detalle.subtotal_usd || 0);
+        const tasa = Number((venta && venta.tasa_cambio) || 0);
+        if (tasa && detalle.subtotal_usd) {
+          productosAgrupados[productoId].totalBsEquivalenteDesdeUsd += Number(detalle.subtotal_usd) * tasa;
+        }
+      } else {
+        productosAgrupados[productoId].totalBs += Number(detalle.subtotal_bs || 0);
+      }
+
+      // Fecha última venta por producto
+      const fechaVenta = venta ? venta.fecha : detalle.fecha;
+      if (fechaVenta) {
+        const fNorm = normalizarFecha(fechaVenta);
+        if (!productosAgrupados[productoId].ultimaFechaVenta || fNorm > productosAgrupados[productoId].ultimaFechaVenta) {
+          productosAgrupados[productoId].ultimaFechaVenta = fNorm;
+        }
+      }
+
+      // Cantidades por método de pago (contar unidades para luego multiplicar por el precio del método)
+      let metodo = obtenerTipoPago(detalle.venta_id, detalle.tipo_pago);
+      // Fallback si no hay método: inferir por moneda del detalle
+      if (!metodo || metodo === 'N/A') {
+        if (detalle.moneda_precio === 'USD') metodo = 'Dólares';
+        else metodo = 'Efectivo';
+      }
+      if (metodo) {
+        if (!productosAgrupados[productoId].cantidadesPorMetodo[metodo]) {
+          productosAgrupados[productoId].cantidadesPorMetodo[metodo] = 0;
+        }
+        const unidades = Number(detalle.cantidad || 0);
+        productosAgrupados[productoId].cantidadesPorMetodo[metodo] += unidades;
+      }
+    });
+
+    const productosArray = Object.values(productosAgrupados).sort((a,b) => a.nombre.localeCompare(b.nombre));
+
+    // Construir tabla
+    tableBody.innerHTML = '';
+    cont.style.display = 'none';
+
+    if (productosArray.length === 0) {
+      tableCont.style.display = 'none';
+      cont.style.display = 'block';
+      cont.innerHTML = '<div class="text-center" style="padding:20px;">No hay datos para el período seleccionado.</div>';
+      if (btnImprimir) btnImprimir.disabled = true;
+      return;
+    }
+
+    tableCont.style.display = 'block';
+    if (btnImprimir) btnImprimir.disabled = false;
+
+    productosArray.forEach(producto => {
+      const totalBsVendido = Number(producto.totalBs || 0) + Number(producto.totalBsEquivalenteDesdeUsd || 0);
+      const productoInfo = productosMap[producto.producto_id];
+      const stockActual = productoInfo && Number.isFinite(Number(productoInfo.cantidad)) ? Number(productoInfo.cantidad) : null;
+      // Inventarios según indicación del usuario:
+      // Inventario Inicial = stock actual
+      const inventarioInicial = stockActual !== null ? stockActual : null;
+      // Inventario Final = stock actual - cantidad vendida del período
+      const inventarioFinal = stockActual !== null ? (stockActual - Number(producto.totalUnidades || 0)) : null;
+      // Recibo (último ingreso): fecha_ingreso + cantidad_ingresada si existen, si no vacío
+      const reciboStr = (productoInfo && productoInfo.fecha_ingreso && productoInfo.cantidad_ingresada)
+        ? `${formatearFecha(productoInfo.fecha_ingreso)} / ${Number(productoInfo.cantidad_ingresada).toLocaleString()}`
+        : '';
+      // Precio: USD, BCV (USD), Efectivo (Bs), Punto (Bs = Efectivo + 150) replicando lógica de ingresarVenta.html
+      const precioUsd = productoInfo && Number.isFinite(Number(productoInfo.precio_venta_1_usd)) ? Number(productoInfo.precio_venta_1_usd) : 0; // Dólar Físico (USD)
+      const precioBcvUsd = productoInfo && Number.isFinite(Number(productoInfo.precio_venta_2_usd)) ? Number(productoInfo.precio_venta_2_usd) : 0; // Dólar BCV (USD)
+      const tasaProducto = productoInfo && Number.isFinite(Number(productoInfo.tasa_cambio)) ? Number(productoInfo.tasa_cambio) : 0;
+      const efectivoBs = (precioBcvUsd && tasaProducto) ? (precioBcvUsd * tasaProducto) : 0; // Efectivo Bs = BCV(USD) * tasa
+      const puntoBs = efectivoBs ? (efectivoBs + 150) : 0; // Punto Bs = Efectivo + 150
+      const precioTexto = `
+        USD: ${formatearMoneda(precioUsd,'USD')}<br>
+        BCV (USD): ${formatearMoneda(precioBcvUsd,'USD')}<br>
+        Efectivo: ${formatearMoneda(efectivoBs,'BS')}<br>
+        Punto: ${formatearMoneda(puntoBs,'BS')}
+      `;
+      // Total ventas por método = (unidades por método) × (precio por método) sin conversión
+      const cantMet = producto.cantidadesPorMetodo || {};
+      const totalesMetodoTexto = Object.keys(cantMet).map(m => {
+        const unidades = Number(cantMet[m] || 0);
+        let moneda = 'BS';
+        let monto = 0;
+        if (m === 'Dólares') {
+          moneda = 'USD';
+          monto = unidades * precioUsd;
+        } else if (m === 'Punto de venta') {
+          monto = unidades * puntoBs;
+        } else {
+          // Efectivo, Pago móvil, Transferencia, Biopago -> usar Efectivo Bs
+          monto = unidades * efectivoBs;
+        }
+        const txt = moneda === 'USD' ? formatearMoneda(monto, 'USD') : formatearMoneda(monto, 'BS');
+        return `${m}: ${txt}`;
+      }).join('<br>');
+      const fechaUltima = producto.ultimaFechaVenta ? formatearFecha(producto.ultimaFechaVenta) : '-';
+
+      const fila = document.createElement('tr');
+      fila.innerHTML = `
+        <td>${fechaUltima}</td>
+        <td>${producto.nombre}</td>
+        <td>${inventarioInicial !== null ? inventarioInicial.toLocaleString() : '-'}</td>
+        <td>${reciboStr || '-'}</td>
+        <td>${stockActual !== null ? stockActual.toLocaleString() : '-'}</td>
+        <td>${precioTexto}</td>
+        <td>${producto.totalUnidades.toLocaleString()}</td>
+        <td>${totalesMetodoTexto || '-'}</td>
+        <td>${inventarioFinal !== null ? inventarioFinal.toLocaleString() : '-'}</td>
+      `;
+      tableBody.appendChild(fila);
+    });
+  }
+
+  // BUSCAR VENTA POR numero_venta
+  async function buscarVentaPorNumero(numeroVenta) {
+    const resultadoCont = document.getElementById('resultadoBusqueda');
+    const mensaje = document.getElementById('mensajeBusqueda');
+    if (!resultadoCont || !mensaje) return;
+
+    resultadoCont.style.display = 'none';
+    resultadoCont.innerHTML = '';
+    mensaje.style.display = 'none';
+    mensaje.textContent = '';
+
+    if (!numeroVenta || !numeroVenta.trim()) {
+      mensaje.style.display = 'block';
+      mensaje.textContent = 'Ingrese un número de venta válido.';
+      return;
+    }
+
+    try {
+      const { data: venta, error: errVenta } = await supabaseClient
+        .from('ventas')
+        .select('*')
+        .eq('numero_venta', numeroVenta.trim())
+        .maybeSingle();
+      if (errVenta) throw errVenta;
+      if (!venta) {
+        mensaje.style.display = 'block';
+        mensaje.textContent = 'No se encontró la venta.';
+        return;
+      }
+
+      const { data: detalles, error: errDet } = await supabaseClient
+        .from('detalles_venta')
+        .select('*')
+        .eq('venta_id', venta.id);
+      if (errDet) throw errDet;
+
+      const { data: pagos, error: errPagos } = await supabaseClient
+        .from('pagos_venta')
+        .select('*')
+        .eq('venta_id', venta.id);
+      if (errPagos) throw errPagos;
+
+      const productosHtml = (detalles || []).map(d => {
+        const p = productosMap[d.producto_id];
+        const tipoPago = (pagos && pagos.find(x => x.metodo)?.metodo) || d.tipo_pago || 'N/A';
+        const esUsd = tipoPago === 'Dólares';
+        const precio = obtenerPrecioUnitario(d, tipoPago, venta);
+        const subtotal = esUsd ? Number(d.subtotal_usd || 0) : Number(d.subtotal_bs || 0);
+        const clase = esUsd ? 'moneda-usd' : 'moneda-bs';
+        const sim = esUsd ? '$' : 'Bs';
+        return `
+          <div class="producto-card">
+            <h3 class="producto-nombre">${p ? p.nombre : 'Producto'}</h3>
+            <div class="producto-info">
+              <div class="producto-info-row"><span class="producto-info-label">Marca</span><span class="producto-info-value">${p && p.marca ? p.marca : 'N/A'}</span></div>
+              <div class="producto-info-row"><span class="producto-info-label">Cantidad</span><span class="producto-info-value">${d.cantidad || 0}</span></div>
+              <div class="producto-info-row"><span class="producto-info-label">Tipo de pago</span><span class="producto-info-value">${tipoPago}</span></div>
+              <div class="producto-info-row"><span class="producto-info-label">Precio Unitario</span><span class="producto-info-value ${clase}">${sim} ${Number(precio||0).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+              <div class="producto-info-row"><span class="producto-info-label">Subtotal</span><span class="producto-info-value ${clase}">${sim} ${Number(subtotal||0).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const headerHtml = `
+        <div class="producto-card">
+          <h3 class="producto-nombre">Venta #${venta.numero_venta || '-'} - ${formatearFechaTexto(venta.fecha)}</h3>
+          <div class="producto-info">
+            <div class="producto-info-row"><span class="producto-info-label">ID Venta</span><span class="producto-info-value">${venta.id}</span></div>
+            <div class="producto-info-row"><span class="producto-info-label">Tasa de cambio</span><span class="producto-info-value">${venta.tasa_cambio || 'N/A'}</span></div>
+          </div>
+        </div>
+      `;
+
+      resultadoCont.innerHTML = headerHtml + (productosHtml || '<div class="text-center" style="padding:20px;">Sin productos en esta venta.</div>');
+      resultadoCont.style.display = 'grid';
+    } catch (e) {
+      console.error(e);
+      mensaje.style.display = 'block';
+      mensaje.textContent = 'Ocurrió un error al buscar la venta.';
+    }
+  }
+
+  // CARGA Y PROCESO PRINCIPAL
+  async function fetchVentasPaginadas(fechaInicioFiltro, fechaFinFiltro, pageSize = 1000) {
+    let desde = 0;
+    let hasta = pageSize - 1;
+    let acumulado = [];
+    while (true) {
+      let q = supabaseClient.from('ventas').select('*').order('fecha', { ascending: false });
+      if (fechaInicioFiltro) q = q.gte('fecha', fechaInicioFiltro);
+      if (fechaFinFiltro) q = q.lte('fecha', fechaFinFiltro);
+      const { data, error } = await q.range(desde, hasta);
+      if (error) throw error;
+      const lote = data || [];
+      acumulado = acumulado.concat(lote);
+      if (lote.length < pageSize) break;
+      desde += pageSize;
+      hasta += pageSize;
+    }
+    return acumulado;
+  }
+
+  async function cargarYMostrarDatos() {
+    try {
+      document.getElementById('loadingIndicator').style.display = 'block';
+      document.getElementById('emptyMessage').style.display = 'none';
+      document.getElementById('errorMessage').style.display = 'none';
+
+      // Productos
+      const { data: productos, error: errorProductos } = await supabaseClient.from('productos').select('*');
+      if (errorProductos) throw errorProductos;
+      productosMap = {};
+      (productos || []).forEach(p => { productosMap[p.id] = p; });
+
+      // Ventas (filtrado en la base de datos por fecha con paginación para evitar límite de 1000)
+      const { inicio: fechaInicioFiltro, fin: fechaFinFiltro } = obtenerRangoFechasFiltro();
+      ventasCompletas = await fetchVentasPaginadas(fechaInicioFiltro, fechaFinFiltro);
+      ventasMap = {};
+      ventasCompletas.forEach(v => { ventasMap[v.id] = v; });
+
+      // Detalles y pagos: si el número de ventas es grande, evita .in con demasiados IDs
+      const ventaIds = ventasCompletas.map(v => v.id);
+      if (ventaIds.length === 0) {
+        detallesVentas = [];
+        pagosVentas = [];
+      } else if (ventaIds.length <= 300) {
+        const { data: detalles, error: errorDetalles } = await supabaseClient
+          .from('detalles_venta')
+          .select('*')
+          .in('venta_id', ventaIds);
+        if (errorDetalles) throw errorDetalles;
+        detallesVentas = detalles || [];
+
+        const { data: pagos, error: errorPagos } = await supabaseClient
+          .from('pagos_venta')
+          .select('*')
+          .in('venta_id', ventaIds);
+        if (errorPagos) throw errorPagos;
+        pagosVentas = pagos || [];
+      } else {
+        // Fallback: trae todos y filtra en cliente para no exceder el límite de URL
+        const [{ data: detalles, error: errorDetalles }, { data: pagos, error: errorPagos }] = await Promise.all([
+          supabaseClient.from('detalles_venta').select('*'),
+          supabaseClient.from('pagos_venta').select('*')
+        ]);
+        if (errorDetalles) throw errorDetalles;
+        if (errorPagos) throw errorPagos;
+        const setIds = new Set(ventaIds);
+        detallesVentas = (detalles || []).filter(d => setIds.has(d.venta_id));
+        pagosVentas = (pagos || []).filter(p => setIds.has(p.venta_id));
+      }
+
+      // Mapear fecha en detalles desde la venta (si existe)
+      const detallesConVentas = detallesVentas.map(detalle => {
+        const venta = ventasMap[detalle.venta_id];
+        return { ...detalle, fecha: venta ? venta.fecha : detalle.fecha };
+      });
+
+      // Ventas ya vienen filtradas; aplicamos filtro por venta_id igualmente por seguridad
+      const ventasFiltradas = ventasCompletas;
+      const detallesFiltradosPorFecha = detallesConVentas.filter(d => ventasFiltradas.some(v => v.id === d.venta_id));
+
+      // Filtrar por tipo de pago (filtroActual)
+      let detallesFiltrados = detallesFiltradosPorFecha;
+      if (filtroActual !== 'all') {
+        detallesFiltrados = detallesFiltradosPorFecha.filter(detalle => {
+          const tipoPago = obtenerTipoPago(detalle.venta_id, detalle.tipo_pago);
+          return tipoPago === filtroActual;
+        });
+      }
+
+      // Filtrar por texto
+      detallesFiltrados = filtrarPorTexto(detallesFiltrados);
+
+      // Pagos filtrados según ventas visibles
+      const pagosFiltrados = pagosVentas.filter(p => ventasFiltradas.some(v => v.id === p.venta_id));
+
+      // Mostrar la pestaña activa (pasamos ventasFiltradas a las vistas)
+      const tabActivo = document.querySelector('.nav-link.active').id;
+      if (tabActivo === 'productos-tab') {
+        mostrarVistaProductos(detallesFiltrados, pagosFiltrados, ventasFiltradas);
+      } else {
+        if (tabActivo === 'detalles-tab') {
+          mostrarVistaDetalles(detallesFiltrados, ventasFiltradas);
+        } else if (tabActivo === 'reporte-tab') {
+          mostrarVistaReporte(detallesFiltrados, pagosFiltrados, ventasFiltradas);
+        }
+      }
+
+      // Habilitar/deshabilitar botón de imprimir según haya datos
+      const hayDatosParaImprimir = (Array.isArray(ventasFiltradas) && ventasFiltradas.length > 0) || (Array.isArray(detallesFiltrados) && detallesFiltrados.length > 0);
+      const btnImprimir = document.getElementById('btnImprimir');
+      if (btnImprimir) btnImprimir.disabled = !hayDatosParaImprimir;
+
+    } catch (error) {
+      console.error('Error al cargar datos:', error);
+      document.getElementById('loadingIndicator').style.display = 'none';
+      document.getElementById('errorMessage').style.display = 'block';
+    }
+  }
+
+  // ELIMINAR VENTA
+  function confirmarEliminarVenta(ventaId) {
+    ventaAEliminar = ventaId;
+    const modal = new bootstrap.Modal(document.getElementById('confirmarEliminarModal'));
+    modal.show();
+  }
+  async function eliminarVenta() {
+    if (!ventaAEliminar) return;
+    try {
+      const { error: errorDetalles } = await supabaseClient.from('detalles_venta').delete().eq('venta_id', ventaAEliminar);
+      if (errorDetalles) throw errorDetalles;
+      const { error: errorPagos } = await supabaseClient.from('pagos_venta').delete().eq('venta_id', ventaAEliminar);
+      if (errorPagos) throw errorPagos;
+      const { error: errorVenta } = await supabaseClient.from('ventas').delete().eq('id', ventaAEliminar);
+      if (errorVenta) throw errorVenta;
+      await cargarYMostrarDatos();
+      const modal = bootstrap.Modal.getInstance(document.getElementById('confirmarEliminarModal'));
+      if (modal) modal.hide();
+      alert('Venta eliminada correctamente');
+    } catch (error) {
+      console.error('Error al eliminar venta:', error);
+      alert('Error al eliminar la venta. Por favor intenta nuevamente.');
+    }
+  }
+
+  // IMPRESIÓN / PDF (incluye texto de rango)
+  function imprimirReporte() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(20);
+    doc.text('REPORTE DE VENTAS', 105, 15, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 105, 22, { align: 'center' });
+    const textoRangoFechas = obtenerTextoRangoFechas();
+    doc.text(`Período: ${textoRangoFechas}`, 105, 29, { align: 'center' });
+
+    const ventasFiltradas = filtrarVentasPorFecha(ventasCompletas);
+
+    const detallesFiltradosPorFecha = detallesVentas.map(detalle => {
+      const venta = ventasMap[detalle.venta_id];
+      return venta ? { ...detalle, fecha: venta.fecha } : null;
+    }).filter(Boolean);
+
+    let detallesFiltrados = detallesFiltradosPorFecha;
+    if (filtroActual !== 'all') {
+      detallesFiltrados = detallesFiltradosPorFecha.filter(detalle => {
+        const tipoPago = obtenerTipoPago(detalle.venta_id, detalle.tipo_pago);
+        return tipoPago === filtroActual;
+      });
+    }
+    detallesFiltrados = filtrarPorTexto(detallesFiltrados);
+
+    const pagosFiltrados = pagosVentas.filter(p => ventasFiltradas.some(v => v.id === p.venta_id));
+    const estadisticas = calcularEstadisticasVentas(detallesFiltrados, pagosFiltrados, ventasFiltradas);
+
+    doc.setFontSize(12);
+    doc.text('RESUMEN', 20, 45);
+    let yPos = 55;
+    doc.text(`Total de ventas: ${estadisticas.totalVentas}`, 20, yPos); yPos += 7;
+    doc.text(`Monto total en USD: ${formatearMoneda(estadisticas.montoTotalUsd, 'USD')}`, 20, yPos); yPos += 7;
+    doc.text(`Monto total en BS: ${formatearMoneda(estadisticas.montoTotalBs, 'BS')}`, 20, yPos); yPos += 7;
+    doc.text(`Ventas con punto de venta: ${formatearMoneda(estadisticas.ventasPuntoBs, 'BS')}`, 20, yPos); yPos += 7;
+    doc.text(`Ventas en efectivo: ${formatearMoneda(estadisticas.ventasEfectivoBs, 'BS')}`, 20, yPos); yPos += 7;
+    doc.text(`Ventas por pago móvil: ${formatearMoneda(estadisticas.ventasMovilBs, 'BS')}`, 20, yPos); yPos += 7;
+    doc.text(`Ventas en dólares: ${formatearMoneda(estadisticas.ventasDolaresUsd, 'USD')}`, 20, yPos); yPos += 7;
+    doc.text(`Ventas con Biopago: ${formatearMoneda(estadisticas.ventasBiopagoBs, 'BS')}`, 20, yPos); yPos += 15;
+
+    if (detallesFiltrados.length > 0) {
+      doc.text('DETALLES DE VENTAS', 20, yPos);
+      yPos += 10;
+      const tableColumn = ["Fecha", "Producto", "Tipo Pago", "Cantidad", "Precio Unitario", "Subtotal"];
+      const tableRows = [];
+      detallesFiltrados.forEach(detalle => {
+        const productoInfo = productosMap[detalle.producto_id];
+        const tipoPago = obtenerTipoPago(detalle.venta_id, detalle.tipo_pago);
+        const venta = ventasMap[detalle.venta_id];
+        const precioUnitario = obtenerPrecioUnitario(detalle, tipoPago, venta);
+        const esDolares = tipoPago === 'Dólares';
+        const subtotal = esDolares ? Number(detalle.subtotal_usd || 0) : Number(detalle.subtotal_bs || 0);
+        const precioUnitarioFormateado = esDolares ? formatearMoneda(precioUnitario, 'USD') : formatearMoneda(precioUnitario, 'BS');
+        const subtotalFormateado = esDolares ? formatearMoneda(subtotal, 'USD') : formatearMoneda(subtotal, 'BS');
+        const detalleData = [
+          formatearFecha(detalle.fecha),
+          productoInfo ? (productoInfo.nombre.length > 20 ? productoInfo.nombre.substring(0,20) + '...' : productoInfo.nombre) : 'N/A',
+          tipoPago,
+          detalle.cantidad || 0,
+          precioUnitarioFormateado,
+          subtotalFormateado
+        ];
+        tableRows.push(detalleData);
+      });
+
+      doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: yPos,
+        theme: 'grid',
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [30,136,229] },
+        columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 40 }, 2: { cellWidth: 25 }, 3: { cellWidth: 20 }, 4: { cellWidth: 25 }, 5: { cellWidth: 25 } }
+      });
+    }
+
+    doc.save(`reporte_ventas_${new Date().toISOString().split('T')[0]}.pdf`);
+  }
+
+  // IMPRESIÓN REPORTE PRODUCTOS / PDF (solo productos totalizados)
+  function imprimirReporteProductos() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', format: 'a4' });
+    doc.setFontSize(20);
+    doc.text('REPORTE DE VENTAS - REY SACERDOTE', 105, 15, { align: 'center' });
+    doc.setFontSize(10);
+    doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 105, 22, { align: 'center' });
+    const textoRangoFechas = obtenerTextoRangoFechas();
+    doc.text(`Período: ${textoRangoFechas}`, 105, 29, { align: 'center' });
+
+    const ventasFiltradas = filtrarVentasPorFecha(ventasCompletas);
+
+    const detallesFiltradosPorFecha = detallesVentas.map(detalle => {
+      const venta = ventasMap[detalle.venta_id];
+      return venta ? { ...detalle, fecha: venta.fecha } : null;
+    }).filter(Boolean);
+
+    let detallesFiltrados = detallesFiltradosPorFecha;
+    if (filtroActual !== 'all') {
+      detallesFiltrados = detallesFiltradosPorFecha.filter(detalle => {
+        const tipoPago = obtenerTipoPago(detalle.venta_id, detalle.tipo_pago);
+        return tipoPago === filtroActual;
+      });
+    }
+    detallesFiltrados = filtrarPorTexto(detallesFiltrados);
+
+    // Agrupar productos (igual que en mostrarVistaReporte)
+    const productosAgrupados = {};
+    detallesFiltrados.forEach(detalle => {
+      const productoId = detalle.producto_id;
+      const productoInfo = productosMap[productoId];
+      const venta = ventasMap[detalle.venta_id];
+      if (!productoInfo) return;
+
+      if (!productosAgrupados[productoId]) {
+        productosAgrupados[productoId] = {
+          producto_id: productoId,
+          nombre: productoInfo.nombre,
+          marca: productoInfo.marca || 'Sin marca',
+          detalles: [],
+          totalUnidades: 0,
+          totalUsd: 0,
+          totalBs: 0,
+          totalBsEquivalenteDesdeUsd: 0
+        };
+      }
+
+      const esDolares = esVentaEnDolares(detalle.venta_id);
+      // Guardar detalle para cálculos posteriores (total por método)
+      productosAgrupados[productoId].detalles.push(detalle);
+      productosAgrupados[productoId].totalUnidades += Number(detalle.cantidad || 0);
+
+      if (esDolares) {
+        productosAgrupados[productoId].totalUsd += Number(detalle.subtotal_usd || 0);
+        const tasa = Number((venta && venta.tasa_cambio) || 0);
+        if (tasa && detalle.subtotal_usd) {
+          productosAgrupados[productoId].totalBsEquivalenteDesdeUsd += Number(detalle.subtotal_usd) * tasa;
+        }
+      } else {
+        productosAgrupados[productoId].totalBs += Number(detalle.subtotal_bs || 0);
+      }
+    });
+
+    const productosArray = Object.values(productosAgrupados).sort((a,b) => a.nombre.localeCompare(b.nombre));
+
+    if (productosArray.length > 0) {
+      const tableColumn = ["Fecha", "Producto", "Inv. Inicial", "Recibo", "Stock", "Precio", "Cant. Vendidas", "Total Ventas", "Inv. Final"];
+      const tableRows = [];
+      
+      productosArray.forEach(producto => {
+        const productoInfo = productosMap[producto.producto_id];
+        const stockActual = productoInfo && Number.isFinite(Number(productoInfo.cantidad)) ? Number(productoInfo.cantidad) : null;
+        const inventarioInicial = stockActual !== null ? stockActual : null;
+        const inventarioFinal = stockActual !== null ? (stockActual - Number(producto.totalUnidades || 0)) : null;
+        const reciboStr = (productoInfo && productoInfo.fecha_ingreso && productoInfo.cantidad_ingresada)
+          ? `${formatearFecha(productoInfo.fecha_ingreso)} / ${Number(productoInfo.cantidad_ingresada).toLocaleString()}`
+          : '-';
+        const precioUsd = productoInfo && Number.isFinite(Number(productoInfo.precio_venta_1_usd)) ? Number(productoInfo.precio_venta_1_usd) : 0; // Dólar Físico (USD)
+        const precioBcvUsd = productoInfo && Number.isFinite(Number(productoInfo.precio_venta_2_usd)) ? Number(productoInfo.precio_venta_2_usd) : 0; // Dólar BCV (USD)
+        const tasaProducto = productoInfo && Number.isFinite(Number(productoInfo.tasa_cambio)) ? Number(productoInfo.tasa_cambio) : 0;
+        const efectivoBs = (precioBcvUsd && tasaProducto) ? (precioBcvUsd * tasaProducto) : 0; // Efectivo Bs = BCV(USD) * tasa
+        const puntoBs = efectivoBs ? (efectivoBs + 150) : 0; // Punto Bs = Efectivo + 150
+        const precioTextoPlano = `USD: ${Number(precioUsd||0).toFixed(2)} | BCV(USD): ${Number(precioBcvUsd||0).toFixed(2)} | Efec: ${Number(efectivoBs||0).toFixed(2)} | Punto: ${Number(puntoBs||0).toFixed(2)}`;
+        
+        // Total ventas por método = (unidades por método) × (precio por método)
+        const cantidadesPorMetodo = {};
+        (producto.detalles || []).forEach(det => {
+          let metodo = obtenerTipoPago(det.venta_id, det.tipo_pago);
+          if (!metodo || metodo === 'N/A') metodo = (det.moneda_precio === 'USD') ? 'Dólares' : 'Efectivo';
+          if (!metodo) return;
+          if (!cantidadesPorMetodo[metodo]) cantidadesPorMetodo[metodo] = 0;
+          cantidadesPorMetodo[metodo] += Number(det.cantidad || 0);
+        });
+        const totalVentasPlano = Object.keys(cantidadesPorMetodo).map(m => {
+          const unidades = Number(cantidadesPorMetodo[m] || 0);
+          let moneda = 'BS';
+          let monto = 0;
+          if (m === 'Dólares') {
+            moneda = 'USD';
+            monto = unidades * precioUsd;
+          } else if (m === 'Punto de venta') {
+            monto = unidades * puntoBs;
+          } else {
+            // Efectivo, Pago móvil, Transferencia, Biopago -> Efectivo Bs
+            monto = unidades * efectivoBs;
+          }
+          // Etiquetas cortas
+          const etiqueta = (m === 'Punto de venta') ? 'Punto'
+                         : (m === 'Pago móvil') ? 'Móvil'
+                         : (m === 'Transferencia') ? 'Transf'
+                         : (m === 'Dólares') ? 'USD'
+                         : (m === 'Biopago') ? 'Biopago'
+                         : (m === 'Efectivo') ? 'Efectivo' : m;
+          const pref = moneda === 'USD' ? '$' : 'Bs';
+          const val = moneda === 'USD'
+            ? Number(monto||0).toFixed(2)
+            : Number(monto||0).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
+          return `${etiqueta}: ${pref} ${val}`;
+        }).join('\\n');
+
+        // Fecha para mostrar: última venta; si no hay, usar fecha_ingreso del producto
+        let ultima = null;
+        (producto.detalles || []).forEach(det => {
+          const v = ventasMap[det.venta_id];
+          const f = v ? v.fecha : det.fecha;
+          if (!f) return;
+          const n = normalizarFecha(f);
+          if (!ultima || (n && n > ultima)) ultima = n;
+        });
+        let fechaUltima = ultima ? formatearFecha(ultima) : '-';
+        if (fechaUltima === '-' && productoInfo && productoInfo.fecha_ingreso) {
+          fechaUltima = formatearFecha(productoInfo.fecha_ingreso);
+        }
+
+        const nombreTruncado = producto.nombre.length > 40 ? producto.nombre.substring(0, 37) + '...' : producto.nombre;
+        
+        tableRows.push([
+          fechaUltima,
+          nombreTruncado,
+          inventarioInicial !== null ? inventarioInicial.toLocaleString() : '-',
+          reciboStr,
+          stockActual !== null ? stockActual.toLocaleString() : '-',
+          precioTextoPlano,
+          Number(producto.totalUnidades || 0).toLocaleString(),
+          totalVentasPlano || '-',
+          inventarioFinal !== null ? inventarioFinal.toLocaleString() : '-'
+        ]);
+      });
+
+      doc.setFontSize(12);
+      doc.text('PRODUCTOS - RESUMEN', 20, 45);
+      
+      doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 55,
+        theme: 'grid',
+        styles: { fontSize: 6, overflow: 'linebreak', cellWidth: 'wrap' },
+        headStyles: { fillColor: [30,136,229] },
+        columnStyles: { 
+          0: { cellWidth: 22 },  // Fecha
+          1: { cellWidth: 50 },  // Producto
+          2: { cellWidth: 20 },  // Inv. Inicial
+          3: { cellWidth: 18 },  // Recibo
+          4: { cellWidth: 20 },  // Stock
+          5: { cellWidth: 52 },  // Precio
+          6: { cellWidth: 26 },  // Cant. Vendidas
+          7: { cellWidth: 48 },  // Total Ventas
+          8: { cellWidth: 22 }   // Inv. Final
+        }
+      });
+    } else {
+      doc.setFontSize(12);
+      doc.text('No hay productos para el período seleccionado.', 20, 45);
+    }
+
+    doc.save(`reporte_productos_${new Date().toISOString().split('T')[0]}.pdf`);
+  }
+
+  // INIT DOM
+  document.addEventListener('DOMContentLoaded', function() {
+    cargarYMostrarDatos();
+
+    // filtros rapidos (tipo pago)
+    document.querySelectorAll('.filtros-rapidos .btn-filtro').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filtros-rapidos .btn-filtro').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        filtroActual = this.getAttribute('data-filter');
+        paginaActualProductos = 1; paginaActualDetalles = 1;
+        cargarYMostrarDatos();
+      });
+    });
+
+    // filtros fechas
+    document.querySelectorAll('.filtros-rapidos-fechas .btn-filtro').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filtros-rapidos-fechas .btn-filtro').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        filtroFechaTipo = this.getAttribute('data-fecha-filtro');
+        fechaInicioRango = null; fechaFinRango = null;
+        document.getElementById('fechaInicio').value = '';
+        document.getElementById('fechaFin').value = '';
+        document.getElementById('fechaInicioMobile').value = '';
+        document.getElementById('fechaFinMobile').value = '';
+        paginaActualProductos = 1; paginaActualDetalles = 1;
+        cargarYMostrarDatos();
+      });
+    });
+
+    document.getElementById('aplicarRango').addEventListener('click', function() {
+      const fechaInicio = document.getElementById('fechaInicio').value;
+      const fechaFin = document.getElementById('fechaFin').value;
+      if (fechaInicio && fechaFin) {
+        filtroFechaTipo = 'rango';
+        fechaInicioRango = fechaInicio;
+        fechaFinRango = fechaFin;
+        document.querySelectorAll('.filtros-rapidos-fechas .btn-filtro').forEach(b => b.classList.remove('active'));
+        paginaActualProductos = 1; paginaActualDetalles = 1;
+        cargarYMostrarDatos();
+      }
+    });
+
+    document.getElementById('aplicarRangoMobile').addEventListener('click', function() {
+      const fechaInicio = document.getElementById('fechaInicioMobile').value;
+      const fechaFin = document.getElementById('fechaFinMobile').value;
+      if (fechaInicio && fechaFin) {
+        filtroFechaTipo = 'rango';
+        fechaInicioRango = fechaInicio;
+        fechaFinRango = fechaFin;
+        document.querySelectorAll('.filtros-rapidos-fechas .btn-filtro').forEach(b => b.classList.remove('active'));
+        document.getElementById('fechaInicio').value = fechaInicio;
+        document.getElementById('fechaFin').value = fechaFin;
+        paginaActualProductos = 1; paginaActualDetalles = 1;
+        cargarYMostrarDatos();
+      }
+    });
+
+    // sincronizar campos
+    ['fechaInicio','fechaFin','fechaInicioMobile','fechaFinMobile'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('change', function() {
+        if (id === 'fechaInicio' || id === 'fechaInicioMobile') {
+          document.getElementById('fechaInicio').value = this.value;
+          document.getElementById('fechaInicioMobile').value = this.value;
+        } else {
+          document.getElementById('fechaFin').value = this.value;
+          document.getElementById('fechaFinMobile').value = this.value;
+        }
+      });
+    });
+
+    // búsqueda
+    document.getElementById('buscadorVentas').addEventListener('input', function() {
+      textoBusqueda = this.value;
+      paginaActualProductos = 1; paginaActualDetalles = 1;
+      cargarYMostrarDatos();
+    });
+
+    // imprimir
+    document.getElementById('btnImprimir').addEventListener('click', imprimirReporte);
+    
+    // imprimir reporte productos
+    const btnImprimirReporte = document.getElementById('btnImprimirReporte');
+    if (btnImprimirReporte) {
+      btnImprimirReporte.addEventListener('click', imprimirReporteProductos);
+    }
+
+    // eliminar confirm
+    document.getElementById('confirmarEliminarBtn').addEventListener('click', eliminarVenta);
+
+    // pestañas
+    document.querySelectorAll('.nav-link').forEach(tab => {
+      tab.addEventListener('shown.bs.tab', function() {
+        paginaActualProductos = 1; paginaActualDetalles = 1;
+        cargarYMostrarDatos();
+      });
+    });
+
+    // paginacion productos
+    document.getElementById('anteriorProductos').addEventListener('click', function() {
+      if (paginaActualProductos > 1) { paginaActualProductos--; cargarYMostrarDatos(); }
+    });
+    document.getElementById('siguienteProductos').addEventListener('click', function() {
+      paginaActualProductos++; cargarYMostrarDatos();
+    });
+
+    // paginacion detalles
+    document.getElementById('anteriorDetalles').addEventListener('click', function() {
+      if (paginaActualDetalles > 1) { paginaActualDetalles--; cargarYMostrarDatos(); }
+    });
+    document.getElementById('siguienteDetalles').addEventListener('click', function() {
+      paginaActualDetalles++; cargarYMostrarDatos();
+    });
+
+    // buscar venta por numero_venta
+    const inputNumVenta = document.getElementById('buscadorNumeroVenta');
+    if (inputNumVenta) {
+      inputNumVenta.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          buscarVentaPorNumero(this.value);
+        }
+      });
+      inputNumVenta.addEventListener('blur', function() {
+        if (document.querySelector('.nav-link.active')?.id === 'buscar-tab') {
+          buscarVentaPorNumero(this.value);
+        }
+      });
+    }
+  });
+  </script>
 </body>
 </html>
-

@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Select2 CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --verde-farmacia: #3105f1;
+      --fondo-oscuro: #1a1a1a;
+      --texto-blanco: #ffffff;
+    }
+    
+    body {
+      background-color: #000;
+      color: var(--texto-blanco);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .container-mobile {
+      max-width: 100%;
+      padding: 15px;
+    }
+
+    .btn-submit {
+      background-color: #3105f1;
+      color: #fff;
+      padding: 10px 30px;
+      border: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+      background-color: #cccccc;
+      color: #000000;
+      transform: translateY(-2px);
+    }
+    
+    .logo-container {
+      text-align: center;
+      margin: 15px 0 25px;
+    }
+    
+    .card-inventario {
+      background-color: var(--fondo-oscuro);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    
+    .title-inventario {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--texto-blanco);
+      font-size: 1.5rem;
+    }
+    
+    .search-box {
+      margin-bottom: 15px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 10px 15px;
+      background-color: #2a2a2a;
+      border: 1px solid var(--verde-farmacia);
+      border-radius: 5px;
+      color: var(--texto-blanco);
+    }
+    
+    .table-inventario {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    
+    .table-inventario th {
+      background-color: var(--verde-farmacia);
+      color: white;
+      padding: 12px 8px;
+      text-align: left;
+    }
+    
+    .table-inventario td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #333;
+    }
+    
+    .table-inventario tr:nth-child(even) {
+      background-color: #2a2a2a;
+    }
+    
+    .table-inventario tr:hover {
+      background-color: #333;
+    }
+    
+    .btn-volver {
+      display: block;
+      width: 100%;
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 20px;
+      text-decoration: none;
+    }
+    
+    .btn-volver:hover {
+      background-color: #444;
+      color: white;
+    }
+    
+    /* Scroll horizontal para móviles */
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Ajustes para pantallas pequeñas */
+    @media (max-width: 576px) {
+      .table-inventario th, 
+      .table-inventario td {
+        padding: 8px 5px;
+        font-size: 0.9rem;
+      }
+      
+      .table-inventario th {
+        font-size: 0.95rem;
+      }
+    }
+
+    /* Estilos para botones de acción */
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+      margin: 0 2px;
+    }
+
+    /* Estilos para modal con tema oscuro */
+    .modal-content {
+      background-color: var(--fondo-oscuro);
+      color: var(--texto-blanco);
+    }
+    
+    .modal-header {
+      border-bottom: 1px solid #444;
+    }
+    
+    .modal-footer {
+      border-top: 1px solid #444;
+    }
+    
+    .form-control, .form-select {
+      background-color: #2a2a2a;
+      border: 1px solid #444;
+      color: var(--texto-blanco);
+    }
+    
+    .form-control:focus, .form-select:focus {
+      background-color: #2a2a2a;
+      border-color: var(--verde-farmacia);
+      color: var(--texto-blanco);
+      box-shadow: 0 0 0 0.2rem rgba(49, 5, 241, 0.25);
+    }
+    
+    .form-label {
+      color: var(--texto-blanco);
+    }
+    
+    .form-text {
+      color: #ccc;
+    }
+    
+    .btn-close {
+      filter: invert(1);
+    }
+
+    /* Estilos para Select2 con tema oscuro */
+    .select2-container--default .select2-selection--single {
+      background-color: #2a2a2a;
+      border: 1px solid #444;
+      color: var(--texto-blanco);
+      height: 38px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+      color: var(--texto-blanco);
+      line-height: 36px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: 36px;
+    }
+
+    .select2-dropdown {
+      background-color: #2a2a2a;
+      border: 1px solid #444;
+    }
+
+    .select2-container--default .select2-results__option {
+      color: var(--texto-blanco);
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+      background-color: var(--verde-farmacia);
+    }
+
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+      background-color: #2a2a2a;
+      border: 1px solid #444;
+      color: var(--texto-blanco);
+    }
+
+    /* Estilos para precios en modal de edición */
+    .price-label {
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+      color: #ddd;
+    }
+    
+    .price-card {
+      background-color: #2a2a2a;
+      border: 1px solid #3105f1;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .price-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    
+    .price-title {
+      font-weight: bold;
+      color: #ffffff;
+    }
+    
+    .price-value {
+      font-size: 1.1rem;
+      color: #00ff00;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .is-invalid {
+      border-color: #dc3545 !important;
+      box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    
+    .form-text-danger {
+      color: #dc3545 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-mobile">
+    <div class="row">
+      <div class="col-12 text-center logo-container">
+        <img alt="Logo" src="logo.png" class="img-fluid" height="150px" width="350px">
+      </div>
+    </div>
+    
+    <div class="card-inventario">
+      <h2 class="title-inventario">PRODUCTOS INGRESADOS</h2>
+      
+      <div class="search-box">
+        <input type="text" class="search-input" placeholder="Buscar producto..." id="buscadorInventario">
+      </div>
+      
+      <!-- Loading indicator -->
+      <div id="loadingIndicator" class="text-center" style="padding: 20px;">
+        <svg style="animation: spin 1s linear infinite; display: inline-block; width: 24px; height: 24px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p>Cargando productos...</p>
+      </div>
+      
+      <div class="table-responsive" id="tableContainer" style="display: none;">
+        <table class="table-inventario">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Marca</th>
+              <th>Variante</th>
+              <th>Presentación</th>
+              <th>Cant. Ingresada</th>
+              <th>N° de Factura</th>
+              <th>Precio Venta</th>
+              <th>Opciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaInventario">
+            <!-- Los datos se cargarán aquí dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Mensaje cuando no hay productos -->
+      <div id="emptyMessage" class="text-center" style="display: none; padding: 40px;">
+        <p>Aún no se ha ingresado productos.</p>
+      </div>
+      
+      <!-- Mensaje de error -->
+      <div id="errorMessage" class="text-center" style="display: none; padding: 40px; color: #ff6b6b;">
+        <p>Usando datos de demostración (no conectado a base de datos).</p>
+      </div>
+      <br>
+      <div class="text-center">
+         <a class="btn btn-submit btn-lg" href="menuProductos.html">Volver al Menú</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para editar producto -->
+  <div class="modal fade" id="modalEditarProducto" tabindex="-1" aria-labelledby="modalEditarProductoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditarProductoLabel">Editar Producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="edit-inventory-form">
+            <div class="mb-3">
+              <label for="edit-product-select" class="form-label">Nombre del Producto</label>
+              <select class="form-control js-edit-product-search" id="edit-product-select" required>
+                <option value="">Buscar producto...</option>
+              </select>
+              <div class="form-text text-muted">Seleccione un producto de la lista</div>
+            </div>
+            
+            <!-- Marca -->
+            <div class="mb-3">
+              <label for="edit-brand" class="form-label">Marca</label>
+              <input type="text" class="form-control" id="edit-brand" placeholder="Ej: Mary" required>
+            </div>
+
+            <!-- Variante -->
+            <div class="mb-3">
+              <label for="edit-variant" class="form-label">Variante</label>
+              <input type="text" class="form-control" id="edit-variant" placeholder="Ej: Integral, Moreno, etc." required>
+            </div>
+
+            <!-- Presentación -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="edit-unit-presentation" class="form-label">Presentación Unitaria</label>
+                <input type="text" class="form-control" id="edit-unit-presentation" placeholder="Ej: 900 gr, 1 lt" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="edit-packaging" class="form-label">Unidad de Empaque Mayor</label>
+                <select class="form-select" id="edit-packaging" required>
+                  <option value="">Seleccione</option>
+                  <option value="Caja">Caja</option>
+                  <option value="Paca">Unidad</option>
+                  <option value="Saco">Saco</option>
+                  <option value="Bulto">Bulto</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Cantidad por Empaque -->
+            <div class="mb-3">
+              <label for="edit-package-quantity" class="form-label">Cantidad por Empaque</label>
+              <input type="number" class="form-control" id="edit-package-quantity" min="1" placeholder="Ej: 24" required>
+            </div>
+
+            <!-- Cantidad de ingreso unitario -->
+            <div class="mb-3">
+              <label for="edit-unit-count" class="form-label">Cantidad Actual (Unidades)</label>
+              <input type="number" class="form-control" id="edit-unit-count" min="0" required>
+            </div>
+
+            <!-- Número de Factura -->
+            <div class="mb-3">
+              <label for="edit-invoice-number" class="form-label">Número de Factura</label>
+              <input type="text" class="form-control" id="edit-invoice-number" placeholder="Ej: F12345-ABC" required>
+              <div id="edit-invoice-feedback" class="form-text" style="display:none;"></div>
+            </div>
+
+            <!-- Tasa de cambio Bs a USD -->
+            <div class="mb-3">
+              <label for="edit-tasa-cambio" class="form-label">Tasa de Cambio (BS a USD)</label>
+              <input type="number" step="0.01" min="1" class="form-control" id="edit-tasa-cambio" value="140" required>
+            </div>
+
+            <!-- Precios -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="price-card">
+                  <div class="price-header">
+                    <span class="price-title">Precio de Compra (USD)</span>
+                  </div>
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-purchase-price" placeholder="0.00" required data-bs-target="edit-purchase-price-bs">
+                  <div class="usd-conversion">
+                    <small>Bs: <span id="edit-purchase-price-bs">0.00</span></small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="price-card">
+                  <div class="price-header">
+                    <span class="price-title">Precio de venta 1 (USD - Físico)</span>
+                  </div>
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-1" placeholder="0.00" required data-bs-target="edit-sale-price-1-bs">
+                  <div class="usd-conversion">
+                    <small>BS: <span id="edit-sale-price-1-bs">0.00</span></small>
+                  </div>
+                </div>
+                <div class="price-card">
+                  <div class="price-header">
+                    <span class="price-title">Precio de venta 2 (USD - BCV)</span>
+                  </div>
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-2" placeholder="0.00" required data-bs-target="edit-sale-price-2-bs">
+                  <div class="usd-conversion">
+                    <small>BS: <span id="edit-sale-price-2-bs">0.00</span></small>
+                  </div>
+                </div>
+                <div class="price-card">
+                  <div class="price-header">
+                    <span class="price-title">Precio de venta 3 (Bs - Efectivo)</span>
+                  </div>
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-3" placeholder="0.00" readonly data-usd-target="edit-sale-price-3-usd">
+                  <div class="usd-conversion">
+                    <small>USD: <span id="edit-sale-price-3-usd">0.00</span></small>
+                  </div>
+                </div>
+                <div class="price-card">
+                  <div class="price-header">
+                    <span class="price-title">Precio de venta 4 (Bs - Punto)</span>
+                  </div>
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-4" placeholder="0.00" readonly data-usd-target="edit-sale-price-4-usd">
+                  <div class="usd-conversion">
+                    <small>USD: <span id="edit-sale-price-4-usd">0.00</span></small>
+                  </div>
+                </div>
+                <div class="price-card">
+                  <div class="price-header">
+                    <span class="price-title">Precio de venta 5 (Bs - Unidad)</span>
+                  </div>
+                  <input type="number" step="0.01" class="form-control price-input" id="edit-sale-price-5" placeholder="0.00" readonly data-usd-target="edit-sale-price-5-usd">
+                  <div class="usd-conversion">
+                    <small>USD: <span id="edit-sale-price-5-usd">0.00</span></small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fecha -->
+            <div class="mb-3">
+              <label for="edit-entry-date" class="form-label">Fecha de Última Actualización</label>
+              <input type="date" class="form-control" id="edit-entry-date" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btnGuardarEdicion">Guardar Cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/i18n/es.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    // ==================== CONFIGURACIÓN ====================
+    const SUPABASE_URL = 'https://rirfvhvlmytnpqkcpxbx.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpcmZ2aHZsbXl0bnBxa2NweGJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0ODE2NDUsImV4cCI6MjA3MjA1NzY0NX0.5JLGuOIWNvKIESJG26JLOgRVCu0jVoH0ELZjQ63gV48';
+    
+    let supabaseClient = null;
+    let todosLosProductos = [];
+    let todosLosProductosMaestros = [];
+    let productoEditando = null;
+
+    // ==================== INICIALIZACIÓN ====================
+    function inicializarSupabase() {
+      try {
+        if (typeof supabase !== 'undefined' && supabase.createClient) {
+          const { createClient } = supabase;
+          supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          console.log('✅ Supabase inicializado correctamente');
+          return true;
+        } else {
+          console.warn('⚠️ Supabase SDK no disponible, usando datos de prueba');
+          return false;
+        }
+      } catch (error) {
+        console.error('❌ Error al inicializar Supabase:', error);
+        return false;
+      }
+    }
+
+    // ==================== DATOS DE PRUEBA ====================
+    function obtenerDatosPrueba() {
+      return [
+        {
+          id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          nombre: "Paracetamol",
+          marca: "Genérico",
+          variante: "500mg",
+          presentacion_unitaria: "1 tableta",
+          empaque_mayor: "Caja",
+          cantidad_por_empaque: 50,
+          cantidad: 25,
+          numero_factura: "F12345-ABC",
+          precio_compra: 70.00,
+          precio_venta_1: 140.00,
+          precio_venta_2: 168.00,
+          precio_venta_3: 196.00,
+          precio_venta_4: 224.00,
+          precio_venta_5: 240.00,
+          precio_compra_usd: 0.50,
+          precio_venta_1_usd: 1.00,
+          precio_venta_2_usd: 1.20,
+          precio_venta_3_usd: 1.40,
+          precio_venta_4_usd: 1.60,
+          precio_venta_5_usd: 1.71,
+          tasa_cambio: 140,
+          fecha_ingreso: "2025-01-15"
+        },
+        {
+          id: "b2c3d4e5-f6g7-8901-bcde-f21345678901",
+          nombre: "Shampoo",
+          marca: "Head & Shoulders",
+          variante: "Anticaspa",
+          presentacion_unitaria: "400 ml",
+          empaque_mayor: "Paca",
+          cantidad_por_empaque: 12,
+          cantidad: 8,
+          numero_factura: "F67890-XYZ",
+          precio_compra: 490.00,
+          precio_venta_1: 838.60,
+          precio_venta_2: 910.00,
+          precio_venta_3: 980.00,
+          precio_venta_4: 1130.00,
+          precio_venta_5: 94.17,
+          precio_compra_usd: 3.50,
+          precio_venta_1_usd: 5.99,
+          precio_venta_2_usd: 6.50,
+          precio_venta_3_usd: 7.00,
+          precio_venta_4_usd: 8.07,
+          precio_venta_5_usd: 0.67,
+          tasa_cambio: 140,
+          fecha_ingreso: "2025-01-10"
+        }
+      ];
+    }
+
+    function obtenerProductosMaestrosPrueba() {
+      return [
+        { id: 1, nombre: "Paracetamol" },
+        { id: 2, nombre: "Shampoo" },
+        { id: 3, nombre: "Pasta Dental" },
+        { id: 4, nombre: "Ibuprofeno" },
+        { id: 5, nombre: "Vitamina C" }
+      ];
+    }
+
+    // ==================== CARGA DE PRODUCTOS MAESTROS ====================
+    async function cargarProductosMaestros() {
+      try {
+        if (supabaseClient) {
+          const { data: productos, error } = await supabaseClient
+            .from('masterproductos')
+            .select('*')
+            .order('nombre', { ascending: true });
+
+          if (error) throw error;
+          todosLosProductosMaestros = productos || [];
+          console.log('✅ Productos maestros cargados desde Supabase:', todosLosProductosMaestros.length);
+        } else {
+          throw new Error('Sin conexión a base de datos');
+        }
+      } catch (error) {
+        console.warn('⚠️ Error al cargar productos maestros:', error.message);
+        todosLosProductosMaestros = obtenerProductosMaestrosPrueba();
+        console.log('🔄 Usando productos maestros de prueba');
+      }
+    }
+
+    // ==================== CARGA DE INVENTARIO ====================
+    async function cargarInventario() {
+      console.log('🔄 Cargando inventario...');
+      
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const tableContainer = document.getElementById('tableContainer');
+      const emptyMessage = document.getElementById('emptyMessage');
+      const errorMessage = document.getElementById('errorMessage');
+
+      // Mostrar loading
+      loadingIndicator.style.display = 'block';
+      tableContainer.style.display = 'none';
+      emptyMessage.style.display = 'none';
+      errorMessage.style.display = 'none';
+
+      try {
+        if (supabaseClient) {
+          const { data: productos, error } = await supabaseClient
+            .from('productos')
+            .select('*')
+            .order('nombre', { ascending: true });
+
+          if (error) throw error;
+
+          todosLosProductos = productos || [];
+          console.log('✅ Datos cargados desde Supabase:', todosLosProductos.length, 'productos');
+        } else {
+          throw new Error('Sin conexión a base de datos');
+        }
+      } catch (error) {
+        console.warn('⚠️ Error al cargar desde Supabase:', error.message);
+        console.log('🔄 Usando datos de prueba...');
+        
+        todosLosProductos = obtenerDatosPrueba();
+        errorMessage.style.display = 'block';
+      }
+
+      // Ocultar loading
+      loadingIndicator.style.display = 'none';
+
+      if (todosLosProductos && todosLosProductos.length > 0) {
+        mostrarProductos(todosLosProductos);
+        tableContainer.style.display = 'block';
+        console.log('✅ Productos mostrados en tabla');
+      } else {
+        emptyMessage.style.display = 'block';
+        console.log('ℹ️ No hay productos para mostrar');
+      }
+    }
+
+    // ==================== MOSTRAR PRODUCTOS ====================
+    function mostrarProductos(productos) {
+      const tabla = document.getElementById('tablaInventario');
+      if (!tabla) {
+        console.error('❌ No se encontró la tabla de inventario');
+        return;
+      }
+
+      tabla.innerHTML = '';
+
+      productos.forEach(producto => {
+        const row = document.createElement('tr');
+        const stockClass = producto.cantidad < 10 ? 'style="color:#ff6b6b; font-weight:bold;"' : '';
+
+        row.innerHTML = `
+          <td>${producto.nombre || 'N/A'}</td>
+          <td>${producto.marca || 'N/A'}</td>
+          <td>${producto.variante || 'N/A'}</td>
+          <td>${producto.presentacion_unitaria || 'N/A'}</td>
+          <td ${stockClass}>${producto.cantidad || 0}</td>
+          <td>${producto.numero_factura || 'N/A'}</td>
+          <td>Bs ${parseFloat(producto.precio_venta_1 || 0).toFixed(2)}</td>
+          <td>
+            <button type="button" class="btn btn-warning btn-sm btn-editar" data-id="${producto.id}" title="Editar">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button type="button" class="btn btn-danger btn-sm btn-eliminar" data-id="${producto.id}" title="Eliminar">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        `;
+        tabla.appendChild(row);
+      });
+
+      // Agregar event listeners a los botones después de crearlos
+      agregarEventListenersBotones();
+    }
+
+    // ==================== EVENT LISTENERS PARA BOTONES ====================
+    function agregarEventListenersBotones() {
+      console.log('🔄 Agregando event listeners a botones...');
+
+      // Botones de editar
+      const botonesEditar = document.querySelectorAll('.btn-editar');
+      botonesEditar.forEach(boton => {
+        boton.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = this.getAttribute('data-id');
+          console.log('✏️ Clic en editar, ID:', id);
+          abrirModalEditar(id);
+        });
+      });
+
+      // Botones de eliminar
+      const botonesEliminar = document.querySelectorAll('.btn-eliminar');
+      botonesEliminar.forEach(boton => {
+        boton.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = this.getAttribute('data-id');
+          console.log('🗑️ Clic en eliminar, ID:', id);
+          confirmarEliminacion(id);
+        });
+      });
+
+      console.log('✅ Event listeners agregados');
+    }
+
+    // ==================== INICIALIZAR SELECT2 PARA EDICIÓN ====================
+    function inicializarSelect2Edicion() {
+      if (typeof jQuery === 'undefined' || typeof $.fn.select2 === 'undefined') {
+        console.error('❌ jQuery o Select2 no están disponibles');
+        return;
+      }
+
+      $('.js-edit-product-search').select2({
+        placeholder: "Buscar producto...",
+        width: '100%',
+        language: "es",
+        dropdownParent: $('#modalEditarProducto'),
+        data: todosLosProductosMaestros.map(producto => ({
+          id: producto.nombre,
+          text: producto.nombre,
+          nombre: producto.nombre
+        }))
+      });
+    }
+
+    // ==================== FUNCIÓN PARA ACTUALIZAR PRECIOS ====================
+    function actualizarPrecios() {
+      const tasaCambio = parseFloat(document.getElementById('edit-tasa-cambio').value) || 1;
+      const purchaseUsd = parseFloat(document.getElementById('edit-purchase-price').value) || 0;
+      const sale1Usd = parseFloat(document.getElementById('edit-sale-price-1').value) || 0;
+      const sale2Usd = parseFloat(document.getElementById('edit-sale-price-2').value) || 0; // BCV USD
+      const packageQty = parseFloat(document.getElementById('edit-package-quantity').value) || 1;
+
+      // Mostrar equivalencias USD->Bs para compra, venta1, venta2
+      const mapBsTargets = [
+        { value: purchaseUsd, target: 'edit-purchase-price-bs' },
+        { value: sale1Usd, target: 'edit-sale-price-1-bs' },
+        { value: sale2Usd, target: 'edit-sale-price-2-bs' }
+      ];
+      mapBsTargets.forEach(({ value, target }) => {
+        const el = document.getElementById(target);
+        if (el) el.textContent = (value * tasaCambio).toFixed(2);
+      });
+
+      // Calcular precios 3, 4, 5 en Bs
+      const sale3Bs = sale2Usd * tasaCambio; // Efectivo
+      const sale4Bs = sale3Bs + 150; // Punto
+      const sale5Bs = packageQty > 0 ? (sale4Bs / packageQty) : 0; // Unidad
+
+      // Escribir en inputs y mostrar equivalencias en USD
+      const writeAndShow = [
+        { inputId: 'edit-sale-price-3', value: sale3Bs, usdTarget: 'edit-sale-price-3-usd' },
+        { inputId: 'edit-sale-price-4', value: sale4Bs, usdTarget: 'edit-sale-price-4-usd' },
+        { inputId: 'edit-sale-price-5', value: sale5Bs, usdTarget: 'edit-sale-price-5-usd' }
+      ];
+      writeAndShow.forEach(({ inputId, value, usdTarget }) => {
+        const input = document.getElementById(inputId);
+        if (input) input.value = value ? value.toFixed(2) : '';
+        const usdEl = document.getElementById(usdTarget);
+        if (usdEl) usdEl.textContent = tasaCambio ? (value / tasaCambio).toFixed(2) : '0.00';
+      });
+    }
+
+    // ==================== MODAL EDITAR ====================
+    function abrirModalEditar(id) {
+      console.log('✏️ Abriendo modal para editar producto ID:', id);
+      
+      const producto = todosLosProductos.find(p => p.id === id);
+      if (!producto) {
+        console.error('❌ Producto no encontrado con ID:', id);
+        Swal.fire({
+          title: 'Error',
+          text: 'Producto no encontrado',
+          icon: 'error',
+          confirmButtonText: 'Aceptar'
+        });
+        return;
+      }
+
+      productoEditando = id;
+      console.log('📝 Producto a editar:', producto);
+
+      // Inicializar Select2 si no está inicializado
+      inicializarSelect2Edicion();
+
+      // Cargar datos en el modal - usando setTimeout para asegurar que el modal esté completamente cargado
+      setTimeout(() => {
+        // Cargar select de producto
+        $('.js-edit-product-search').val(producto.nombre).trigger('change');
+        
+        // Cargar todos los campos
+        document.getElementById("edit-brand").value = producto.marca || '';
+        document.getElementById("edit-variant").value = producto.variante || '';
+        document.getElementById("edit-unit-presentation").value = producto.presentacion_unitaria || '';
+        
+        // CORRECCIÓN CRÍTICA: Cargar el select del empaque mayor
+        const selectEmpaque = document.getElementById("edit-packaging");
+        if (selectEmpaque && producto.empaque_mayor) {
+          selectEmpaque.value = producto.empaque_mayor;
+          console.log('📦 Empaque mayor establecido a:', producto.empaque_mayor);
+        }
+        
+        document.getElementById("edit-package-quantity").value = producto.cantidad_por_empaque || '';
+        document.getElementById("edit-unit-count").value = producto.cantidad || 0;
+        document.getElementById("edit-invoice-number").value = producto.numero_factura || '';
+        document.getElementById("edit-tasa-cambio").value = producto.tasa_cambio || 140;
+        
+        // Precios (cargar en USD para compra y venta 1 y 2)
+        document.getElementById("edit-purchase-price").value = producto.precio_compra_usd || 0;
+        document.getElementById("edit-sale-price-1").value = producto.precio_venta_1_usd || 0;
+        document.getElementById("edit-sale-price-2").value = producto.precio_venta_2_usd || '';
+        document.getElementById("edit-sale-price-3").value = producto.precio_venta_3 || '';
+        document.getElementById("edit-sale-price-4").value = producto.precio_venta_4 || '';
+        document.getElementById("edit-sale-price-5").value = producto.precio_venta_5 || '';
+        
+        document.getElementById("edit-entry-date").value = producto.fecha_ingreso || new Date().toISOString().split('T')[0];
+        
+        // Actualizar precios
+        actualizarPrecios();
+        
+        console.log('✅ Datos cargados en el formulario');
+      }, 200);
+
+      // Abrir modal
+      const modalElement = document.getElementById("modalEditarProducto");
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+      
+      console.log('✅ Modal abierto para producto:', producto.nombre);
+    }
+
+    // ==================== VALIDAR PRECIOS ====================
+    function validarPreciosEdicion() {
+      const precioCompra = parseFloat(document.getElementById("edit-purchase-price").value);
+      const precioVenta1 = parseFloat(document.getElementById("edit-sale-price-1").value);
+      const precioVenta2 = parseFloat(document.getElementById("edit-sale-price-2").value) || 0;
+      const precioVenta3 = parseFloat(document.getElementById("edit-sale-price-3").value) || 0;
+      const precioVenta4 = parseFloat(document.getElementById("edit-sale-price-4").value) || 0;
+      
+      // Validar que precio de venta 1 sea mayor al de compra (ambos en USD)
+      if (precioCompra && precioVenta1 && precioVenta1 <= precioCompra) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error en precios',
+          text: 'El precio de venta 1 debe ser mayor al de compra'
+        });
+        document.getElementById("edit-sale-price-1").value = "";
+        return false;
+      }
+      
+      // Validar precios opcionales (convertir a USD para comparar)
+      const tasaCambio = parseFloat(document.getElementById('edit-tasa-cambio').value) || 1;
+      const purchasePriceUSD = precioCompra;
+      
+      // venta 2 está en USD ahora
+      if (precioVenta2 > 0 && precioVenta2 <= purchasePriceUSD) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error en precios',
+          text: 'El precio de venta 2 debe ser mayor al de compra'
+        });
+        document.getElementById("edit-sale-price-2").value = "";
+        return false;
+      }
+      
+      if (precioVenta3 > 0 && (precioVenta3 / tasaCambio) <= purchasePriceUSD) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error en precios',
+          text: 'El precio de venta 3 debe ser mayor al de compra'
+        });
+        document.getElementById("edit-sale-price-3").value = "";
+        return false;
+      }
+      
+      if (precioVenta4 > 0 && (precioVenta4 / tasaCambio) <= purchasePriceUSD) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error en precios',
+          text: 'El precio de venta 4 debe ser mayor al de compra'
+        });
+        document.getElementById("edit-sale-price-4").value = "";
+        return false;
+      }
+      
+      return true;
+    }
+
+    // ==================== GUARDAR EDICIÓN ====================
+    async function guardarEdicion() {
+      console.log('Iniciando guardado para producto ID:', productoEditando);
+
+      if (!productoEditando) {
+        Swal.fire({
+          title: 'Error',
+          text: 'No hay producto seleccionado para editar',
+          icon: 'error'
+        });
+        return;
+      }
+
+      // Validar precios
+      if (!validarPreciosEdicion()) {
+        return;
+      }
+
+      // Obtener datos del formulario
+      const nombre = $('.js-edit-product-search').val();
+      const marca = document.getElementById("edit-brand").value.trim();
+      const variante = document.getElementById("edit-variant").value.trim();
+      const presentacionUnitaria = document.getElementById("edit-unit-presentation").value.trim();
+      const empaqueMayor = document.getElementById("edit-packaging").value;
+      const cantidadPorEmpaque = parseInt(document.getElementById("edit-package-quantity").value);
+      const cantidad = parseInt(document.getElementById("edit-unit-count").value);
+      const numeroFactura = document.getElementById("edit-invoice-number").value.trim();
+      const tasaCambio = parseFloat(document.getElementById("edit-tasa-cambio").value);
+      
+      // Precios (compra y venta 1 y 2 en USD, otros en Bs)
+      const precioCompraUSD = parseFloat(document.getElementById("edit-purchase-price").value);
+      const precioVenta1USD = parseFloat(document.getElementById("edit-sale-price-1").value);
+      const precioVenta2USD = parseFloat(document.getElementById("edit-sale-price-2").value) || 0;
+      const precioVenta3 = document.getElementById("edit-sale-price-3").value ? parseFloat(document.getElementById("edit-sale-price-3").value) : null;
+      const precioVenta4 = document.getElementById("edit-sale-price-4").value ? parseFloat(document.getElementById("edit-sale-price-4").value) : null;
+      const precioVenta5 = document.getElementById("edit-sale-price-5").value ? parseFloat(document.getElementById("edit-sale-price-5").value) : null;
+      
+      const fechaIngreso = document.getElementById("edit-entry-date").value;
+
+      // Validar campos requeridos
+      if (!nombre || !marca || !variante || !presentacionUnitaria || !empaqueMayor || 
+          isNaN(cantidadPorEmpaque) || isNaN(cantidad) || !numeroFactura || isNaN(tasaCambio) || 
+          isNaN(precioCompraUSD) || isNaN(precioVenta1USD) || !fechaIngreso) {
+        Swal.fire({
+          title: 'Error',
+          text: 'Complete todos los campos requeridos',
+          icon: 'error'
+        });
+        return;
+      }
+
+      // Preparar datos para actualizar (convertir USD a Bs para compra, venta 1 y venta 2)
+      const dataActualizada = {
+        nombre: nombre,
+        marca: marca,
+        variante: variante,
+        presentacion_unitaria: presentacionUnitaria,
+        empaque_mayor: empaqueMayor,
+        cantidad_por_empaque: cantidadPorEmpaque,
+        cantidad: cantidad,
+        numero_factura: numeroFactura,
+        tasa_cambio: tasaCambio,
+        // Precios en Bs (convertidos desde USD)
+        precio_compra: precioCompraUSD * tasaCambio,
+        precio_venta_1: precioVenta1USD * tasaCambio,
+        precio_venta_2: precioVenta2USD * tasaCambio,
+        precio_venta_3: precioVenta3,
+        precio_venta_4: precioVenta4,
+        precio_venta_5: precioVenta5,
+        // Precios en USD (originales para compra, venta 1 y venta 2)
+        precio_compra_usd: precioCompraUSD,
+        precio_venta_1_usd: precioVenta1USD,
+        precio_venta_2_usd: precioVenta2USD,
+        precio_venta_3_usd: precioVenta3 ? precioVenta3 / tasaCambio : null,
+        precio_venta_4_usd: precioVenta4 ? precioVenta4 / tasaCambio : null,
+        precio_venta_5_usd: precioVenta5 ? precioVenta5 / tasaCambio : null,
+        fecha_ingreso: fechaIngreso
+      };
+
+      console.log('Datos a actualizar:', dataActualizada);
+
+      try {
+        if (supabaseClient) {
+          // Actualizar en Supabase - SIN .single()
+          const { data, error } = await supabaseClient
+            .from('productos')
+            .update(dataActualizada)
+            .eq('id', productoEditando);
+
+          if (error) {
+            throw error;
+          }
+
+          console.log('Actualizado en Supabase');
+          
+          // Actualizar localmente
+          const index = todosLosProductos.findIndex(p => p.id === productoEditando);
+          if (index !== -1) {
+            todosLosProductos[index] = { ...todosLosProductos[index], ...dataActualizada };
+            mostrarProductos(todosLosProductos);
+          }
+          
+        } else {
+          // Solo actualizar localmente
+          const index = todosLosProductos.findIndex(p => p.id === productoEditando);
+          if (index !== -1) {
+            todosLosProductos[index] = { ...todosLosProductos[index], ...dataActualizada };
+            mostrarProductos(todosLosProductos);
+          }
+        }
+
+        Swal.fire({
+          title: 'Éxito',
+          text: 'Producto actualizado correctamente',
+          icon: 'success'
+        });
+
+        // Cerrar modal
+        const modalElement = document.getElementById("modalEditarProducto");
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+          modal.hide();
+        }
+
+        productoEditando = null;
+        
+      } catch (error) {
+        console.error('Error al actualizar:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudo actualizar el producto: ' + error.message,
+          icon: 'error'
+        });
+      }
+    }
+
+    // ==================== ELIMINAR PRODUCTO ====================
+    async function confirmarEliminacion(id) {
+      console.log('🗑️ Confirmando eliminación de producto ID:', id);
+      
+      const producto = todosLosProductos.find(p => p.id === id);
+      if (!producto) {
+        console.error('❌ Producto no encontrado');
+        return;
+      }
+      
+      const { value: confirmar } = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: `Vas a eliminar "${producto.nombre} - ${producto.marca}". Esta acción no se puede deshacer.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      });
+      
+      if (confirmar) {
+        console.log('✅ Confirmada eliminación de producto ID:', id);
+        eliminarProducto(id);
+      } else {
+        console.log('❌ Eliminación cancelada');
+      }
+    }
+
+    async function eliminarProducto(id) {
+      console.log('🗑️ Eliminando producto ID:', id);
+      
+      try {
+        if (supabaseClient) {
+          // Eliminar de Supabase
+          const { error } = await supabaseClient
+            .from('productos')
+            .delete()
+            .eq('id', id);
+          
+          if (error) throw error;
+          
+          console.log('✅ Producto eliminado de Supabase');
+          Swal.fire({
+            icon: 'success',
+            title: '¡Eliminado!',
+            text: 'El producto ha sido eliminado correctamente',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          // Eliminar de datos locales
+          todosLosProductos = todosLosProductos.filter(p => p.id !== id);
+          console.log('✅ Producto eliminado localmente');
+          Swal.fire({
+            icon: 'success',
+            title: '¡Eliminado!',
+            text: 'El producto ha sido eliminado correctamente (modo demo)',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        }
+        
+        // Recargar inventario
+        cargarInventario();
+        
+      } catch (error) {
+        console.error('❌ Error al eliminar producto:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo eliminar el producto: ' + error.message
+        });
+      }
+    }
+
+    // ==================== FILTRAR PRODUCTOS ====================
+    function filtrarProductos() {
+      const textoBusqueda = document.getElementById('buscadorInventario').value.toLowerCase();
+      
+      if (!textoBusqueda) {
+        mostrarProductos(todosLosProductos);
+        return;
+      }
+      
+      const productosFiltrados = todosLosProductos.filter(producto => {
+        return (
+          (producto.nombre && producto.nombre.toLowerCase().includes(textoBusqueda)) ||
+          (producto.marca && producto.marca.toLowerCase().includes(textoBusqueda)) ||
+          (producto.variante && producto.variante.toLowerCase().includes(textoBusqueda)) ||
+          (producto.presentacion_unitaria && producto.presentacion_unitaria.toLowerCase().includes(textoBusqueda)) ||
+          (producto.numero_factura && producto.numero_factura.toLowerCase().includes(textoBusqueda))
+        );
+      });
+      
+      mostrarProductos(productosFiltrados);
+    }
+
+    // ==================== INICIALIZACIÓN ====================
+    document.addEventListener('DOMContentLoaded', async function() {
+      console.log('🚀 Inicializando aplicación...');
+      
+      // Inicializar Supabase
+      const supabaseConectado = inicializarSupabase();
+      
+      // Cargar productos maestros
+      await cargarProductosMaestros();
+      
+      // Cargar inventario
+      await cargarInventario();
+      
+      // Configurar buscador
+      document.getElementById('buscadorInventario').addEventListener('input', filtrarProductos);
+      
+      // Configurar botón de guardar edición
+      document.getElementById('btnGuardarEdicion').addEventListener('click', guardarEdicion);
+      
+      // Configurar eventos para actualizar precios cuando cambia la tasa
+      document.getElementById('edit-tasa-cambio').addEventListener('input', actualizarPrecios);
+      
+      // Configurar eventos para actualizar precios cuando cambian los inputs
+      const priceInputs = document.querySelectorAll('#modalEditarProducto .price-input');
+      priceInputs.forEach(input => {
+        input.addEventListener('input', actualizarPrecios);
+      });
+      
+      // Configurar eventos para actualizar precios cuando cambia la cantidad por empaque
+      document.getElementById('edit-package-quantity').addEventListener('input', actualizarPrecios);
+      
+      // Validaciones de precio
+      document.getElementById("edit-purchase-price").addEventListener("change", validarPreciosEdicion);
+      document.getElementById("edit-sale-price-1").addEventListener("change", validarPreciosEdicion);
+      document.getElementById("edit-sale-price-2").addEventListener("change", validarPreciosEdicion);
+      
+      console.log('✅ Aplicación inicializada correctamente');
+    });
+  </script>
+</body>
+</html>
